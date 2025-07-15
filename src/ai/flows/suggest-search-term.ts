@@ -41,11 +41,12 @@ Your task is to provide a list of relevant search suggestions based on a user's 
 Rules:
 - Analyze the user's query: "{{query}}".
 - The user might type in English, Hindi, or a mix (Hinglish).
+- **IMPORTANT**: All suggestions MUST be based on the provided part names or categories derived from them. Do not invent terms.
 - Compare the query against the available English and Hindi part names.
 - English Part Names: {{#each partNames}}- {{this}}{{/each}}
 - Hindi Part Names: {{#each partNamesHi}}- {{this}}{{/each}}
 - Provide a list of up to 5 suggestions.
-- The suggestions should include potential spelling corrections, autocompletions of part names, or broader relevant categories.
+- The suggestions should include potential spelling corrections, autocompletions of part names, or broader relevant categories that exist in the product data.
 - If the query has no relevant matches or is too generic (e.g., "part", "पार्ट"), return an empty list of suggestions.
 - Do not suggest the exact same term as the query.
 - If the user's query is in Hindi, provide suggestions in Hindi. If it's in English, provide suggestions in English.
