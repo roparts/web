@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Mic, History, X, ShoppingCart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
-import { getSearchSuggestion } from './actions';
+import { getSearchSuggestion, getRefinedVoiceSearch } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -82,7 +82,7 @@ export default function Home() {
     }
   };
 
-  const handleSearchSubmit = (e?: FormEvent) => {
+  const handleSearchSubmit = useCallback((e?: FormEvent) => {
     e?.preventDefault();
     if (searchQuery.trim()) {
       setActiveSearch(searchQuery);
@@ -91,7 +91,7 @@ export default function Home() {
     } else {
       setActiveSearch('');
     }
-  };
+  }, [searchQuery]);
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => language === 'hi' && part.category_hi ? part.category_hi : part.category);
@@ -177,10 +177,13 @@ export default function Home() {
       setIsRecording(false);
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = async (event) => {
       const transcript = event.results[0][0].transcript;
-      setSearchQuery(transcript);
-      handleSearchSubmit();
+      setIsRecording(false);
+      const refinedQuery = await getRefinedVoiceSearch(transcript);
+      setSearchQuery(refinedQuery);
+      setActiveSearch(refinedQuery);
+      updateSearchHistory(refinedQuery);
     };
     
     recognition.onerror = (event) => {
@@ -193,11 +196,19 @@ export default function Home() {
     return () => {
       recognitionRef.current?.abort();
     };
-  }, [language, handleSearchSubmit]);
+  }, [language]);
   
   useEffect(() => {
-    setActiveSearch(debouncedSearchQuery);
-  }, [debouncedSearchQuery]);
+    const timeoutId = setTimeout(() => {
+      if (searchQuery === debouncedSearchQuery) {
+        setActiveSearch(debouncedSearchQuery);
+        if (debouncedSearchQuery.trim()) {
+          updateSearchHistory(debouncedSearchQuery);
+        }
+      }
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [debouncedSearchQuery, searchQuery]);
 
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
@@ -275,7 +286,6 @@ export default function Home() {
                       size="icon" 
                       className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                       onClick={handleVoiceSearch}
-                      disabled={isRecording}
                       aria-label="Search by voice"
                     >
                       <Mic className={cn("h-5 w-5", isRecording ? "text-destructive animate-pulse" : "text-muted-foreground")} />
