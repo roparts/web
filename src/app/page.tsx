@@ -10,23 +10,40 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortOption, setSortOption] = useState<SortOption>('default');
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => part.category);
     return ['All', ...Array.from(new Set(allCategories))];
   }, []);
 
-  const filteredParts = useMemo(() => {
-    return partsData.filter(part => {
+  const filteredAndSortedParts = useMemo(() => {
+    const filtered = partsData.filter(part => {
       const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
       const matchesSearch = part.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, selectedCategory]);
+
+    switch (sortOption) {
+      case 'price-asc':
+        return filtered.sort((a, b) => a.price - b.price);
+      case 'price-desc':
+        return filtered.sort((a, b) => b.price - a.price);
+      case 'name-asc':
+        return filtered.sort((a, b) => a.name.localeCompare(b.name));
+      case 'name-desc':
+        return filtered.sort((a, b) => b.name.localeCompare(a.name));
+      default:
+        return filtered;
+    }
+  }, [searchQuery, selectedCategory, sortOption]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -47,15 +64,29 @@ export default function Home() {
           </div>
 
           <div className="mb-8 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search for parts by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 text-base"
-              />
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search for parts by name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 text-base"
+                />
+              </div>
+              <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
+                <SelectTrigger className="w-full sm:w-[200px] text-base">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                  <SelectItem value="name-asc">Name: A-Z</SelectItem>
+                  <SelectItem value="name-desc">Name: Z-A</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {/* Category Tabs for Desktop */}
             <div className="hidden md:block">
@@ -71,9 +102,9 @@ export default function Home() {
             </div>
           </div>
           
-          {filteredParts.length > 0 ? (
+          {filteredAndSortedParts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-              {filteredParts.map((part) => (
+              {filteredAndSortedParts.map((part) => (
                 <PartCard key={part.id} part={part} />
               ))}
             </div>
