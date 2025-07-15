@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Mic, History, X, ShoppingCart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
-import { getSearchSuggestion, getRefinedVoiceSearch } from './actions';
+import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -43,11 +43,22 @@ export default function Home() {
 
   const fuse = useMemo(() => {
     const options = {
-      keys: ['name', 'name_hi'],
+      keys: ['name', 'name_hi', 'category', 'category_hi'],
       includeScore: true,
-      threshold: 0.4, // Adjust threshold for fuzziness
+      threshold: 0.4,
     };
     return new Fuse(partsData, options);
+  }, []);
+
+  const categoriesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    partsData.forEach(part => {
+      map.set(part.category, part.category_hi || part.category);
+      if (part.category_hi) {
+        map.set(part.category_hi, part.category);
+      }
+    });
+    return map;
   }, []);
 
   useEffect(() => {
@@ -96,33 +107,32 @@ export default function Home() {
     }
   };
 
-  const handleSearchSubmit = useCallback((query: string, e?: FormEvent) => {
+  const handleSearchSubmit = useCallback(async (query: string, e?: FormEvent) => {
     e?.preventDefault();
     const term = query.trim();
+    
     if (term) {
-      setActiveSearch(term);
+      const detectedCategory = await getCategoryFromSearch(term);
+      if (detectedCategory) {
+        const localizedCategory = language === 'hi' ? categoriesMap.get(detectedCategory) || detectedCategory : detectedCategory;
+        setSelectedCategory(localizedCategory);
+        setActiveSearch(''); 
+      } else {
+         setActiveSearch(term);
+      }
       updateSearchHistory(term);
     } else {
       setActiveSearch('');
+      setSelectedCategory('All');
     }
     setSuggestions([]);
     setIsInputFocused(false);
-  }, []);
+  }, [language, categoriesMap]);
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => language === 'hi' && part.category_hi ? part.category_hi : part.category);
     return ['All', ...Array.from(new Set(allCategories))];
   }, [language]);
-  
-  const categoriesMap = useMemo(() => {
-    const map = new Map<string, string>();
-    partsData.forEach(part => {
-      if (part.category_hi) {
-        map.set(part.category_hi, part.category);
-      }
-    });
-    return map;
-  }, []);
 
 
   const filteredAndSortedParts = useMemo(() => {

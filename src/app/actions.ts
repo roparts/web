@@ -4,6 +4,7 @@ import { generatePartDescription } from "@/ai/flows/generate-part-description";
 import { refineVoiceSearch } from "@/ai/flows/refine-voice-search";
 import { suggestRelatedParts } from "@/ai/flows/suggest-related-parts";
 import { suggestSearchTerm } from "@/ai/flows/suggest-search-term";
+import { detectSearchCategory } from "@/ai/flows/detect-search-category";
 import type { Part } from "@/lib/types";
 
 export async function generateDescriptionAction(input: {
@@ -57,4 +58,17 @@ export async function getRefinedVoiceSearch(transcript: string) {
         // Fallback to the original transcript on error
         return transcript;
     }
+}
+
+export async function getCategoryFromSearch(query: string) {
+  if (!query || query.trim().length < 2) {
+    return null;
+  }
+  try {
+    const result = await detectSearchCategory({ query });
+    return result.category;
+  } catch (error) {
+    console.error("Error detecting search category:", error);
+    return null;
+  }
 }
