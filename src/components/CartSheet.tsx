@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -14,7 +15,7 @@ interface CartSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const WHATSAPP_NUMBER = "911234567890"; // Replace with your WhatsApp number
+const WHATSAPP_NUMBER = "919523728080";
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
