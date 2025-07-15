@@ -21,7 +21,7 @@ export function CategorySheet({
   selectedCategory, 
   onCategoryChange 
 }: CategorySheetProps) {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
 
   const handleCategoryClick = (category: string) => {
     onCategoryChange(category);
@@ -43,7 +43,7 @@ export function CategorySheet({
                 className="w-full justify-start text-base"
                 onClick={() => handleCategoryClick(category)}
               >
-                {category}
+                {category === 'All' && language === 'hi' ? 'सभी' : category}
               </Button>
             ))}
           </div>

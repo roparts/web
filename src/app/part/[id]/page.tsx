@@ -17,7 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export default function PartDetailPage({ params }: { params: { id: string } }) {
   const { addToCart } = useCart();
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
   
   const part = useMemo(() => {
     return partsData.find(p => p.id === params.id);
@@ -26,11 +26,16 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
   if (!part) {
     notFound();
   }
+  
+  const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
+  const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
+  const partCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
+  const partFeatures = language === 'hi' && part.features_hi ? part.features_hi : part.features;
 
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
   
-  const features = part.features.split(',').map(f => f.trim());
+  const features = partFeatures.split(',').map(f => f.trim());
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -42,7 +47,7 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
               <div className="aspect-square overflow-hidden rounded-lg border">
                 <Image
                   src={part.image}
-                  alt={part.name}
+                  alt={partName}
                   width={600}
                   height={600}
                   className="object-cover w-full h-full"
@@ -57,8 +62,8 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
             </div>
             
             <div className="flex flex-col">
-              <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight">{part.name}</h1>
-              <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{part.category}</Link></p>
+              <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight">{partName}</h1>
+              <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{partCategory}</Link></p>
               
               <div className="mt-6">
                 <p className="text-lg font-semibold">{translations.partDetails.keyFeatures}</p>
@@ -96,8 +101,8 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
 
           <div className="mt-12 lg:mt-16">
             <h2 className="text-2xl font-bold font-headline">{translations.partDetails.productDescription}</h2>
-            <div className="mt-4 prose max-w-none text-muted-foreground">
-              <p>{part.description}</p>
+            <div className="prose max-w-none text-muted-foreground mt-4">
+              <p>{partDescription}</p>
             </div>
           </div>
           

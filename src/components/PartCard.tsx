@@ -17,7 +17,7 @@ interface PartCardProps {
 
 export function PartCard({ part }: PartCardProps) {
   const { addToCart } = useCart();
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
   const showMinQuantity = !!part.minQuantity && part.minQuantity > 1;
@@ -27,6 +27,9 @@ export function PartCard({ part }: PartCardProps) {
     e.stopPropagation();
     addToCart(part);
   };
+  
+  const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
+  const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
@@ -35,7 +38,7 @@ export function PartCard({ part }: PartCardProps) {
           <div className="aspect-square overflow-hidden">
               <Image
                 src={part.image}
-                alt={part.name}
+                alt={partName}
                 width={400}
                 height={400}
                 className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
@@ -51,8 +54,8 @@ export function PartCard({ part }: PartCardProps) {
       </CardHeader>
       <div className="p-4 flex-grow flex flex-col">
           <Link href={`/part/${part.id}`} className="flex-grow">
-            <CardTitle className="text-lg font-headline mb-2">{part.name}</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground line-clamp-3">{part.description}</CardDescription>
+            <CardTitle className="text-lg font-headline mb-2">{partName}</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground line-clamp-3">{partDescription}</CardDescription>
           </Link>
       </div>
       <CardFooter className="p-4 flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-2 mt-auto">

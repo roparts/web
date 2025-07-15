@@ -82,14 +82,29 @@ export default function Home() {
   };
 
   const categories = useMemo(() => {
-    const allCategories = partsData.map(part => part.category);
+    const allCategories = partsData.map(part => language === 'hi' && part.category_hi ? part.category_hi : part.category);
     return ['All', ...Array.from(new Set(allCategories))];
+  }, [language]);
+  
+  const categoriesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    partsData.forEach(part => {
+      if (part.category_hi) {
+        map.set(part.category_hi, part.category);
+      }
+    });
+    return map;
   }, []);
+
 
   const filteredAndSortedParts = useMemo(() => {
     const filtered = partsData.filter(part => {
-      const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
-      const matchesSearch = part.name.toLowerCase().includes(activeSearch.toLowerCase());
+      const currentCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
+      const matchesCategory = selectedCategory === 'All' || currentCategory === selectedCategory;
+      
+      const nameToSearch = language === 'hi' && part.name_hi ? part.name_hi : part.name;
+      const matchesSearch = nameToSearch.toLowerCase().includes(activeSearch.toLowerCase());
+      
       return matchesCategory && matchesSearch;
     });
 
@@ -99,9 +114,17 @@ export default function Home() {
       case 'price-desc':
         return filtered.sort((a, b) => (b.discountPrice ?? b.price) - (a.discountPrice ?? a.price));
       case 'name-asc':
-        return filtered.sort((a, b) => a.name.localeCompare(b.name));
+        return filtered.sort((a, b) => {
+            const nameA = language === 'hi' && a.name_hi ? a.name_hi : a.name;
+            const nameB = language === 'hi' && b.name_hi ? b.name_hi : b.name;
+            return nameA.localeCompare(nameB, language === 'hi' ? 'hi' : 'en');
+        });
       case 'name-desc':
-        return filtered.sort((a, b) => b.name.localeCompare(a.name));
+        return filtered.sort((a, b) => {
+            const nameA = language === 'hi' && a.name_hi ? a.name_hi : a.name;
+            const nameB = language === 'hi' && b.name_hi ? b.name_hi : b.name;
+            return nameB.localeCompare(nameA, language === 'hi' ? 'hi' : 'en');
+        });
       case 'discount-desc':
         return filtered.sort((a, b) => {
           const discountA = a.discountPrice ? (a.price - a.discountPrice) / a.price : 0;
@@ -112,12 +135,16 @@ export default function Home() {
         // Use activeSearch for filtering, not searchQuery
         if (!activeSearch) return filtered;
         return partsData.filter(part => {
-            const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
-            const matchesSearch = part.name.toLowerCase().includes(activeSearch.toLowerCase());
+            const currentCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
+            const matchesCategory = selectedCategory === 'All' || currentCategory === selectedCategory;
+            
+            const nameToSearch = language === 'hi' && part.name_hi ? part.name_hi : part.name;
+            const matchesSearch = nameToSearch.toLowerCase().includes(activeSearch.toLowerCase());
+            
             return matchesCategory && matchesSearch;
         });
     }
-  }, [activeSearch, selectedCategory, sortOption]);
+  }, [activeSearch, selectedCategory, sortOption, language]);
   
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -294,7 +321,7 @@ export default function Home() {
                 <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap h-auto">
                   {categories.map(category => (
                     <TabsTrigger key={category} value={category} className="flex-1 lg:flex-none">
-                      {category}
+                      {category === 'All' && language === 'hi' ? 'सभी' : category}
                     </TabsTrigger>
                   ))}
                 </TabsList>
