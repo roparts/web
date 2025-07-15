@@ -15,18 +15,29 @@ interface CartSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const WHATSAPP_NUMBER = "919523728080";
+const WHATSAPP_NUMBER = "9523728080";
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
 
   const handleWhatsAppOrder = () => {
-    const message = `Hello RoParts Hub, I would like to place an order for the following items:\n\n${cartItems
-      .map(item => {
-        const price = item.discountPrice ?? item.price;
-        return `${item.name} (x${item.quantity}) - ₹${(price * item.quantity).toLocaleString('en-IN')}`
-      })
-      .join('\n')}\n\n*Total: ₹${totalPrice.toLocaleString('en-IN')}*`;
+    const rfqNumber = Math.floor(10000 + Math.random() * 90000);
+    const currentDate = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY format
+
+    const productLines = cartItems
+      .map(item => `${item.quantity} x ${item.name} (${item.id})`)
+      .join('\n');
+
+    const message = `*RFQ from roparts.in*
+
+RFQ Number: ${rfqNumber}
+Date: ${currentDate}
+
+Products:
+${productLines}
+
+Total: ₹${totalPrice.toLocaleString('en-IN')}
+`;
 
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -84,7 +95,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                   <span>₹{totalPrice.toLocaleString('en-IN')}</span>
                 </div>
                  <Button onClick={handleWhatsAppOrder} className="w-full bg-green-500 hover:bg-green-600 text-white">
-                  Order on WhatsApp
+                  Get Quote on WhatsApp
                 </Button>
                 <Button variant="outline" className="w-full" onClick={clearCart}>
                   Clear Cart
