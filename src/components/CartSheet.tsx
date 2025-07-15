@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Minus, Plus, Trash2, X } from "lucide-react";
-import Link from 'next/link';
+import { Minus, Plus, Trash2 } from "lucide-react";
 import { useLanguage } from '@/context/LanguageContext';
 
 interface CartSheetProps {
@@ -145,5 +144,3 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
     </Sheet>
   );
 }
-
-    

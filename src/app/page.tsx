@@ -9,7 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, X, ShoppingCart } from 'lucide-react';
+import { Search, Mic, History, ShoppingCart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
@@ -85,7 +85,7 @@ export default function Home() {
     };
   }, []);
 
-  const updateSearchHistory = (query: string) => {
+  const updateSearchHistory = useCallback((query: string) => {
     if (!query) return;
     setSearchHistory(prev => {
       const newHistory = [query, ...prev.filter(item => item !== query)].slice(0, 5);
@@ -96,7 +96,7 @@ export default function Home() {
       }
       return newHistory;
     });
-  };
+  }, []);
 
   const clearSearchHistory = () => {
     setSearchHistory([]);
@@ -119,10 +119,8 @@ export default function Home() {
       
       if (detectedCategory) {
         // The AI always returns the English category name.
-        // If the current language is Hindi, we need to find the corresponding Hindi category name.
-        const categoryToSet = language === 'hi' 
-          ? categoriesMap.get(detectedCategory) || detectedCategory 
-          : detectedCategory;
+        // We need to find the corresponding localized category name.
+        const categoryToSet = (language === 'hi' ? categoriesMap.get(detectedCategory) : detectedCategory) || 'All';
         
         setSelectedCategory(categoryToSet);
         setActiveSearch(''); 
@@ -138,7 +136,7 @@ export default function Home() {
   }, [language, categoriesMap, updateSearchHistory]);
 
   const categories = useMemo(() => {
-    const allCategories = partsData.map(part => language === 'hi' && part.category_hi ? part.category_hi : part.category);
+    const allCategories = partsData.map(part => (language === 'hi' && part.category_hi) ? part.category_hi : part.category);
     return ['All', ...Array.from(new Set(allCategories))];
   }, [language]);
 
@@ -152,7 +150,7 @@ export default function Home() {
 
     const filteredByCategory = partsToFilter.filter(part => {
       if (selectedCategory === 'All') return true;
-      const currentCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
+      const currentCategory = (language === 'hi' && part.category_hi) ? part.category_hi : part.category;
       return currentCategory === selectedCategory;
     });
     
@@ -165,14 +163,14 @@ export default function Home() {
         return sorted.sort((a, b) => (b.discountPrice ?? b.price) - (a.discountPrice ?? a.price));
       case 'name-asc':
         return sorted.sort((a, b) => {
-            const nameA = language === 'hi' && a.name_hi ? a.name_hi : a.name;
-            const nameB = language === 'hi' && b.name_hi ? b.name_hi : b.name;
+            const nameA = (language === 'hi' && a.name_hi) ? a.name_hi : a.name;
+            const nameB = (language === 'hi' && b.name_hi) ? b.name_hi : b.name;
             return nameA.localeCompare(nameB, language === 'hi' ? 'hi' : 'en');
         });
       case 'name-desc':
         return sorted.sort((a, b) => {
-            const nameA = language === 'hi' && a.name_hi ? a.name_hi : a.name;
-            const nameB = language === 'hi' && b.name_hi ? b.name_hi : b.name;
+            const nameA = (language === 'hi' && a.name_hi) ? a.name_hi : a.name;
+            const nameB = (language === 'hi' && b.name_hi) ? b.name_hi : b.name;
             return nameB.localeCompare(nameA, language === 'hi' ? 'hi' : 'en');
         });
       case 'discount-desc':
@@ -184,14 +182,12 @@ export default function Home() {
       default:
         // When there's an active search, Fuse.js score provides the default sort order.
         // Otherwise, we return the original order.
-        if (activeSearch.trim()) {
-           return filteredByCategory;
-        }
-        return sorted;
+        return filteredByCategory;
     }
   }, [activeSearch, selectedCategory, sortOption, language, fuse]);
   
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       console.warn("Speech recognition not supported in this browser.");
@@ -237,6 +233,10 @@ export default function Home() {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
         .then(result => setSuggestions(result))
+        .catch(err => {
+          console.error("Error fetching suggestions:", err);
+          setSuggestions([]);
+        })
         .finally(() => setIsSuggestionLoading(false));
     } else {
       setSuggestions([]);

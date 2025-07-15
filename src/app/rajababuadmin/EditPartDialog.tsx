@@ -51,7 +51,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       discountPrice: undefined,
       features: '',
       description: '',
-      image: '',
+      image: 'https://placehold.co/400x400.png',
       minQuantity: 1,
     },
   });
@@ -132,10 +132,11 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
   const onSubmit = (values: z.infer<typeof partSchema>) => {
     onSave({
       ...values,
-      id: part?.id || '',
+      id: part?.id || '', // Keep existing ID if editing
       discountPrice: values.discountPrice || undefined,
       minQuantity: values.minQuantity || 1,
     });
+    onOpenChange(false);
   };
 
   return (

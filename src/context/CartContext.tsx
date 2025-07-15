@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import type { Part, CartItem } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from './LanguageContext';
@@ -20,7 +20,11 @@ interface CartContextType {
   setSheetOpen: (isOpen: boolean) => void;
 }
 
+const CART_STORAGE_KEY = 'ro-cart-items';
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const isServer = typeof window === 'undefined';
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -28,6 +32,27 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const { toast } = useToast();
   const { translations } = useLanguage();
+
+  useEffect(() => {
+    if (isServer) return;
+    try {
+        const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+        if (storedCart) {
+            setCartItems(JSON.parse(storedCart));
+        }
+    } catch (error) {
+        console.error("Failed to load cart from localStorage:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isServer) return;
+    try {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    } catch (error) {
+        console.error("Failed to save cart to localStorage:", error);
+    }
+  }, [cartItems]);
 
   const addToCart = useCallback((part: Part) => {
     const minQuantity = part.minQuantity || 1;

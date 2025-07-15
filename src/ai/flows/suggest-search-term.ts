@@ -46,24 +46,26 @@ const suggestSearchTermFlow = ai.defineFlow(
       prompt: `You are a helpful search assistant for an e-commerce store that sells Reverse Osmosis (RO) parts.
         Your task is to provide relevant search suggestions based on the user's query.
 
-        RULES:
-        1. Your suggestions MUST be relevant to the products in the list of available parts.
-        2. Correct spelling mistakes.
-        3. Handle Hindi transliteration variations. For example, if the user types "मेंबराने" (membraane), you should suggest "मेम्ब्रेन" (membrane).
-        4. Provide up to 4 suggestions.
-        5. Return ONLY a JSON array of strings. Do not include the original query in the suggestions.
-        6. If you have no good suggestions, return an empty array.
+        STRICT RULES:
+        1. Your suggestions MUST be relevant to products from the "AVAILABLE PARTS & CATEGORIES" list.
+        2. Correct common spelling mistakes.
+        3. Handle Hindi transliteration variations (e.g., "मेंबराने" -> "मेम्ब्रेन").
+        4. Provide up to 4 suggestions, ranked by relevance.
+        5. You MUST return ONLY a valid JSON array of strings. Do not include any other text, explanations, or markdown.
+        6. Do not include the original query in the suggestions unless it's a valid term itself.
+        7. If you have no good suggestions, you MUST return an empty JSON array: [].
 
         AVAILABLE PARTS & CATEGORIES:
         [${allPartNamesAndCategories}]
 
         EXAMPLES:
-        - User Query: "pamp" -> Suggestions: ["Pump"]
+        - User Query: "pamp" -> Suggestions: ["Pump", "Pumps"]
         - User Query: "filtr" -> Suggestions: ["Filters", "Sediment Filter", "Carbon Block Filter"]
         - User Query: "meme" -> Suggestions: ["Membranes", "AquaPure Membrane 100GPD"]
         - User Query: "membr" -> Suggestions: ["Membranes", "AquaPure Membrane 100GPD"]
         - User Query: "मेंबराने" -> Suggestions: ["मेम्ब्रेन", "AquaPure Membrane 100GPD"]
         - User Query: "valv" -> Suggestions: ["Valves", "Solenoid Valve", "Auto Flush Valve"]
+        - User Query: "xyz" -> Suggestions: []
 
         User Query: "${query}"
       `,
@@ -74,9 +76,13 @@ const suggestSearchTermFlow = ai.defineFlow(
     });
 
     try {
-      const parsed = JSON.parse(llmResponse.text);
-      if (Array.isArray(parsed)) {
-        return {suggestions: parsed};
+      // Ensure the response is valid JSON before attempting to parse.
+      const textResponse = llmResponse.text.trim();
+      if (textResponse.startsWith('[') && textResponse.endsWith(']')) {
+        const parsed = JSON.parse(textResponse);
+        if (Array.isArray(parsed)) {
+          return {suggestions: parsed.filter(s => typeof s === 'string')};
+        }
       }
     } catch (e) {
       console.error('Could not parse search suggestions:', e);

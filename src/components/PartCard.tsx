@@ -28,8 +28,8 @@ export function PartCard({ part }: PartCardProps) {
     addToCart(part);
   };
   
-  const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
-  const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
+  const partName = (language === 'hi' && part.name_hi) ? part.name_hi : part.name;
+  const partDescription = (language === 'hi' && part.description_hi) ? part.description_hi : part.description;
   const categoryKeyword = part.category.split(' ')[0].toLowerCase();
 
   return (
