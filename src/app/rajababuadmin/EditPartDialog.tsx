@@ -25,7 +25,7 @@ const partSchema = z.object({
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  image: z.string().url("A valid image URL or data URI is required."),
+  image: z.string().min(1, "An image is required."), // Accepts URL or data URI
   minQuantity: z.coerce.number().min(1, 'Minimum quantity must be at least 1').optional(),
 });
 
@@ -162,7 +162,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                         onError={(e) => e.currentTarget.src = 'https://placehold.co/400x400.png'}
                       />
                     )}
-                     <FormField
+                    <FormField
                       control={form.control}
                       name="image"
                       render={({ field }) => (
@@ -183,11 +183,6 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                                             {t.uploadImageButton}
                                         </label>
                                     </Button>
-                                    <Input 
-                                        placeholder="Or paste image URL"
-                                        {...field}
-                                        className="mt-2"
-                                    />
                                 </>
                             </FormControl>
                           <FormMessage />
@@ -308,3 +303,5 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     </Dialog>
   );
 }
+
+    
