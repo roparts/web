@@ -1,10 +1,12 @@
+
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -22,6 +24,7 @@ const partSchema = z.object({
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
+  image: z.string().url("A valid image URL or Data URL is required.")
 });
 
 interface EditPartDialogProps {
@@ -33,6 +36,7 @@ interface EditPartDialogProps {
 
 export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof partSchema>>({
@@ -44,26 +48,45 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       discountPrice: undefined,
       features: '',
       description: '',
+      image: '',
     },
   });
 
   useEffect(() => {
-    if (part) {
-      form.reset({
-        ...part,
-        discountPrice: part.discountPrice ?? undefined,
-      });
-    } else {
-      form.reset({
-        name: '',
-        category: '',
-        price: 0,
-        discountPrice: undefined,
-        features: '',
-        description: '',
-      });
+    if (isOpen) {
+      if (part) {
+        form.reset({
+          ...part,
+          discountPrice: part.discountPrice ?? undefined,
+        });
+        setImagePreview(part.image);
+      } else {
+        form.reset({
+          name: '',
+          category: '',
+          price: 0,
+          discountPrice: undefined,
+          features: '',
+          description: '',
+          image: 'https://placehold.co/400x400.png',
+        });
+        setImagePreview('https://placehold.co/400x400.png');
+      }
     }
   }, [part, form, isOpen]);
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        setImagePreview(dataUrl);
+        form.setValue('image', dataUrl, { shouldValidate: true });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleGenerateDescription = async () => {
     const { name, category, features } = form.getValues();
@@ -104,7 +127,6 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     onSave({
       ...values,
       id: part?.id || '',
-      image: part?.image || 'https://placehold.co/400x400.png',
       discountPrice: values.discountPrice || undefined,
     });
   };
@@ -120,6 +142,41 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <div className="flex flex-col items-center gap-4">
+                {imagePreview && (
+                  <Image
+                    src={imagePreview}
+                    alt="Part preview"
+                    width={128}
+                    height={128}
+                    className="rounded-md object-cover border"
+                  />
+                )}
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem className="w-full text-center">
+                       <Button asChild variant="outline">
+                        <label htmlFor="image-upload" className="cursor-pointer">
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload Image
+                        </label>
+                      </Button>
+                      <FormControl>
+                        <Input 
+                            id="image-upload" 
+                            type="file" 
+                            className="hidden"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleImageUpload} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             <FormField
               control={form.control}
               name="name"
