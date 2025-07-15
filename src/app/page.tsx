@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef, type FormEvent } from 'react';
 import { Header } from '@/components/Header';
 import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
@@ -9,7 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic } from 'lucide-react';
+import { Search, Mic, History, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion } from './actions';
@@ -18,19 +18,65 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
+const SEARCH_HISTORY_KEY = 'ro-search-history';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
   const { lastAddedItem } = useCart();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  useEffect(() => {
+    try {
+      const storedHistory = localStorage.getItem(SEARCH_HISTORY_KEY);
+      if (storedHistory) {
+        setSearchHistory(JSON.parse(storedHistory));
+      }
+    } catch (error) {
+      console.error('Failed to load search history:', error);
+    }
+  }, []);
+
+  const updateSearchHistory = (query: string) => {
+    if (!query) return;
+    setSearchHistory(prev => {
+      const newHistory = [query, ...prev.filter(item => item !== query)].slice(0, 5);
+      try {
+        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+      } catch (error) {
+        console.error('Failed to save search history:', error);
+      }
+      return newHistory;
+    });
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    try {
+      localStorage.removeItem(SEARCH_HISTORY_KEY);
+    } catch (error) {
+      console.error('Failed to clear search history:', error);
+    }
+  };
+
+  const handleSearchSubmit = (e?: FormEvent) => {
+    e?.preventDefault();
+    if (searchQuery.trim()) {
+      setActiveSearch(searchQuery);
+      updateSearchHistory(searchQuery);
+      setSuggestions([]); // Close suggestions on search
+    }
+  };
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => part.category);
@@ -40,7 +86,7 @@ export default function Home() {
   const filteredAndSortedParts = useMemo(() => {
     const filtered = partsData.filter(part => {
       const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
-      const matchesSearch = part.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = part.name.toLowerCase().includes(activeSearch.toLowerCase());
       return matchesCategory && matchesSearch;
     });
 
@@ -60,9 +106,15 @@ export default function Home() {
           return discountB - discountA;
         });
       default:
-        return filtered;
+        // Use activeSearch for filtering, not searchQuery
+        if (!activeSearch) return filtered;
+        return partsData.filter(part => {
+            const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
+            const matchesSearch = part.name.toLowerCase().includes(activeSearch.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
     }
-  }, [searchQuery, selectedCategory, sortOption]);
+  }, [activeSearch, selectedCategory, sortOption]);
   
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -83,6 +135,8 @@ export default function Home() {
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         setSearchQuery(transcript);
+        setActiveSearch(transcript);
+        updateSearchHistory(transcript);
       };
       
       recognition.onerror = (event) => {
@@ -105,8 +159,10 @@ export default function Home() {
     }
   }, [debouncedSearchQuery]);
   
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchQuery(suggestion);
+  const handleSuggestionClick = (term: string) => {
+    setSearchQuery(term);
+    setActiveSearch(term);
+    updateSearchHistory(term);
     setSuggestions([]);
   };
 
@@ -115,6 +171,9 @@ export default function Home() {
       recognitionRef.current.start();
     }
   };
+  
+  const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
+  const showSuggestions = suggestions.length > 0 || isSuggestionLoading;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -137,17 +196,20 @@ export default function Home() {
           <div className="mb-8 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-grow z-30">
-                <div className="relative flex items-center">
+                <form onSubmit={handleSearchSubmit} className="relative flex items-center">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Search for parts by name or voice..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setTimeout(() => setIsInputFocused(false), 150)}
                     className="w-full pl-10 pr-10 text-base"
                   />
                   {recognitionRef.current && (
                     <Button 
+                      type="button"
                       variant="ghost" 
                       size="icon" 
                       className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
@@ -158,26 +220,50 @@ export default function Home() {
                       <Mic className={cn("h-5 w-5", isRecording ? "text-destructive animate-pulse" : "text-muted-foreground")} />
                     </Button>
                   )}
-                </div>
-                 {(isSuggestionLoading || suggestions.length > 0) && (
+                </form>
+                 {(showSuggestions || showHistory) && (
                     <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg">
-                      {isSuggestionLoading ? (
-                        <div className="p-3 text-sm text-muted-foreground">Searching...</div>
-                      ) : (
-                        <ul className="py-1">
-                          {suggestions.map((suggestion, index) => (
-                            <li key={index}>
-                              <button
-                                onClick={() => handleSuggestionClick(suggestion)}
-                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
-                              >
-                                <Search className="h-4 w-4 text-muted-foreground" />
-                                <span>{suggestion}</span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+                      {showSuggestions ? (
+                        <>
+                          {isSuggestionLoading ? (
+                            <div className="p-3 text-sm text-muted-foreground">Searching...</div>
+                          ) : (
+                            <ul className="py-1">
+                              {suggestions.map((suggestion, index) => (
+                                <li key={index}>
+                                  <button
+                                    onClick={() => handleSuggestionClick(suggestion)}
+                                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
+                                  >
+                                    <Search className="h-4 w-4 text-muted-foreground" />
+                                    <span>{suggestion}</span>
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </>
+                      ) : showHistory ? (
+                        <div>
+                           <div className="px-3 py-2 flex justify-between items-center">
+                              <span className="text-sm font-semibold">Recent Searches</span>
+                              <button onClick={clearSearchHistory} className="text-xs text-primary hover:underline">Clear</button>
+                           </div>
+                           <ul className="py-1">
+                            {searchHistory.map((item, index) => (
+                              <li key={index}>
+                                <button
+                                  onClick={() => handleSuggestionClick(item)}
+                                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
+                                >
+                                  <History className="h-4 w-4 text-muted-foreground" />
+                                  <span>{item}</span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                     </div>
                   )}
               </div>
