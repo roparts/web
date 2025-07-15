@@ -39,7 +39,7 @@ export default function Home() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
 
   const fuse = useMemo(() => {
     const options = {
