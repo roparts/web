@@ -114,9 +114,10 @@ export default function Home() {
                             <li key={index}>
                               <button
                                 onClick={() => handleSuggestionClick(suggestion)}
-                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent"
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
                               >
-                                {suggestion}
+                                <Search className="h-4 w-4 text-muted-foreground" />
+                                <span>{suggestion}</span>
                               </button>
                             </li>
                           ))}
