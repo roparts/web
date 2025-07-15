@@ -17,7 +17,7 @@ export function PartCard({ part }: PartCardProps) {
   const { addToCart } = useCart();
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
-  const showMinQuantity = part.minQuantity && part.minQuantity > 1;
+  const showMinQuantity = !!part.minQuantity;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative">
