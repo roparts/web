@@ -15,7 +15,7 @@ interface CartSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const WHATSAPP_NUMBER = "9523728080";
+const WHATSAPP_NUMBER = "919523728080";
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
@@ -38,8 +38,9 @@ ${productLines}
 
 Total: ₹${totalPrice.toLocaleString('en-IN')}
 `;
-
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
