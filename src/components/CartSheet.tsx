@@ -21,8 +21,12 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
 
   const handleWhatsAppOrder = () => {
-    const rfqNumber = Math.floor(10000 + Math.random() * 90000);
-    const currentDate = new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY format
+    // Combine a random number with a timestamp for a highly unique RFQ number
+    const randomPart = Math.floor(100 + Math.random() * 900).toString();
+    const timestampPart = Date.now().toString().slice(-5);
+    const rfqNumber = `${randomPart}${timestampPart}`;
+
+    const currentDate = new Date().toLocaleDateString('en-GB');
 
     const productLines = cartItems
       .map(item => `${item.quantity} x ${item.name} (${item.id})`)
@@ -39,9 +43,11 @@ ${productLines}
 Total: ₹${totalPrice.toLocaleString('en-IN')}
 `;
     
+    // Manually encode the message to ensure newlines are preserved.
     const encodedMessage = encodeURIComponent(message);
-    // Use the confirmed working URL structure
+
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
+    
     window.open(whatsappUrl, '_blank');
   };
 
