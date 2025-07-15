@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { Metadata } from 'next';
 import Image from 'next/image';
 import { PlusCircle, Edit, Trash2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,8 +77,8 @@ export default function AdminPage() {
     return (
       <>
         <Head>
-            <meta name="robots" content="noindex, nofollow" />
             <title>Admin Login</title>
+            <meta name="robots" content="noindex, nofollow" />
         </Head>
         <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
             <Card className="w-full max-w-sm">
@@ -134,8 +133,8 @@ export default function AdminPage() {
   return (
     <>
         <Head>
-            <meta name="robots" content="noindex, nofollow" />
             <title>Admin Panel</title>
+            <meta name="robots" content="noindex, nofollow" />
         </Head>
         <div className="min-h-screen bg-muted/40">
         <header className="bg-background border-b sticky top-0 z-10">

@@ -18,6 +18,8 @@ type Props = {
   params: { id: string };
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
+
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
@@ -27,28 +29,39 @@ export async function generateMetadata(
   if (!part) {
     return {
       title: 'Part Not Found',
-      description: 'The requested part could not be found.',
     };
   }
 
-  // Use English for metadata as it's more universally indexed
-  const title = `${part.name} | RoParts Hub`;
+  const title = part.name;
   const description = `Buy ${part.name}. ${part.description.substring(0, 120)}... High-quality RO parts available at RoParts Hub.`;
+  const imageUrl = part.image.startsWith('http') ? part.image : `${siteUrl}${part.image}`;
+  const partUrl = `${siteUrl}/part/${part.id}`;
 
   return {
     title,
     description,
+    alternates: {
+      canonical: partUrl,
+    },
     openGraph: {
       title,
       description,
+      url: partUrl,
+      type: 'product',
       images: [
         {
-          url: part.image,
+          url: imageUrl,
           width: 600,
           height: 600,
           alt: part.name,
         },
       ],
+    },
+     twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [imageUrl],
     },
   };
 }
