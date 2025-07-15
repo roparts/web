@@ -9,8 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon, ListFilter } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon, ListFilter, Filter } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -21,7 +20,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
 import type { Part } from '@/lib/types';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
 
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
@@ -393,43 +392,48 @@ export default function Home() {
                   </div>
                 )}
             </div>
-            {/* Category and Sort controls */}
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-grow">
-                <Select onValueChange={handleCategoryChange} value={selectedCategory}>
-                  <SelectTrigger className="w-full text-base">
-                    <SelectValue placeholder={translations.categories.title} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category === 'All' && language === 'hi' ? translations.categories.all : category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex-grow">
-                <Select onValueChange={handleBrandChange} value={selectedBrand}>
-                  <SelectTrigger className="w-full text-base">
-                    <SelectValue placeholder={translations.brands.title} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand} value={brand}>
-                         {brand === 'All' && language === 'hi' ? translations.brands.all : brand}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Filter and Sort controls */}
+            <div className="flex gap-4 justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex-shrink-0">
+                    <Filter className="h-4 w-4 md:mr-2" />
+                    <span className="hidden md:inline">{translations.home.filterBy}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>{translations.categories.title}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuRadioGroup value={selectedCategory} onValueChange={handleCategoryChange}>
+                        {categories.map((category) => (
+                          <DropdownMenuRadioItem key={category} value={category}>
+                            {category === 'All' && language === 'hi' ? translations.categories.all : category}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>{translations.brands.title}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuRadioGroup value={selectedBrand} onValueChange={handleBrandChange}>
+                        {brands.map((brand) => (
+                          <DropdownMenuRadioItem key={brand} value={brand}>
+                            {brand === 'All' && language === 'hi' ? translations.brands.all : brand}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex-shrink-0 md:flex-grow-0 w-full md:w-auto">
+                  <Button variant="outline" className="flex-shrink-0">
                     <ListFilter className="h-4 w-4 md:mr-2" />
-                    <span className="md:inline">{translations.home.sortBy}</span>
+                    <span className="hidden md:inline">{translations.home.sortBy}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -505,3 +509,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

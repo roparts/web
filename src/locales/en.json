@@ -4,7 +4,8 @@
     "title": "Ultimate RO Parts Collection",
     "subtitle": "Find everything you need for your water purification system. High-quality, reliable, and ready to ship.",
     "searchPlaceholder": "Search for parts by name or voice...",
-    "sortBy": "Sort by",
+    "sortBy": "Sort",
+    "filterBy": "Filter",
     "sortOptions": {
       "default": "Default",
       "priceAsc": "Price: Low to High",
@@ -109,11 +110,11 @@
     }
   },
   "categories": {
-    "title": "Filter by Category",
+    "title": "Category",
     "all": "All Categories"
   },
    "brands": {
-    "title": "Filter by Brand",
+    "title": "Brand",
     "all": "All Brands"
   },
   "metadata": {
@@ -121,3 +122,5 @@
     "description": "Find high-quality reverse osmosis system parts, from filters to membranes, at RoParts Hub."
   }
 }
+
+    
