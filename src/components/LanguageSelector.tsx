@@ -12,8 +12,12 @@ export function LanguageSelector() {
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm text-center">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Choose Your Language</CardTitle>
-          <CardDescription>Select your preferred language to continue.</CardDescription>
+          <CardTitle className="text-2xl font-headline">
+            Choose Your Language / अपनी भाषा चुनें
+          </CardTitle>
+          <CardDescription>
+            Select your preferred language to continue. / जारी रखने के लिए अपनी पसंदीदा भाषा चुनें।
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Button onClick={() => setLanguage('en')} size="lg">
@@ -27,5 +31,3 @@ export function LanguageSelector() {
     </div>
   );
 }
-
-    
