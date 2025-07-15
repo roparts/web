@@ -9,7 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, ShoppingCart } from 'lucide-react';
+import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
@@ -19,14 +19,18 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
+import type { Part } from '@/lib/types';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
+type ProductType = 'Domestic' | 'Commercial';
+
 const SEARCH_HISTORY_KEY = 'ro-search-history';
 
 export default function Home() {
   const { translations, language, isLanguageSelected } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [selectedType, setSelectedType] = useState<ProductType>('Domestic');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
   const { itemCount, setSheetOpen } = useCart();
@@ -43,17 +47,16 @@ export default function Home() {
 
   const fuse = useMemo(() => {
     const options = {
-      keys: ['name', 'name_hi', 'category', 'category_hi'],
+      keys: ['name', 'name_hi', 'category', 'category_hi', 'type'],
       includeScore: true,
       threshold: 0.4,
     };
     return new Fuse(partsData, options);
   }, []);
-
+  
   const categoriesMap = useMemo(() => {
     const map = new Map<string, string>();
     partsData.forEach(part => {
-      // Maps English category to its Hindi translation
       if(part.category && part.category_hi) {
         map.set(part.category, part.category_hi);
       }
@@ -118,10 +121,7 @@ export default function Home() {
       const detectedCategory = await getCategoryFromSearch(term);
       
       if (detectedCategory) {
-        // The AI always returns the English category name.
-        // We need to find the corresponding localized category name.
         const categoryToSet = (language === 'hi' ? categoriesMap.get(detectedCategory) : detectedCategory) || 'All';
-        
         setSelectedCategory(categoryToSet);
         setActiveSearch(''); 
         setSearchQuery('');
@@ -136,16 +136,17 @@ export default function Home() {
   }, [language, categoriesMap, updateSearchHistory]);
 
   const categories = useMemo(() => {
-    const allCategories = partsData.map(part => (language === 'hi' && part.category_hi) ? part.category_hi : part.category);
+    const relevantParts = partsData.filter(part => part.type === selectedType);
+    const allCategories = relevantParts.map(part => (language === 'hi' && part.category_hi) ? part.category_hi : part.category);
     return ['All', ...Array.from(new Set(allCategories))];
-  }, [language]);
+  }, [language, selectedType]);
 
 
   const filteredAndSortedParts = useMemo(() => {
-    let partsToFilter = partsData;
+    let partsToFilter: Part[] = partsData.filter(part => part.type === selectedType);
 
     if (activeSearch.trim()) {
-      partsToFilter = fuse.search(activeSearch).map(result => result.item);
+      partsToFilter = fuse.search(activeSearch).map(result => result.item).filter(part => part.type === selectedType);
     }
 
     const filteredByCategory = partsToFilter.filter(part => {
@@ -180,11 +181,9 @@ export default function Home() {
           return discountB - discountA;
         });
       default:
-        // When there's an active search, Fuse.js score provides the default sort order.
-        // Otherwise, we return the original order.
         return filteredByCategory;
     }
-  }, [activeSearch, selectedCategory, sortOption, language, fuse]);
+  }, [activeSearch, selectedCategory, sortOption, language, fuse, selectedType]);
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -259,6 +258,13 @@ export default function Home() {
       recognitionRef.current?.stop();
     }
   };
+
+  const handleTypeChange = (type: ProductType) => {
+    setSelectedType(type);
+    setSelectedCategory('All');
+    setActiveSearch('');
+    setSearchQuery('');
+  }
   
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
   const showSuggestions = isInputFocused && searchQuery.length > 0 && (suggestions.length > 0 || isSuggestionLoading);
@@ -290,6 +296,14 @@ export default function Home() {
           </div>
 
           <div className="mb-8 space-y-4">
+             <Tabs value={selectedType} onValueChange={(v) => handleTypeChange(v as ProductType)} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-12">
+                <TabsTrigger value="Domestic" className="text-base gap-2"><HomeIcon/>Domestic</TabsTrigger>
+                <TabsTrigger value="Commercial" className="text-base gap-2"><Building/>Commercial</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+
             <div className="flex flex-col sm:flex-row gap-4">
               <div ref={searchContainerRef} className="relative flex-grow z-30">
                 <form onSubmit={(e) => handleSearchSubmit(searchQuery, e)} className="relative flex items-center">

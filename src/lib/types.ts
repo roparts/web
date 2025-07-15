@@ -1,7 +1,9 @@
+
 export interface Part {
   id: string;
   name: string;
   name_hi?: string;
+  type: 'Domestic' | 'Commercial';
   price: number;
   discountPrice?: number;
   description: string;
