@@ -16,16 +16,34 @@ interface CartSheetProps {
 }
 
 const WHATSAPP_NUMBER = "919523728080";
+const RFQ_COUNTER_KEY = 'roparts-rfq-counter';
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
 
-  const handleWhatsAppOrder = () => {
-    // Combine a random number with a timestamp for a highly unique RFQ number
-    const randomPart = Math.floor(100 + Math.random() * 900).toString();
-    const timestampPart = Date.now().toString().slice(-5);
-    const rfqNumber = `${randomPart}${timestampPart}`;
+  const getNextRfqNumber = () => {
+    let currentCount = 10001; // Starting number
+    try {
+        const savedCount = localStorage.getItem(RFQ_COUNTER_KEY);
+        if (savedCount) {
+            const parsedCount = parseInt(savedCount, 10);
+            if (!isNaN(parsedCount)) {
+                currentCount = parsedCount + 1;
+            }
+        }
+        localStorage.setItem(RFQ_COUNTER_KEY, String(currentCount));
+    } catch (error) {
+        // LocalStorage might be disabled (e.g., in private browsing)
+        console.error("Could not access localStorage for RFQ number:", error);
+        // Fallback to a non-sequential number
+        return Math.floor(10000 + Math.random() * 90000);
+    }
+    return currentCount;
+  };
 
+
+  const handleWhatsAppOrder = () => {
+    const rfqNumber = getNextRfqNumber();
     const currentDate = new Date().toLocaleDateString('en-GB');
 
     const productLines = cartItems
