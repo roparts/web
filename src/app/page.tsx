@@ -194,12 +194,11 @@ export default function Home() {
     };
   }, [language]);
 
-  // This effect handles debouncing for both AI suggestions and the main fuzzy search filtering.
   useEffect(() => {
-    // Set active search for Fuse.js filtering
-    setActiveSearch(debouncedSearchQuery);
+    // We don't debounce the active search for Fuse.js to make it feel instant
+    setActiveSearch(searchQuery);
 
-    // Fetch AI-powered suggestions
+    // We debounce the call to the AI for suggestions
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
@@ -208,7 +207,7 @@ export default function Home() {
     } else {
       setSuggestions([]);
     }
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, searchQuery]);
 
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
@@ -230,7 +229,7 @@ export default function Home() {
   };
   
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
-  const showSuggestions = isInputFocused && (suggestions.length > 0 || isSuggestionLoading);
+  const showSuggestions = isInputFocused && searchQuery.length > 0 && (suggestions.length > 0 || isSuggestionLoading);
 
   if (!isLanguageSelected) {
     return <LanguageSelector />;
@@ -286,7 +285,7 @@ export default function Home() {
                     <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg">
                       {showSuggestions ? (
                         <>
-                          {isSuggestionLoading ? (
+                          {isSuggestionLoading && !suggestions.length ? (
                             <div className="p-3 text-sm text-muted-foreground">{translations.home.searching}</div>
                           ) : (
                             <ul className="py-1">
