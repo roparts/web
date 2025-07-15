@@ -44,12 +44,10 @@ export default function RootLayout({
         <LanguageProvider>
           <CartProvider>
             {children}
+            <Toaster />
           </CartProvider>
-          <Toaster />
         </LanguageProvider>
       </body>
     </html>
   );
 }
-
-    

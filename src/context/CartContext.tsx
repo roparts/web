@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode, useCallback } fr
 import type { Part, CartItem } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from './LanguageContext';
+import { CartSheet } from '@/components/CartSheet';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -15,6 +16,8 @@ interface CartContextType {
   itemCount: number;
   totalPrice: number;
   lastAddedItem: Part | null;
+  isSheetOpen: boolean;
+  setSheetOpen: (isOpen: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -22,6 +25,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [lastAddedItem, setLastAddedItem] = useState<Part | null>(null);
+  const [isSheetOpen, setSheetOpen] = useState(false);
   const { toast } = useToast();
   const { translations } = useLanguage();
 
@@ -83,8 +87,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, 0);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, itemCount, totalPrice, lastAddedItem }}>
+    <CartContext.Provider value={{ 
+        cartItems, 
+        addToCart, 
+        removeFromCart, 
+        updateQuantity, 
+        clearCart, 
+        itemCount, 
+        totalPrice, 
+        lastAddedItem,
+        isSheetOpen,
+        setSheetOpen
+    }}>
       {children}
+      <CartSheet open={isSheetOpen} onOpenChange={setSheetOpen} />
     </CartContext.Provider>
   );
 };

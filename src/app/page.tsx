@@ -9,7 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, X } from 'lucide-react';
+import { Search, Mic, History, X, ShoppingCart } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion } from './actions';
@@ -28,7 +28,7 @@ export default function Home() {
   const [activeSearch, setActiveSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
-  const { lastAddedItem } = useCart();
+  const { lastAddedItem, itemCount, setSheetOpen } = useCart();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -353,8 +353,19 @@ export default function Home() {
             </p>
         </div>
       </footer>
+      
+      {itemCount > 0 && (
+         <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+           <Button
+             size="lg"
+             className="rounded-full shadow-lg"
+             onClick={() => setSheetOpen(true)}
+           >
+             <ShoppingCart className="mr-2 h-5 w-5" />
+             {translations.cart.viewQuote} ({itemCount})
+           </Button>
+         </div>
+       )}
     </div>
   );
 }
-
-    

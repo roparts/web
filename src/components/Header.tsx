@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ShoppingCart, Menu, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
-import { CartSheet } from './CartSheet';
 import { CategorySheet } from './CategorySheet';
 import { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -25,8 +24,7 @@ interface HeaderProps {
 
 
 export function Header({ categories, selectedCategory, onCategoryChange }: HeaderProps) {
-  const { itemCount } = useCart();
-  const [isCartOpen, setCartOpen] = useState(false);
+  const { itemCount, setSheetOpen } = useCart();
   const [isCategoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const { language, setLanguage, translations } = useLanguage();
 
@@ -65,7 +63,7 @@ export function Header({ categories, selectedCategory, onCategoryChange }: Heade
             </DropdownMenu>
 
             <nav className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={() => setCartOpen(true)} aria-label={translations.header.openCart}>
+              <Button variant="ghost" size="icon" onClick={() => setSheetOpen(true)} aria-label={translations.header.openCart}>
                 <div className="relative">
                   <ShoppingCart className="h-6 w-6" />
                   {itemCount > 0 && (
@@ -79,7 +77,6 @@ export function Header({ categories, selectedCategory, onCategoryChange }: Heade
           </div>
         </div>
       </header>
-      <CartSheet open={isCartOpen} onOpenChange={setCartOpen} />
       {categories && onCategoryChange && (
          <CategorySheet 
             open={isCategoryMenuOpen} 
