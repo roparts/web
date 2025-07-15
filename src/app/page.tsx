@@ -148,34 +148,44 @@ export default function Home() {
   
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
-      recognition.interimResults = false;
-
-      recognition.onstart = () => {
-        setIsRecording(true);
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setSearchQuery(transcript);
-        setActiveSearch(transcript);
-        updateSearchHistory(transcript);
-      };
-      
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecording(false);
-      };
-
-      recognitionRef.current = recognition;
+    if (!SpeechRecognition) {
+      console.warn("Speech recognition not supported in this browser.");
+      recognitionRef.current = null;
+      return;
     }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchQuery(transcript);
+      // Automatically trigger search after voice input
+      setActiveSearch(transcript);
+      updateSearchHistory(transcript);
+    };
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+
+    // Cleanup function to stop any active recognition when component unmounts or language changes
+    return () => {
+      recognitionRef.current?.abort();
+    };
   }, [language]);
 
   useEffect(() => {
@@ -198,12 +208,18 @@ export default function Home() {
 
   const handleVoiceSearch = () => {
     if (recognitionRef.current && !isRecording) {
-      recognitionRef.current.start();
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error("Could not start voice recognition:", error)
+      }
+    } else if (isRecording) {
+      recognitionRef.current?.stop();
     }
   };
   
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
-  const showSuggestions = suggestions.length > 0 || isSuggestionLoading;
+  const showSuggestions = isInputFocused && (suggestions.length > 0 || isSuggestionLoading);
 
   if (!isLanguageSelected) {
     return <LanguageSelector />;
