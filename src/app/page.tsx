@@ -112,7 +112,7 @@ export default function Home() {
   const filteredAndSortedParts = useMemo(() => {
     let partsToFilter = partsData;
 
-    // Fuzzy search with Fuse.js if there is an active search query
+    // Client-side fuzzy search with Fuse.js is the primary filter
     if (activeSearch.trim()) {
       partsToFilter = fuse.search(activeSearch).map(result => result.item);
     }
@@ -205,7 +205,7 @@ export default function Home() {
     }
   }, [debouncedSearchQuery]);
 
-  // Update activeSearch in real-time as user types for instant filtering
+  // Update activeSearch in real-time as user types for instant client-side filtering
   useEffect(() => {
     setActiveSearch(searchQuery);
   }, [searchQuery]);
