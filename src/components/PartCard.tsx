@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart } from 'lucide-react';
+import { Badge } from './ui/badge';
 
 interface PartCardProps {
   part: Part;
@@ -14,9 +15,16 @@ interface PartCardProps {
 
 export function PartCard({ part }: PartCardProps) {
   const { addToCart } = useCart();
+  const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
+  const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
+    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group relative">
+       {hasDiscount && (
+        <Badge variant="destructive" className="absolute top-2 right-2 z-10">
+          {discountPercentage}% OFF
+        </Badge>
+      )}
       <CardHeader className="p-0">
         <div className="aspect-square overflow-hidden">
           <Image
@@ -34,7 +42,16 @@ export function PartCard({ part }: PartCardProps) {
         <CardDescription className="text-sm text-muted-foreground line-clamp-3">{part.description}</CardDescription>
       </CardContent>
       <CardFooter className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-2">
-        <p className="text-xl font-bold text-primary self-start sm:self-center">₹{part.price.toLocaleString('en-IN')}</p>
+         <div className="flex flex-col items-start sm:items-center self-start sm:self-center">
+            {hasDiscount ? (
+                <>
+                    <p className="text-xl font-bold text-primary">₹{part.discountPrice!.toLocaleString('en-IN')}</p>
+                    <p className="text-sm text-muted-foreground line-through">₹{part.price.toLocaleString('en-IN')}</p>
+                </>
+            ) : (
+                <p className="text-xl font-bold text-primary">₹{part.price.toLocaleString('en-IN')}</p>
+            )}
+        </div>
         <Button onClick={() => addToCart(part)} size="sm" className="w-full sm:w-auto">
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart

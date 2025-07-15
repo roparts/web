@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
+type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,13 +33,19 @@ export default function Home() {
 
     switch (sortOption) {
       case 'price-asc':
-        return filtered.sort((a, b) => a.price - b.price);
+        return filtered.sort((a, b) => (a.discountPrice ?? a.price) - (b.discountPrice ?? b.price));
       case 'price-desc':
-        return filtered.sort((a, b) => b.price - a.price);
+        return filtered.sort((a, b) => (b.discountPrice ?? b.price) - (a.discountPrice ?? a.price));
       case 'name-asc':
         return filtered.sort((a, b) => a.name.localeCompare(b.name));
       case 'name-desc':
         return filtered.sort((a, b) => b.name.localeCompare(a.name));
+      case 'discount-desc':
+        return filtered.sort((a, b) => {
+          const discountA = a.discountPrice ? (a.price - a.discountPrice) / a.price : 0;
+          const discountB = b.discountPrice ? (b.price - b.discountPrice) / b.price : 0;
+          return discountB - discountA;
+        });
       default:
         return filtered;
     }
@@ -85,6 +91,7 @@ export default function Home() {
                   <SelectItem value="price-desc">Price: High to Low</SelectItem>
                   <SelectItem value="name-asc">Name: A-Z</SelectItem>
                   <SelectItem value="name-desc">Name: Z-A</SelectItem>
+                  <SelectItem value="discount-desc">Biggest Discount</SelectItem>
                 </SelectContent>
               </Select>
             </div>

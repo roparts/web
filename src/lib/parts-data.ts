@@ -5,6 +5,7 @@ export const partsData: Part[] = [
     id: 'ROP-0001',
     name: 'AquaPure Membrane 100GPD',
     price: 2500,
+    discountPrice: 2250,
     description: 'A high-quality RO membrane with a 100 GPD capacity, ensuring high rejection rates and long-lasting performance for pure, safe drinking water.',
     image: 'https://placehold.co/400x400.png',
     category: 'Membranes',
@@ -23,6 +24,7 @@ export const partsData: Part[] = [
     id: 'ROP-0003',
     name: 'PureStream Booster Pump',
     price: 4500,
+    discountPrice: 4000,
     description: 'Powerful and quiet booster pump to increase water pressure for optimal RO membrane performance, suitable for low-pressure areas.',
     image: 'https://placehold.co/400x400.png',
     category: 'Pumps',
@@ -41,6 +43,7 @@ export const partsData: Part[] = [
     id: 'ROP-0005',
     name: 'MaxFlow 1/4" Fitting',
     price: 150,
+    discountPrice: 120,
     description: 'Quick-connect 1/4 inch elbow fitting for secure, leak-free connections between RO components. Made from food-grade plastic.',
     image: 'https://placehold.co/400x400.png',
     category: 'Fittings',
@@ -59,6 +62,7 @@ export const partsData: Part[] = [
     id: 'ROP-0007',
     name: 'AquaPure Carbon Block Filter',
     price: 750,
+    discountPrice: 650,
     description: 'Activated carbon block filter that removes chlorine, tastes, and odors to improve water quality and taste.',
     image: 'https://placehold.co/400x400.png',
     category: 'Filters',
@@ -86,6 +90,7 @@ export const partsData: Part[] = [
     id: 'ROP-0010',
     name: 'EcoWater Mineral Cartridge',
     price: 900,
+    discountPrice: 800,
     description: 'Adds essential minerals back into the purified water to improve taste and provide health benefits.',
     image: 'https://placehold.co/400x400.png',
     category: 'Filters',
@@ -96,10 +101,13 @@ export const partsData: Part[] = [
     const categories = ['Membranes', 'Filters', 'Pumps', 'Valves', 'Fittings', 'Housing', 'Sterilizers'];
     const names = ['AquaPure', 'HydroFlow', 'PureStream', 'EcoWater', 'MaxFlow', 'UltraSafe'];
     const category = categories[id % categories.length];
+    const price = Math.floor(Math.random() * (9000 - 500 + 1)) + 500;
+    const hasDiscount = Math.random() > 0.7; // 30% chance of having a discount
     return {
       id: `ROP-${String(id).padStart(4, '0')}`,
       name: `${names[id % names.length]} ${category.slice(0, -1)} ${Math.floor(Math.random() * 1000)}`,
-      price: Math.floor(Math.random() * (9000 - 500 + 1)) + 500,
+      price: price,
+      discountPrice: hasDiscount ? Math.floor(price * (Math.random() * (0.9 - 0.7) + 0.7)) : undefined,
       description: 'A high-quality RO part designed for performance and durability. Ideal for various water purification systems.',
       image: 'https://placehold.co/400x400.png',
       category: category,

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { EditPartDialog } from './EditPartDialog';
+import { Badge } from '@/components/ui/badge';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -70,6 +71,22 @@ export default function AdminPage() {
     );
   }
 
+  const renderPrice = (part: Part) => {
+    const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
+    return (
+        <div className="flex flex-col">
+            {hasDiscount ? (
+                <>
+                    <span className="font-medium text-destructive">₹{part.discountPrice!.toLocaleString('en-IN')}</span>
+                    <span className="text-xs text-muted-foreground line-through">₹{part.price.toLocaleString('en-IN')}</span>
+                </>
+            ) : (
+                <span>₹{part.price.toLocaleString('en-IN')}</span>
+            )}
+        </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted/40">
       <header className="bg-background border-b sticky top-0 z-10">
@@ -118,7 +135,7 @@ export default function AdminPage() {
                       </TableCell>
                       <TableCell className="font-medium">{part.name}</TableCell>
                       <TableCell>{part.category}</TableCell>
-                      <TableCell>₹{part.price.toLocaleString('en-IN')}</TableCell>
+                      <TableCell>{renderPrice(part)}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(part)}>
                           <Edit className="h-4 w-4" />
@@ -148,7 +165,7 @@ export default function AdminPage() {
                      <div className="flex-grow space-y-1">
                         <p className="font-semibold">{part.name}</p>
                         <p className="text-sm text-muted-foreground">{part.category}</p>
-                        <p className="font-medium">₹{part.price.toLocaleString('en-IN')}</p>
+                        <div className="font-medium">{renderPrice(part)}</div>
                      </div>
                       <div className="flex flex-col justify-between items-center">
                          <Button variant="ghost" size="icon" onClick={() => handleEdit(part)}>

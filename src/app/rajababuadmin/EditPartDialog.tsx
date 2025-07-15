@@ -19,6 +19,7 @@ const partSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   category: z.string().min(3, 'Category is required'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
+  discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
 });
@@ -40,6 +41,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       name: '',
       category: '',
       price: 0,
+      discountPrice: undefined,
       features: '',
       description: '',
     },
@@ -47,12 +49,16 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
 
   useEffect(() => {
     if (part) {
-      form.reset(part);
+      form.reset({
+        ...part,
+        discountPrice: part.discountPrice ?? undefined,
+      });
     } else {
       form.reset({
         name: '',
         category: '',
         price: 0,
+        discountPrice: undefined,
         features: '',
         description: '',
       });
@@ -99,6 +105,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       ...values,
       id: part?.id || '',
       image: part?.image || 'https://placehold.co/400x400.png',
+      discountPrice: values.discountPrice || undefined,
     });
   };
 
@@ -127,20 +134,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
               )}
             />
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Filters" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
+               <FormField
                 control={form.control}
                 name="price"
                 render={({ field }) => (
@@ -153,7 +147,33 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="discountPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Discount Price (₹)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Optional" {...field} value={field.value ?? ''}/>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Filters" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
              <FormField
               control={form.control}
               name="features"
