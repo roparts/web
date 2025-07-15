@@ -17,18 +17,20 @@ interface RelatedPartsProps {
 export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const { lastAddedItem } = useCart();
   const [suggestions, setSuggestions] = useState<Part[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { translations } = useLanguage();
 
-  const partToFetch = currentPart || lastAddedItem;
+  const partToFetch = currentPart || lastAddedItem || partsData[partsData.length - 1];
 
   const allPartsMap = useMemo(() => new Map(partsData.map(p => [p.name.toLowerCase(), p])), []);
 
   useEffect(() => {
-    if (!partToFetch) {
-      setSuggestions([]);
-      return;
-    }
+    // This check is removed to allow fetching even if partToFetch is the default
+    // if (!partToFetch) {
+    //   setSuggestions([]);
+    //   setIsLoading(false);
+    //   return;
+    // }
 
     const fetchSuggestions = async () => {
       setIsLoading(true);
@@ -53,26 +55,31 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
     fetchSuggestions();
   }, [partToFetch, allPartsMap]);
 
-  if (!partToFetch || (suggestions.length === 0 && !isLoading)) return null;
+  if (isLoading) {
+    return (
+      <div className="my-16">
+        <h2 className="text-3xl font-bold text-center mb-8 font-headline">{translations.partDetails.relatedTitle}</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Skeleton className="h-96 w-full" />
+          <Skeleton className="h-96 w-full" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (suggestions.length === 0) {
+    return null; // Don't render anything if there are no suggestions and it's not loading.
+  }
 
   return (
     <div className="my-16">
       <h2 className="text-3xl font-bold text-center mb-8 font-headline">{translations.partDetails.relatedTitle}</h2>
-      {isLoading ? (
-        <div className="grid md:grid-cols-3 gap-8">
-          <Skeleton className="h-96 w-full" />
-          <Skeleton className="h-96 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      ) : suggestions.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {suggestions.map(part => (
-            <PartCard key={part.id} part={part} />
-          ))}
-        </div>
-      ) : (
-         <p className="text-center text-muted-foreground">{translations.partDetails.noSuggestions}</p>
-      )}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {suggestions.map(part => (
+          <PartCard key={part.id} part={part} />
+        ))}
+      </div>
     </div>
   );
 }

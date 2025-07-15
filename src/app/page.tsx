@@ -29,7 +29,7 @@ export default function Home() {
   const [activeSearch, setActiveSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
-  const { lastAddedItem, itemCount, setSheetOpen } = useCart();
+  const { itemCount, setSheetOpen } = useCart();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -410,7 +410,7 @@ export default function Home() {
             </div>
           )}
 
-          {lastAddedItem && <RelatedParts />}
+          <RelatedParts />
         </section>
       </main>
       <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
