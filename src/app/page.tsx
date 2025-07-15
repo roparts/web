@@ -9,7 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon } from 'lucide-react';
+import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon, ListFilter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
@@ -21,6 +21,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
 import type { Part } from '@/lib/types';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
@@ -304,80 +305,78 @@ export default function Home() {
             </Tabs>
 
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div ref={searchContainerRef} className="relative flex-grow z-30">
-                <form onSubmit={(e) => handleSearchSubmit(searchQuery, e)} className="relative flex items-center">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder={translations.home.searchPlaceholder}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setIsInputFocused(true)}
-                    className="w-full pl-10 pr-10 text-base"
-                  />
-                  {recognitionRef.current && (
-                    <Button 
-                      type="button"
-                      variant="ghost" 
-                      size="icon" 
-                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                      onClick={handleVoiceSearch}
-                      aria-label="Search by voice"
-                    >
-                      <Mic className={cn("h-5 w-5", isRecording ? "text-destructive animate-pulse" : "text-muted-foreground")} />
-                    </Button>
-                  )}
-                </form>
-                 {(showSuggestions || showHistory) && (
-                    <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg">
-                      {showSuggestions ? (
-                        <>
-                          {isSuggestionLoading && !suggestions.length ? (
-                            <div className="p-3 text-sm text-muted-foreground">{translations.home.searching}</div>
-                          ) : (
-                            <ul className="py-1">
-                              {suggestions.map((suggestion, index) => (
-                                <li key={index}>
-                                  <button
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
-                                  >
-                                    <Search className="h-4 w-4 text-muted-foreground" />
-                                    <span>{suggestion}</span>
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </>
-                      ) : showHistory ? (
-                        <div>
-                           <div className="px-3 py-2 flex justify-between items-center">
-                              <span className="text-sm font-semibold">{translations.home.recentSearches}</span>
-                              <button onClick={clearSearchHistory} className="text-xs text-primary hover:underline">{translations.home.clear}</button>
-                           </div>
-                           <ul className="py-1">
-                            {searchHistory.map((item, index) => (
+            <div className="relative flex-grow z-30">
+              <form onSubmit={(e) => handleSearchSubmit(searchQuery, e)} className="relative flex items-center">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder={translations.home.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  className="w-full pl-10 pr-10 text-base"
+                />
+                {recognitionRef.current && (
+                  <Button 
+                    type="button"
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                    onClick={handleVoiceSearch}
+                    aria-label="Search by voice"
+                  >
+                    <Mic className={cn("h-5 w-5", isRecording ? "text-destructive animate-pulse" : "text-muted-foreground")} />
+                  </Button>
+                )}
+              </form>
+               {(showSuggestions || showHistory) && (
+                  <div ref={searchContainerRef} className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg">
+                    {showSuggestions ? (
+                      <>
+                        {isSuggestionLoading && !suggestions.length ? (
+                          <div className="p-3 text-sm text-muted-foreground">{translations.home.searching}</div>
+                        ) : (
+                          <ul className="py-1">
+                            {suggestions.map((suggestion, index) => (
                               <li key={index}>
                                 <button
-                                  onClick={() => handleSuggestionClick(item)}
+                                  onClick={() => handleSuggestionClick(suggestion)}
                                   className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
                                 >
-                                  <History className="h-4 w-4 text-muted-foreground" />
-                                  <span>{item}</span>
+                                  <Search className="h-4 w-4 text-muted-foreground" />
+                                  <span>{suggestion}</span>
                                 </button>
                               </li>
                             ))}
                           </ul>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-              </div>
+                        )}
+                      </>
+                    ) : showHistory ? (
+                      <div>
+                         <div className="px-3 py-2 flex justify-between items-center">
+                            <span className="text-sm font-semibold">{translations.home.recentSearches}</span>
+                            <button onClick={clearSearchHistory} className="text-xs text-primary hover:underline">{translations.home.clear}</button>
+                         </div>
+                         <ul className="py-1">
+                          {searchHistory.map((item, index) => (
+                            <li key={index}>
+                              <button
+                                onClick={() => handleSuggestionClick(item)}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent flex items-center gap-3"
+                              >
+                                <History className="h-4 w-4 text-muted-foreground" />
+                                <span>{item}</span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
             </div>
             {/* Category and Sort controls */}
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex gap-4">
               <div className="md:hidden flex-grow">
                 <Select onValueChange={handleCategoryChange} value={selectedCategory}>
                   <SelectTrigger className="w-full text-base">
@@ -392,19 +391,28 @@ export default function Home() {
                   </SelectContent>
                 </Select>
               </div>
-              <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
-                <SelectTrigger className="w-full md:w-[200px] text-base">
-                  <SelectValue placeholder={translations.home.sortBy} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">{translations.home.sortOptions.default}</SelectItem>
-                  <SelectItem value="price-asc">{translations.home.sortOptions.priceAsc}</SelectItem>
-                  <SelectItem value="price-desc">{translations.home.sortOptions.priceDesc}</SelectItem>
-                  <SelectItem value="name-asc">{translations.home.sortOptions.nameAsc}</SelectItem>
-                  <SelectItem value="name-desc">{translations.home.sortOptions.nameDesc}</SelectItem>
-                  <SelectItem value="discount-desc">{translations.home.sortOptions.discountDesc}</SelectItem>
-                </SelectContent>
-              </Select>
+
+               <div className="flex-grow hidden md:block">
+                  {/* Placeholder for desktop category tabs to maintain layout */}
+               </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="flex-shrink-0">
+                    <ListFilter className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuRadioGroup value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+                      <DropdownMenuRadioItem value="default">{translations.home.sortOptions.default}</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="price-asc">{translations.home.sortOptions.priceAsc}</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="price-desc">{translations.home.sortOptions.priceDesc}</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="name-asc">{translations.home.sortOptions.nameAsc}</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="name-desc">{translations.home.sortOptions.nameDesc}</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="discount-desc">{translations.home.sortOptions.discountDesc}</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             {/* Category Tabs for Desktop */}
             <div className="hidden md:block">
