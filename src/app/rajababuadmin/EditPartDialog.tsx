@@ -24,7 +24,7 @@ const partSchema = z.object({
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  image: z.string().url("A valid image URL is required."),
+  image: z.string().url("A valid image URL or data URI is required."),
   minQuantity: z.coerce.number().min(1, 'Minimum quantity must be at least 1').optional(),
 });
 
@@ -79,6 +79,17 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       }
     }
   }, [part, form, isOpen]);
+
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        form.setValue('image', reader.result as string, { shouldValidate: true });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
 
   const handleGenerateDescription = async () => {
@@ -148,18 +159,34 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                     onError={(e) => e.currentTarget.src = 'https://placehold.co/400x400.png'}
                   />
                 )}
-                <FormField
+                 <FormField
                   control={form.control}
                   name="image"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                       <FormLabel>{t.uploadImageButton}</FormLabel>
-                      <FormControl>
-                        <Input 
-                            placeholder="https://your-repo/image.png"
-                            {...field}
-                        />
-                      </FormControl>
+                       <FormLabel className="sr-only">Image</FormLabel>
+                        <FormControl>
+                            <>
+                                <Input 
+                                    id="image-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageUpload}
+                                />
+                                <Button asChild variant="outline" className="w-full">
+                                    <label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center">
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        {t.uploadImageButton}
+                                    </label>
+                                </Button>
+                                <Input 
+                                    placeholder="Or paste image URL"
+                                    {...field}
+                                    className="mt-2"
+                                />
+                            </>
+                        </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
