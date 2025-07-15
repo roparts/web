@@ -35,6 +35,7 @@ export default function Home() {
   const [activeSearch, setActiveSearch] = useState('');
   const [selectedType, setSelectedType] = useState<ProductType>('Domestic');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
   const { itemCount, setSheetOpen } = useCart();
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -50,7 +51,7 @@ export default function Home() {
 
   const fuse = useMemo(() => {
     const options = {
-      keys: ['name', 'name_hi', 'category', 'category_hi', 'type'],
+      keys: ['name', 'name_hi', 'category', 'category_hi', 'type', 'brand'],
       includeScore: true,
       threshold: 0.4,
     };
@@ -131,6 +132,7 @@ export default function Home() {
       } else {
          setActiveSearch(term);
          setSelectedCategory('All');
+         setSelectedBrand('All');
       }
     } else {
       setActiveSearch('');
@@ -144,6 +146,11 @@ export default function Home() {
     return ['All', ...Array.from(new Set(allCategories))];
   }, [language, selectedType]);
 
+  const brands = useMemo(() => {
+    const relevantParts = partsData.filter(part => part.type === selectedType);
+    const allBrands = relevantParts.map(part => part.brand).filter(Boolean);
+    return ['All', ...Array.from(new Set(allBrands as string[]))];
+  }, [selectedType]);
 
   const filteredAndSortedParts = useMemo(() => {
     let partsToFilter: Part[] = partsData.filter(part => part.type === selectedType);
@@ -151,14 +158,19 @@ export default function Home() {
     if (activeSearch.trim()) {
       partsToFilter = fuse.search(activeSearch).map(result => result.item).filter(part => part.type === selectedType);
     }
-
+    
     const filteredByCategory = partsToFilter.filter(part => {
       if (selectedCategory === 'All') return true;
       const currentCategory = (language === 'hi' && part.category_hi) ? part.category_hi : part.category;
       return currentCategory === selectedCategory;
     });
+
+    const filteredByBrand = filteredByCategory.filter(part => {
+        if (selectedBrand === 'All') return true;
+        return part.brand === selectedBrand;
+    });
     
-    const sorted = [...filteredByCategory];
+    const sorted = [...filteredByBrand];
 
     switch (sortOption) {
       case 'price-asc':
@@ -184,9 +196,9 @@ export default function Home() {
           return discountB - discountA;
         });
       default:
-        return filteredByCategory;
+        return filteredByBrand;
     }
-  }, [activeSearch, selectedCategory, sortOption, language, fuse, selectedType]);
+  }, [activeSearch, selectedCategory, selectedBrand, sortOption, language, fuse, selectedType]);
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -265,12 +277,18 @@ export default function Home() {
   const handleTypeChange = (type: ProductType) => {
     setSelectedType(type);
     setSelectedCategory('All');
+    setSelectedBrand('All');
     setActiveSearch('');
     setSearchQuery('');
   }
 
   const handleCategoryChange = (cat: string) => {
       setSelectedCategory(cat);
+      setActiveSearch('');
+      setSearchQuery('');
+  }
+   const handleBrandChange = (brand: string) => {
+      setSelectedBrand(brand);
       setActiveSearch('');
       setSearchQuery('');
   }
@@ -376,8 +394,8 @@ export default function Home() {
                 )}
             </div>
             {/* Category and Sort controls */}
-            <div className="flex gap-4">
-              <div className="md:hidden flex-grow">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-grow">
                 <Select onValueChange={handleCategoryChange} value={selectedCategory}>
                   <SelectTrigger className="w-full text-base">
                     <SelectValue placeholder={translations.categories.title} />
@@ -385,21 +403,33 @@ export default function Home() {
                   <SelectContent>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
-                        {category === 'All' && language === 'hi' ? 'सभी' : category}
+                        {category === 'All' && language === 'hi' ? translations.categories.all : category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex-grow">
+                <Select onValueChange={handleBrandChange} value={selectedBrand}>
+                  <SelectTrigger className="w-full text-base">
+                    <SelectValue placeholder={translations.brands.title} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand} value={brand}>
+                         {brand === 'All' && language === 'hi' ? translations.brands.all : brand}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-               <div className="flex-grow hidden md:block">
-                  {/* Placeholder for desktop category tabs to maintain layout */}
-               </div>
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon" className="flex-shrink-0">
-                    <ListFilter className="h-4 w-4" />
+                  <Button variant="outline" className="flex-shrink-0 md:flex-grow-0 w-full md:w-auto">
+                    <ListFilter className="h-4 w-4 md:mr-2" />
+                    <span className="md:inline">{translations.home.sortBy}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -425,7 +455,7 @@ export default function Home() {
                   <TabsList className="h-auto justify-start">
                     {categories.map((category) => (
                       <TabsTrigger key={category} value={category} className="flex-shrink-0">
-                        {category === 'All' && language === 'hi' ? 'सभी' : category}
+                        {category === 'All' && language === 'hi' ? translations.categories.all : category}
                       </TabsTrigger>
                     ))}
                   </TabsList>

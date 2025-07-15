@@ -21,6 +21,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 const partSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   category: z.string().min(3, 'Category is required'),
+  brand: z.string().optional(),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
@@ -47,6 +48,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     defaultValues: {
       name: '',
       category: '',
+      brand: '',
       price: 0,
       discountPrice: undefined,
       features: '',
@@ -63,6 +65,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       if (part) {
         form.reset({
           ...part,
+          brand: part.brand ?? '',
           discountPrice: part.discountPrice ?? undefined,
           minQuantity: part.minQuantity ?? 1,
         });
@@ -70,6 +73,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
         form.reset({
           name: '',
           category: '',
+          brand: '',
           price: 0,
           discountPrice: undefined,
           features: '',
@@ -132,6 +136,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     onSave({
       ...values,
       id: part?.id || '', // Keep existing ID if editing
+      brand: values.brand || undefined,
       discountPrice: values.discountPrice || undefined,
       minQuantity: values.minQuantity || 1,
     });
@@ -198,6 +203,19 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                       <FormLabel>{t.partNameLabel}</FormLabel>
                       <FormControl>
                         <Input placeholder={t.partNamePlaceholder} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t.brandLabel}</FormLabel>
+                      <FormControl>
+                        <Input placeholder={t.brandPlaceholder} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -303,5 +321,3 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     </Dialog>
   );
 }
-
-    

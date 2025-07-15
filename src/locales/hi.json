@@ -45,6 +45,7 @@
   },
   "partDetails": {
     "category": "श्रेणी",
+    "brand": "ब्रांड",
     "keyFeatures": "मुख्य विशेषताएँ:",
     "minQuantity": "न्यूनतम आदेश मात्रा",
     "discount": "% की छूट",
@@ -70,6 +71,7 @@
     "imageColumn": "छवि",
     "nameColumn": "नाम",
     "categoryColumn": "श्रेणी",
+    "brandColumn": "ब्रांड",
     "priceColumn": "कीमत",
     "actionsColumn": "कार्रवाइयाँ",
     "deleteConfirm": "क्या आप वाकई इस पार्ट को हटाना चाहते हैं?",
@@ -80,6 +82,8 @@
     "uploadImageButton": "छवि अपलोड करें",
     "partNameLabel": "पार्ट का नाम",
     "partNamePlaceholder": "जैसे, एक्वाप्योर आरओ मेम्ब्रेन",
+    "brandLabel": "ब्रांड",
+    "brandPlaceholder": "जैसे, केंट",
     "priceLabel": "कीमत (₹)",
     "discountPriceLabel": "छूट मूल्य (₹)",
     "optionalPlaceholder": "वैकल्पिक",
@@ -105,7 +109,12 @@
     }
   },
   "categories": {
-    "title": "श्रेणियाँ"
+    "title": "श्रेणी के अनुसार फ़िल्टर करें",
+    "all": "सभी श्रेणियाँ"
+  },
+   "brands": {
+    "title": "ब्रांड के अनुसार फ़िल्टर करें",
+    "all": "सभी ब्रांड"
   },
   "metadata": {
     "title": "रो पार्ट्स हब - आरओ स्पेयर्स के लिए आपकी वन-स्टॉप शॉप",

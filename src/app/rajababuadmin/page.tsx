@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/context/LanguageContext';
 import Head from 'next/head';
+import { Badge } from '@/components/ui/badge';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -163,6 +164,7 @@ export default function AdminPage() {
                     <TableRow>
                         <TableHead className="w-[80px]">{t.imageColumn}</TableHead>
                         <TableHead>{t.nameColumn}</TableHead>
+                        <TableHead>{t.brandColumn}</TableHead>
                         <TableHead>{t.categoryColumn}</TableHead>
                         <TableHead>{t.priceColumn}</TableHead>
                         <TableHead className="text-right">{t.actionsColumn}</TableHead>
@@ -182,6 +184,7 @@ export default function AdminPage() {
                             />
                         </TableCell>
                         <TableCell className="font-medium">{part.name}</TableCell>
+                        <TableCell>{part.brand ? <Badge variant="secondary">{part.brand}</Badge> : '-'}</TableCell>
                         <TableCell>{part.category}</TableCell>
                         <TableCell>{renderPrice(part)}</TableCell>
                         <TableCell className="text-right">
@@ -212,7 +215,10 @@ export default function AdminPage() {
                         />
                         <div className="flex-grow space-y-1">
                             <p className="font-semibold">{part.name}</p>
-                            <p className="text-sm text-muted-foreground">{part.category}</p>
+                            <div className="flex gap-2 items-center">
+                                <p className="text-sm text-muted-foreground">{part.category}</p>
+                                {part.brand && <Badge variant="secondary">{part.brand}</Badge>}
+                            </div>
                             <div className="font-medium">{renderPrice(part)}</div>
                         </div>
                         <div className="flex flex-col justify-between items-center">

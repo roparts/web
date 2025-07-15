@@ -55,6 +55,7 @@ export function PartCard({ part }: PartCardProps) {
       </CardHeader>
       <div className="p-4 flex-grow flex flex-col">
           <Link href={`/part/${part.id}`} className="flex-grow">
+            {part.brand && <p className="text-xs font-semibold text-muted-foreground mb-1">{part.brand}</p>}
             <CardTitle className="text-lg font-headline mb-2">{partName}</CardTitle>
             <CardDescription className="text-sm text-muted-foreground line-clamp-3">{partDescription}</CardDescription>
           </Link>

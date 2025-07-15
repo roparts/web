@@ -14,6 +14,7 @@ export interface Part {
   features: string;
   features_hi?: string;
   minQuantity?: number;
+  brand?: string;
 }
 
 export interface CartItem extends Part {

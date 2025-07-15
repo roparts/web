@@ -54,7 +54,8 @@ export function PartDetailClient({ part }: { part: Part }) {
             </div>
             
             <div className="flex flex-col">
-              <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight">{partName}</h1>
+              {part.brand && <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{part.brand}</p>}
+              <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight mt-1">{partName}</h1>
               <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{partCategory}</Link></p>
               
               <div className="mt-6">
