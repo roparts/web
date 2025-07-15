@@ -1,6 +1,4 @@
 
-"use client";
-
 import { useMemo } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -14,19 +12,52 @@ import { RelatedParts } from '@/components/RelatedParts';
 import type { Part } from '@/lib/types';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
+import type { Metadata, ResolvingMetadata } from 'next';
 
-export default function PartDetailPage({ params }: { params: { id: string } }) {
-  const { addToCart } = useCart();
-  const { translations, language } = useLanguage();
-  
-  const part = useMemo(() => {
-    return partsData.find(p => p.id === params.id);
-  }, [params.id]);
+type Props = {
+  params: { id: string };
+};
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const part = partsData.find(p => p.id === params.id);
 
   if (!part) {
-    notFound();
+    return {
+      title: 'Part Not Found',
+      description: 'The requested part could not be found.',
+    };
   }
-  
+
+  // Use English for metadata as it's more universally indexed
+  const title = `${part.name} | RoParts Hub`;
+  const description = `Buy ${part.name}. ${part.description.substring(0, 120)}... High-quality RO parts available at RoParts Hub.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url: part.image,
+          width: 600,
+          height: 600,
+          alt: part.name,
+        },
+      ],
+    },
+  };
+}
+
+
+function PartDetailClient({ part }: { part: Part }) {
+  const { addToCart } = useCart();
+  const { translations, language } = useLanguage();
+
   const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
   const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
   const partCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
@@ -53,6 +84,7 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
                   height={600}
                   className="object-cover w-full h-full"
                   data-ai-hint={`${categoryKeyword} water`}
+                  priority // Prioritize loading the main product image
                 />
               </div>
                {hasDiscount && (
@@ -121,4 +153,17 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
       </footer>
     </div>
   );
+}
+
+
+export default function PartDetailPage({ params }: { params: { id: string } }) {
+  const part = partsData.find(p => p.id === params.id);
+
+  if (!part) {
+    notFound();
+  }
+
+  // The page itself is a server component, which fetches data.
+  // The interactive parts are in a client component.
+  return <PartDetailClient part={part} />;
 }

@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { CartProvider } from '@/context/CartContext';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/context/LanguageContext';
+import en from '@/locales/en.json';
+import hi from '@/locales/hi.json';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -17,9 +19,10 @@ const fontHeadline = Space_Grotesk({
   variable: '--font-headline',
 });
 
+// Using default 'en' translations for base metadata
 export const metadata: Metadata = {
-  title: 'RoParts Hub - Your One-Stop Shop for RO Spares',
-  description: 'Find high-quality reverse osmosis system parts, from filters to membranes, at RoParts Hub.',
+  title: en.metadata.title,
+  description: en.metadata.description,
 };
 
 export default function RootLayout({
