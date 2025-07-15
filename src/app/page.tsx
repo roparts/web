@@ -194,7 +194,12 @@ export default function Home() {
     };
   }, [language]);
 
+  // This effect handles debouncing for both AI suggestions and the main fuzzy search filtering.
   useEffect(() => {
+    // Set active search for Fuse.js filtering
+    setActiveSearch(debouncedSearchQuery);
+
+    // Fetch AI-powered suggestions
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
@@ -205,11 +210,6 @@ export default function Home() {
     }
   }, [debouncedSearchQuery]);
 
-  // Update activeSearch in real-time as user types for instant client-side filtering
-  useEffect(() => {
-    setActiveSearch(searchQuery);
-  }, [searchQuery]);
-  
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
     setActiveSearch(term);
