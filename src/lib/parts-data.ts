@@ -291,5 +291,3 @@ export const partsData: Part[] = [
     minQuantity: 10,
   }
 ];
-
-    
