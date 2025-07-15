@@ -60,6 +60,8 @@ const suggestSearchTermFlow = ai.defineFlow(
         EXAMPLES:
         - User Query: "pamp" -> Suggestions: ["Pump"]
         - User Query: "filtr" -> Suggestions: ["Filters", "Sediment Filter", "Carbon Block Filter"]
+        - User Query: "meme" -> Suggestions: ["Membranes", "AquaPure Membrane 100GPD"]
+        - User Query: "membr" -> Suggestions: ["Membranes", "AquaPure Membrane 100GPD"]
         - User Query: "मेंबराने" -> Suggestions: ["मेम्ब्रेन", "AquaPure Membrane 100GPD"]
         - User Query: "valv" -> Suggestions: ["Valves", "Solenoid Valve", "Auto Flush Valve"]
 
