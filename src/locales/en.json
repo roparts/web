@@ -26,12 +26,88 @@
     "clearCart": "Clear Cart",
     "emptyTitle": "Your cart is empty",
     "emptySubtitle": "Add some parts to get started!",
-    "continueShopping": "Continue Shopping"
+    "continueShopping": "Continue Shopping",
+    "itemUpdated": "Item quantity updated",
+    "itemAdded": "Added to cart",
+    "quantityIncreased": "Increased quantity for {partName}.",
+    "unitsAdded": "Added {quantity} unit(s) of {partName}."
   },
   "footer": {
     "rightsReserved": "All Rights Reserved.",
     "adminPanel": "Admin Panel"
+  },
+  "header": {
+    "openCategories": "Open categories menu",
+    "openCart": "Open cart",
+    "english": "English",
+    "hindi": "हिन्दी"
+  },
+  "partDetails": {
+    "category": "Category",
+    "keyFeatures": "Key Features:",
+    "minQuantity": "Minimum Order Quantity",
+    "discount": "% OFF",
+    "addToCart": "Add to Cart",
+    "productDescription": "Product Description",
+    "relatedTitle": "You Might Also Like",
+    "noSuggestions": "No suggestions available right now."
+  },
+  "partCard": {
+    "addToCart": "Add to Cart",
+    "minQty": "Min Qty"
+  },
+  "admin": {
+    "loginTitle": "Admin Access",
+    "loginDescription": "Enter the password to manage your products.",
+    "passwordLabel": "Password",
+    "signInButton": "Sign In",
+    "incorrectPassword": "Incorrect password. Please try again.",
+    "headerTitle": "Admin Panel",
+    "addNewPart": "Add New Part",
+    "manageTitle": "Manage Parts",
+    "manageDescription": "Add, edit, or delete RO parts from your catalog.",
+    "imageColumn": "Image",
+    "nameColumn": "Name",
+    "categoryColumn": "Category",
+    "priceColumn": "Price",
+    "actionsColumn": "Actions",
+    "deleteConfirm": "Are you sure you want to delete this part?",
+    "editDialogTitle": "Edit Part",
+    "addDialogTitle": "Add New Part",
+    "editDialogDescription": "Update the details for this part.",
+    "addDialogDescription": "Fill in the details for the new part.",
+    "uploadImageButton": "Upload Image",
+    "partNameLabel": "Part Name",
+    "partNamePlaceholder": "e.g., AquaPure RO Membrane",
+    "priceLabel": "Price (₹)",
+    "discountPriceLabel": "Discount Price (₹)",
+    "optionalPlaceholder": "Optional",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "e.g., Filters",
+    "minQuantityLabel": "Min Quantity",
+    "minQuantityPlaceholder": "e.g., 1",
+    "featuresLabel": "Features",
+    "featuresPlaceholder": "e.g., High rejection rate, Long lifespan",
+    "descriptionLabel": "Description",
+    "generateButton": "Generate with AI",
+    "generatingButton": "Generating...",
+    "descriptionPlaceholder": "A compelling description of the part.",
+    "cancelButton": "Cancel",
+    "saveButton": "Save Part",
+    "toast": {
+      "missingInfoTitle": "Information Missing",
+      "missingInfoDescription": "Please fill in Name, Category, and Features to generate a description.",
+      "generationSuccessTitle": "Description Generated!",
+      "generationSuccessDescription": "The AI has created a new description for your part.",
+      "generationFailedTitle": "Generation Failed",
+      "generationFailedDescription": "Could not generate a description."
+    }
+  },
+  "categories": {
+    "title": "Categories"
+  },
+  "metadata": {
+    "title": "RoParts Hub - Your One-Stop Shop for RO Spares",
+    "description": "Find high-quality reverse osmosis system parts, from filters to membranes, at RoParts Hub."
   }
 }
-
-    
