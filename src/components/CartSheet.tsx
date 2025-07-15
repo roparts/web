@@ -15,7 +15,7 @@ interface CartSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const WHATSAPP_NUMBER = "919523728080";
+const WHATSAPP_NUMBER = "+919523728080";
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
