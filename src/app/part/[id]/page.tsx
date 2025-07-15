@@ -1,3 +1,4 @@
+"use client";
 
 import { useMemo } from 'react';
 import Image from 'next/image';
@@ -20,6 +21,8 @@ type Props = {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
 
+// Note: generateMetadata still runs on the server even with "use client" at the top.
+// Next.js is smart enough to separate server-only functions.
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
