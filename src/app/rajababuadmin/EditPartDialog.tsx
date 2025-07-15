@@ -24,7 +24,8 @@ const partSchema = z.object({
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  image: z.string().url("A valid image URL or Data URL is required.")
+  image: z.string().url("A valid image URL or Data URL is required."),
+  minQuantity: z.coerce.number().min(1, 'Minimum quantity must be at least 1').optional(),
 });
 
 interface EditPartDialogProps {
@@ -49,6 +50,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       features: '',
       description: '',
       image: '',
+      minQuantity: 1,
     },
   });
 
@@ -58,6 +60,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
         form.reset({
           ...part,
           discountPrice: part.discountPrice ?? undefined,
+          minQuantity: part.minQuantity ?? 1,
         });
         setImagePreview(part.image);
       } else {
@@ -69,6 +72,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           features: '',
           description: '',
           image: 'https://placehold.co/400x400.png',
+          minQuantity: 1,
         });
         setImagePreview('https://placehold.co/400x400.png');
       }
@@ -128,6 +132,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       ...values,
       id: part?.id || '',
       discountPrice: values.discountPrice || undefined,
+      minQuantity: values.minQuantity || 1,
     });
   };
 
@@ -218,19 +223,34 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                 )}
               />
             </div>
-             <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Filters" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-2 gap-4">
+               <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Filters" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minQuantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Min. Quantity</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
              <FormField
               control={form.control}
               name="features"
