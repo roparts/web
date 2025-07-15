@@ -112,7 +112,6 @@ export default function Home() {
   const filteredAndSortedParts = useMemo(() => {
     let partsToFilter = partsData;
 
-    // Client-side fuzzy search with Fuse.js is the primary filter
     if (activeSearch.trim()) {
       partsToFilter = fuse.search(activeSearch).map(result => result.item);
     }
@@ -148,6 +147,11 @@ export default function Home() {
           return discountB - discountA;
         });
       default:
+        // When there's an active search, Fuse.js score provides the default sort order.
+        // Otherwise, we return the original order.
+        if (activeSearch.trim()) {
+           return filteredByCategory;
+        }
         return sorted;
     }
   }, [activeSearch, selectedCategory, sortOption, language, fuse]);
@@ -176,9 +180,7 @@ export default function Home() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setSearchQuery(transcript);
-      // Automatically trigger search after voice input
-      setActiveSearch(transcript);
-      updateSearchHistory(transcript);
+      handleSearchSubmit();
     };
     
     recognition.onerror = (event) => {
@@ -188,17 +190,16 @@ export default function Home() {
 
     recognitionRef.current = recognition;
 
-    // Cleanup function to stop any active recognition when component unmounts or language changes
     return () => {
       recognitionRef.current?.abort();
     };
-  }, [language]);
+  }, [language, handleSearchSubmit]);
+  
+  useEffect(() => {
+    setActiveSearch(debouncedSearchQuery);
+  }, [debouncedSearchQuery]);
 
   useEffect(() => {
-    // We don't debounce the active search for Fuse.js to make it feel instant
-    setActiveSearch(searchQuery);
-
-    // We debounce the call to the AI for suggestions
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
@@ -207,7 +208,7 @@ export default function Home() {
     } else {
       setSuggestions([]);
     }
-  }, [debouncedSearchQuery, searchQuery]);
+  }, [debouncedSearchQuery]);
 
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
@@ -395,3 +396,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
