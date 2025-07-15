@@ -11,14 +11,14 @@ import {z} from 'zod';
 import {ai} from '../genkit';
 import {partsData} from '@/lib/parts-data';
 
-export const SuggestRelatedPartsInputSchema = z.object({
+const SuggestRelatedPartsInputSchema = z.object({
   partDescription: z.string(),
 });
 export type SuggestRelatedPartsInput = z.infer<
   typeof SuggestRelatedPartsInputSchema
 >;
 
-export const SuggestRelatedPartsOutputSchema = z.object({
+const SuggestRelatedPartsOutputSchema = z.object({
   relatedParts: z.array(z.string()),
 });
 export type SuggestRelatedPartsOutput = z.infer<

@@ -9,7 +9,7 @@
 import {z} from 'zod';
 import {ai} from '../genkit';
 
-export const GeneratePartDescriptionInputSchema = z.object({
+const GeneratePartDescriptionInputSchema = z.object({
   partName: z.string(),
   partCategory: z.string(),
   partFeatures: z.string(),
@@ -18,7 +18,7 @@ export type GeneratePartDescriptionInput = z.infer<
   typeof GeneratePartDescriptionInputSchema
 >;
 
-export const GeneratePartDescriptionOutputSchema = z.object({
+const GeneratePartDescriptionOutputSchema = z.object({
   description: z.string(),
 });
 export type GeneratePartDescriptionOutput = z.infer<

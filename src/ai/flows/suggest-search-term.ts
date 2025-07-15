@@ -11,12 +11,12 @@ import {ai} from '@/ai/genkit';
 import {partsData} from '@/lib/parts-data';
 import {z} from 'zod';
 
-export const SuggestSearchTermInputSchema = z.object({
+const SuggestSearchTermInputSchema = z.object({
   query: z.string(),
 });
 export type SuggestSearchTermInput = z.infer<typeof SuggestSearchTermInputSchema>;
 
-export const SuggestSearchTermOutputSchema = z.object({
+const SuggestSearchTermOutputSchema = z.object({
   suggestions: z.array(z.string()),
 });
 export type SuggestSearchTermOutput = z.infer<

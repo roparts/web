@@ -9,14 +9,14 @@
 import {z} from 'zod';
 import {ai} from '../genkit';
 
-export const RefineVoiceSearchInputSchema = z.object({
+const RefineVoiceSearchInputSchema = z.object({
   transcript: z.string(),
 });
 export type RefineVoiceSearchInput = z.infer<
   typeof RefineVoiceSearchInputSchema
 >;
 
-export const RefineVoiceSearchOutputSchema = z.object({
+const RefineVoiceSearchOutputSchema = z.object({
   refinedQuery: z.string(),
 });
 export type RefineVoiceSearchOutput = z.infer<
