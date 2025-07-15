@@ -53,10 +53,8 @@ export default function Home() {
   const categoriesMap = useMemo(() => {
     const map = new Map<string, string>();
     partsData.forEach(part => {
+      // Maps English category to its Hindi translation
       map.set(part.category, part.category_hi || part.category);
-      if (part.category_hi) {
-        map.set(part.category_hi, part.category);
-      }
     });
     return map;
   }, []);
@@ -110,24 +108,33 @@ export default function Home() {
   const handleSearchSubmit = useCallback(async (query: string, e?: FormEvent) => {
     e?.preventDefault();
     const term = query.trim();
+    setIsInputFocused(false);
+    setSuggestions([]);
     
     if (term) {
-      const detectedCategory = await getCategoryFromSearch(term);
-      if (detectedCategory) {
-        const localizedCategory = language === 'hi' ? categoriesMap.get(detectedCategory) || detectedCategory : detectedCategory;
-        setSelectedCategory(localizedCategory);
-        setActiveSearch(''); 
-      } else {
-         setActiveSearch(term);
-      }
       updateSearchHistory(term);
+      const detectedCategory = await getCategoryFromSearch(term);
+      
+      if (detectedCategory) {
+        // AI detected a category. Filter by that category.
+        const localizedCategory = language === 'hi' 
+          ? categoriesMap.get(detectedCategory) || detectedCategory 
+          : detectedCategory;
+        
+        setSelectedCategory(localizedCategory);
+        setActiveSearch(''); // Clear text search to show all items in category
+        setSearchQuery(''); // Also clear the input bar
+      } else {
+        // No category detected, perform a standard text search.
+         setActiveSearch(term);
+         setSelectedCategory('All'); // Reset category filter for text search
+      }
     } else {
+      // Search is empty, show all items.
       setActiveSearch('');
       setSelectedCategory('All');
     }
-    setSuggestions([]);
-    setIsInputFocused(false);
-  }, [language, categoriesMap]);
+  }, [language, categoriesMap, updateSearchHistory]);
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => language === 'hi' && part.category_hi ? part.category_hi : part.category);
@@ -143,8 +150,9 @@ export default function Home() {
     }
 
     const filteredByCategory = partsToFilter.filter(part => {
+      if (selectedCategory === 'All') return true;
       const currentCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
-      return selectedCategory === 'All' || currentCategory === selectedCategory;
+      return currentCategory === selectedCategory;
     });
     
     const sorted = [...filteredByCategory];
@@ -263,7 +271,11 @@ export default function Home() {
       <Header 
         categories={categories}
         selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
+        onCategoryChange={(cat) => {
+          setSelectedCategory(cat);
+          setActiveSearch('');
+          setSearchQuery('');
+        }}
       />
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 sm:py-12">
@@ -364,7 +376,15 @@ export default function Home() {
             </div>
             {/* Category Tabs for Desktop */}
             <div className="hidden md:block">
-              <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+              <Tabs 
+                value={selectedCategory} 
+                onValueChange={(cat) => {
+                  setSelectedCategory(cat);
+                  setActiveSearch('');
+                  setSearchQuery('');
+                }} 
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap h-auto">
                   {categories.map(category => (
                     <TabsTrigger key={category} value={category} className="flex-1 lg:flex-none">
@@ -416,5 +436,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
