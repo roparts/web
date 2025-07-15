@@ -57,6 +57,7 @@ Examples (English):
 - User Query: "xyz", Suggestions: []
 
 Examples (Hindi):
+- User Query: "मेंबराने", Suggestions: ["मेम्ब्रेन", "एक्वाप्योर मेम्ब्रेन 100GPD"]
 - User Query: "मेमबरेन", Suggestions: ["मेम्ब्रेन", "एक्वाप्योर मेम्ब्रेन 100GPD"]
 - User Query: "फिल्टर", Suggestions: ["हाइड्रोफ्लो सेडिमेंट फ़िल्टर", "एक्वाप्योर कार्बन ब्लॉक फ़िल्टर", "इकोवाटर मिनरल कार्ट्रिज"]
 - User Query: "पमप", Suggestions: ["पंप", "प्योरस्ट्रीम बूस्टर पंप"]
@@ -85,4 +86,3 @@ const suggestSearchTermFlow = ai.defineFlow(
     return output || { suggestions: [] };
   }
 );
-
