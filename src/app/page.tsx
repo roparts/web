@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/Header';
 import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
@@ -12,6 +12,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
+import { getSearchSuggestion } from './actions';
+import { useDebounce } from '@/hooks/use-debounce';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 
@@ -20,6 +22,10 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
   const { lastAddedItem } = useCart();
+  const [suggestion, setSuggestion] = useState('');
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
+  
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => part.category);
@@ -52,6 +58,22 @@ export default function Home() {
         return filtered;
     }
   }, [searchQuery, selectedCategory, sortOption]);
+  
+  useEffect(() => {
+    if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+      setIsSuggestionLoading(true);
+      getSearchSuggestion(debouncedSearchQuery)
+        .then(result => setSuggestion(result))
+        .finally(() => setIsSuggestionLoading(false));
+    } else {
+      setSuggestion('');
+    }
+  }, [debouncedSearchQuery]);
+  
+  const handleSuggestionClick = () => {
+    setSearchQuery(suggestion);
+    setSuggestion('');
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -82,6 +104,19 @@ export default function Home() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 text-base"
                 />
+                 {suggestion && !isSuggestionLoading && (
+                  <div className="absolute top-full mt-2 text-sm text-muted-foreground">
+                    Did you mean:{" "}
+                    <button onClick={handleSuggestionClick} className="font-semibold text-primary hover:underline">
+                      {suggestion}
+                    </button>
+                  </div>
+                )}
+                 {isSuggestionLoading && (
+                  <div className="absolute top-full mt-2 text-sm text-muted-foreground">
+                    Checking spelling...
+                  </div>
+                )}
               </div>
               <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
                 <SelectTrigger className="w-full sm:w-[200px] text-base">
