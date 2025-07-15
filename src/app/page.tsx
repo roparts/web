@@ -95,17 +95,19 @@ export default function Home() {
 
           <div className="mb-8 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search for parts by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 text-base"
-                />
+              <div className="relative flex-grow z-30">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search for parts by name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 text-base"
+                  />
+                </div>
                  {(isSuggestionLoading || suggestions.length > 0) && (
-                    <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg z-20">
+                    <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg">
                       {isSuggestionLoading ? (
                         <div className="p-3 text-sm text-muted-foreground">Searching...</div>
                       ) : (
