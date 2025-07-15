@@ -2,41 +2,52 @@
 "use client";
 
 import { useMemo, useState, useEffect, useCallback, useRef, type FormEvent } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
 import { partsData } from '@/lib/parts-data';
-import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon, ListFilter, Filter } from 'lucide-react';
-import { useCart } from '@/context/CartContext';
-import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
+import { Search, Mic, History, ListFilter, Filter, Home as HomeIcon, Building, Wrench, Package, Star } from 'lucide-react';
+import { getSearchSuggestion, getRefinedVoiceSearch } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
-import type { Part } from '@/lib/types';
+import type { Part, MainCategory } from '@/lib/types';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
-type ProductType = 'Domestic' | 'Commercial';
 
 const SEARCH_HISTORY_KEY = 'ro-search-history';
+const MAIN_CATEGORIES: MainCategory[] = [
+  'Domestic RO Parts',
+  'Commercial RO Parts',
+  'RO Accessories & Tools',
+  'Complete RO Systems',
+  'Service Kits & Combo Packs',
+];
+
+const categoryIcons = {
+  'Domestic RO Parts': HomeIcon,
+  'Commercial RO Parts': Building,
+  'RO Accessories & Tools': Wrench,
+  'Complete RO Systems': Package,
+  'Service Kits & Combo Packs': Star,
+};
 
 export default function Home() {
   const { translations, language, isLanguageSelected } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
-  const [selectedType, setSelectedType] = useState<ProductType>('Domestic');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory>('Domestic RO Parts');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
-  const { itemCount, setSheetOpen } = useCart();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -50,21 +61,11 @@ export default function Home() {
 
   const fuse = useMemo(() => {
     const options = {
-      keys: ['name', 'name_hi', 'category', 'category_hi', 'type', 'brand'],
+      keys: ['name', 'name_hi', 'subcategory', 'brand', 'mainCategory'],
       includeScore: true,
       threshold: 0.4,
     };
     return new Fuse(partsData, options);
-  }, []);
-  
-  const categoriesMap = useMemo(() => {
-    const map = new Map<string, string>();
-    partsData.forEach(part => {
-      if(part.category && part.category_hi) {
-        map.set(part.category, part.category_hi);
-      }
-    });
-    return map;
   }, []);
 
   useEffect(() => {
@@ -113,7 +114,7 @@ export default function Home() {
     }
   };
 
-  const handleSearchSubmit = useCallback(async (query: string, e?: FormEvent) => {
+  const handleSearchSubmit = useCallback((query: string, e?: FormEvent) => {
     e?.preventDefault();
     const term = query.trim();
     setIsInputFocused(false);
@@ -121,50 +122,40 @@ export default function Home() {
     
     if (term) {
       updateSearchHistory(term);
-      const detectedCategory = await getCategoryFromSearch(term);
-      
-      if (detectedCategory) {
-        const categoryToSet = (language === 'hi' ? categoriesMap.get(detectedCategory) : detectedCategory) || 'All';
-        setSelectedCategory(categoryToSet);
-        setActiveSearch(''); 
-        setSearchQuery('');
-      } else {
-         setActiveSearch(term);
-         setSelectedCategory('All');
-         setSelectedBrand('All');
-      }
+      setActiveSearch(term);
+      setSelectedSubcategory('All');
+      setSelectedBrand('All');
     } else {
       setActiveSearch('');
-      setSelectedCategory('All');
+      setSelectedSubcategory('All');
     }
-  }, [language, categoriesMap, updateSearchHistory]);
-
-  const categories = useMemo(() => {
-    const relevantParts = partsData.filter(part => part.type === selectedType);
-    const allCategories = relevantParts.map(part => (language === 'hi' && part.category_hi) ? part.category_hi : part.category);
-    return ['All', ...Array.from(new Set(allCategories))];
-  }, [language, selectedType]);
+  }, [updateSearchHistory]);
+  
+  const subcategories = useMemo(() => {
+    const relevantParts = partsData.filter(part => part.mainCategory === selectedMainCategory);
+    const allSubcategories = relevantParts.map(part => part.subcategory);
+    return ['All', ...Array.from(new Set(allSubcategories))];
+  }, [selectedMainCategory]);
 
   const brands = useMemo(() => {
-    const relevantParts = partsData.filter(part => part.type === selectedType);
+    const relevantParts = partsData.filter(part => part.mainCategory === selectedMainCategory);
     const allBrands = relevantParts.map(part => part.brand).filter(Boolean);
     return ['All', ...Array.from(new Set(allBrands as string[]))];
-  }, [selectedType]);
+  }, [selectedMainCategory]);
 
   const filteredAndSortedParts = useMemo(() => {
-    let partsToFilter: Part[] = partsData.filter(part => part.type === selectedType);
+    let partsToFilter: Part[] = partsData.filter(part => part.mainCategory === selectedMainCategory);
 
     if (activeSearch.trim()) {
-      partsToFilter = fuse.search(activeSearch).map(result => result.item).filter(part => part.type === selectedType);
+      partsToFilter = fuse.search(activeSearch).map(result => result.item).filter(part => part.mainCategory === selectedMainCategory);
     }
     
-    const filteredByCategory = partsToFilter.filter(part => {
-      if (selectedCategory === 'All') return true;
-      const currentCategory = (language === 'hi' && part.category_hi) ? part.category_hi : part.category;
-      return currentCategory === selectedCategory;
+    const filteredBySubcategory = partsToFilter.filter(part => {
+      if (selectedSubcategory === 'All') return true;
+      return part.subcategory === selectedSubcategory;
     });
 
-    const filteredByBrand = filteredByCategory.filter(part => {
+    const filteredByBrand = filteredBySubcategory.filter(part => {
         if (selectedBrand === 'All') return true;
         return part.brand === selectedBrand;
     });
@@ -197,7 +188,7 @@ export default function Home() {
       default:
         return filteredByBrand;
     }
-  }, [activeSearch, selectedCategory, selectedBrand, sortOption, language, fuse, selectedType]);
+  }, [activeSearch, selectedSubcategory, selectedBrand, sortOption, language, fuse, selectedMainCategory]);
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -213,11 +204,10 @@ export default function Home() {
     recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
     recognition.interimResults = false;
 
-    recognition.onstart = () => {
-      setIsRecording(true);
-    };
-
-    recognition.onend = () => {
+    recognition.onstart = () => setIsRecording(true);
+    recognition.onend = () => setIsRecording(false);
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
       setIsRecording(false);
     };
 
@@ -229,23 +219,16 @@ export default function Home() {
       handleSearchSubmit(refinedQuery);
     };
     
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setIsRecording(false);
-    };
-
     recognitionRef.current = recognition;
 
-    return () => {
-      recognitionRef.current?.abort();
-    };
+    return () => recognitionRef.current?.abort();
   }, [language, handleSearchSubmit]);
 
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
-        .then(result => setSuggestions(result))
+        .then(setSuggestions)
         .catch(err => {
           console.error("Error fetching suggestions:", err);
           setSuggestions([]);
@@ -273,23 +256,12 @@ export default function Home() {
     }
   };
 
-  const handleTypeChange = (type: ProductType) => {
-    setSelectedType(type);
-    setSelectedCategory('All');
+  const handleMainCategoryChange = (cat: MainCategory) => {
+    setSelectedMainCategory(cat);
+    setSelectedSubcategory('All');
     setSelectedBrand('All');
     setActiveSearch('');
     setSearchQuery('');
-  }
-
-  const handleCategoryChange = (cat: string) => {
-      setSelectedCategory(cat);
-      setActiveSearch('');
-      setSearchQuery('');
-  }
-   const handleBrandChange = (brand: string) => {
-      setSelectedBrand(brand);
-      setActiveSearch('');
-      setSearchQuery('');
   }
   
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
@@ -298,6 +270,8 @@ export default function Home() {
   if (!isLanguageSelected) {
     return <LanguageSelector />;
   }
+  
+  const CurrentCategoryIcon = categoryIcons[selectedMainCategory];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -314,13 +288,22 @@ export default function Home() {
           </div>
 
           <div className="mb-8 space-y-4">
-             <Tabs value={selectedType} onValueChange={(v) => handleTypeChange(v as ProductType)} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-12">
-                <TabsTrigger value="Domestic" className="text-base gap-2"><HomeIcon/>Domestic</TabsTrigger>
-                <TabsTrigger value="Commercial" className="text-base gap-2"><Building/>Commercial</TabsTrigger>
-              </TabsList>
+             <Tabs value={selectedMainCategory} onValueChange={(v) => handleMainCategoryChange(v as MainCategory)} className="w-full">
+              <ScrollArea className="w-full whitespace-nowrap">
+                <TabsList className="h-12 justify-start">
+                  {MAIN_CATEGORIES.map(cat => {
+                    const Icon = categoryIcons[cat];
+                    return (
+                      <TabsTrigger key={cat} value={cat} className="text-sm sm:text-base gap-2 px-3 sm:px-4">
+                        <Icon className="h-5 w-5"/>
+                        <span className="hidden sm:inline">{cat}</span>
+                      </TabsTrigger>
+                    );
+                   })}
+                </TabsList>
+                <ScrollBar orientation="horizontal" className="mt-2" />
+              </ScrollArea>
             </Tabs>
-
 
             <div className="relative flex-grow z-30">
               <form onSubmit={(e) => handleSearchSubmit(searchQuery, e)} className="relative flex items-center">
@@ -405,10 +388,10 @@ export default function Home() {
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>{translations.categories.title}</DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={selectedCategory} onValueChange={handleCategoryChange}>
-                        {categories.map((category) => (
+                      <DropdownMenuRadioGroup value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+                        {subcategories.map((category) => (
                           <DropdownMenuRadioItem key={category} value={category}>
-                            {category === 'All' && language === 'hi' ? translations.categories.all : category}
+                            {category === 'All' ? translations.categories.all : category}
                           </DropdownMenuRadioItem>
                         ))}
                       </DropdownMenuRadioGroup>
@@ -417,10 +400,10 @@ export default function Home() {
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>{translations.brands.title}</DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={selectedBrand} onValueChange={handleBrandChange}>
+                      <DropdownMenuRadioGroup value={selectedBrand} onValueChange={setSelectedBrand}>
                         {brands.map((brand) => (
                           <DropdownMenuRadioItem key={brand} value={brand}>
-                            {brand === 'All' && language === 'hi' ? translations.brands.all : brand}
+                             {brand === 'All' ? translations.brands.all : brand}
                           </DropdownMenuRadioItem>
                         ))}
                       </DropdownMenuRadioGroup>
@@ -448,23 +431,27 @@ export default function Home() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            {/* Category Tabs for Desktop */}
+             {/* Sub-category tabs for larger screens */}
             <div className="hidden md:block">
+              <h2 className="text-lg font-semibold flex items-center gap-2 mb-2">
+                <CurrentCategoryIcon className="h-5 w-5 text-primary" />
+                {selectedMainCategory}
+              </h2>
               <ScrollArea className="w-full whitespace-nowrap">
-                <Tabs
-                  value={selectedCategory}
-                  onValueChange={handleCategoryChange}
-                  className="w-full"
-                >
-                  <TabsList className="h-auto justify-start">
-                    {categories.map((category) => (
-                      <TabsTrigger key={category} value={category} className="flex-shrink-0">
-                        {category === 'All' && language === 'hi' ? translations.categories.all : category}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
-                <ScrollBar orientation="horizontal" className="mt-2" />
+                  <Tabs
+                    value={selectedSubcategory}
+                    onValueChange={setSelectedSubcategory}
+                    className="w-full"
+                  >
+                    <TabsList className="h-auto justify-start">
+                      {subcategories.map((category) => (
+                        <TabsTrigger key={category} value={category} className="flex-shrink-0">
+                          {category === 'All' ? translations.categories.all : category}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                  <ScrollBar orientation="horizontal" className="mt-2" />
               </ScrollArea>
             </div>
           </div>
@@ -493,21 +480,6 @@ export default function Home() {
             </p>
         </div>
       </footer>
-      
-      {itemCount > 0 && (
-         <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-           <Button
-             size="lg"
-             className="rounded-full shadow-lg"
-             onClick={() => setSheetOpen(true)}
-           >
-             <ShoppingCart className="mr-2 h-5 w-5" />
-             {translations.cart.viewQuote} ({itemCount})
-           </Button>
-         </div>
-       )}
     </div>
   );
 }
-
-    

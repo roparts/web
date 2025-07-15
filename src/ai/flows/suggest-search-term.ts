@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow that provides intelligent search suggestions.
@@ -26,9 +27,8 @@ export type SuggestSearchTermOutput = z.infer<
 const allPartNamesAndCategories = [
   ...new Set([
     ...partsData.map(p => p.name),
-    ...partsData.map(p => p.category),
+    ...partsData.map(p => p.subcategory),
     ...partsData.map(p => p.name_hi || '').filter(Boolean),
-    ...partsData.map(p => p.category_hi || '').filter(Boolean),
   ]),
 ].join(', ');
 
@@ -47,7 +47,7 @@ const suggestSearchTermFlow = ai.defineFlow(
         Your task is to provide relevant search suggestions based on the user's query.
 
         STRICT RULES:
-        1. Your suggestions MUST be relevant to products from the "AVAILABLE PARTS & CATEGORIES" list.
+        1. Your suggestions MUST be relevant to products from the "AVAILABLE PARTS & SUBCATEGORIES" list.
         2. Correct common spelling mistakes.
         3. Handle Hindi transliteration variations (e.g., "मेंबराने" -> "मेम्ब्रेन").
         4. Provide up to 4 suggestions, ranked by relevance.
@@ -55,16 +55,16 @@ const suggestSearchTermFlow = ai.defineFlow(
         6. Do not include the original query in the suggestions unless it's a valid term itself.
         7. If you have no good suggestions, you MUST return an empty JSON array: [].
 
-        AVAILABLE PARTS & CATEGORIES:
+        AVAILABLE PARTS & SUBCATEGORIES:
         [${allPartNamesAndCategories}]
 
         EXAMPLES:
-        - User Query: "pamp" -> Suggestions: ["Pump", "Pumps"]
-        - User Query: "filtr" -> Suggestions: ["Filters", "Sediment Filter", "Carbon Block Filter"]
-        - User Query: "meme" -> Suggestions: ["Membranes", "AquaPure Membrane 100GPD"]
-        - User Query: "membr" -> Suggestions: ["Membranes", "AquaPure Membrane 100GPD"]
-        - User Query: "मेंबराने" -> Suggestions: ["मेम्ब्रेन", "AquaPure Membrane 100GPD"]
-        - User Query: "valv" -> Suggestions: ["Valves", "Solenoid Valve", "Auto Flush Valve"]
+        - User Query: "pamp" -> Suggestions: ["100 GPD Booster Pump", "Pump (Booster Pump)"]
+        - User Query: "filtr" -> Suggestions: ["Pre-Filters / Sediment", "Carbon Filters", "5 Micron Spun Filter"]
+        - User Query: "meme" -> Suggestions: ["RO Membranes", "Vontron 80 GPD RO Membrane"]
+        - User Query: "membr" -> Suggestions: ["RO Membranes", "Vontron 80 GPD RO Membrane"]
+        - User Query: "मेंबराने" -> Suggestions: ["मेम्ब्रेन", "Vontron 80 GPD RO Membrane"]
+        - User Query: "valv" -> Suggestions: ["Solenoid Valve", "RO Solenoid Valve (SV)"]
         - User Query: "xyz" -> Suggestions: []
 
         User Query: "${query}"
@@ -97,3 +97,5 @@ export async function suggestSearchTerm(
 ): Promise<SuggestSearchTermOutput> {
   return await suggestSearchTermFlow(input);
 }
+
+    

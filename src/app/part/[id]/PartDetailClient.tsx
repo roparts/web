@@ -19,14 +19,14 @@ export function PartDetailClient({ part }: { part: Part }) {
 
   const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
   const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
-  const partCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
+  const partSubcategory = part.subcategory;
   const partFeatures = language === 'hi' && part.features_hi ? part.features_hi : part.features;
 
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
   
   const features = partFeatures.split(',').map(f => f.trim());
-  const categoryKeyword = part.category.split(' ')[0].toLowerCase();
+  const categoryKeyword = part.subcategory.split(' ')[0].toLowerCase();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -56,7 +56,7 @@ export function PartDetailClient({ part }: { part: Part }) {
             <div className="flex flex-col">
               {part.brand && <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{part.brand}</p>}
               <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight mt-1">{partName}</h1>
-              <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{partCategory}</Link></p>
+              <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{partSubcategory}</Link></p>
               
               <div className="mt-6">
                 <p className="text-lg font-semibold">{translations.partDetails.keyFeatures}</p>
@@ -114,3 +114,5 @@ export function PartDetailClient({ part }: { part: Part }) {
     </div>
   );
 }
+
+    

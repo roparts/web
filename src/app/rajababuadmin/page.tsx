@@ -180,12 +180,12 @@ export default function AdminPage() {
                             width={40}
                             height={40}
                             className="rounded-sm object-cover"
-                            data-ai-hint={`${part.category.split(' ')[0].toLowerCase()} water`}
+                            data-ai-hint={`${part.subcategory.split(' ')[0].toLowerCase()} water`}
                             />
                         </TableCell>
                         <TableCell className="font-medium">{part.name}</TableCell>
                         <TableCell>{part.brand ? <Badge variant="secondary">{part.brand}</Badge> : '-'}</TableCell>
-                        <TableCell>{part.category}</TableCell>
+                        <TableCell>{part.subcategory}</TableCell>
                         <TableCell>{renderPrice(part)}</TableCell>
                         <TableCell className="text-right">
                             <Button variant="ghost" size="icon" onClick={() => handleEdit(part)}>
@@ -211,12 +211,12 @@ export default function AdminPage() {
                             width={64}
                             height={64}
                             className="rounded-md object-cover"
-                            data-ai-hint={`${part.category.split(' ')[0].toLowerCase()} water`}
+                            data-ai-hint={`${part.subcategory.split(' ')[0].toLowerCase()} water`}
                         />
                         <div className="flex-grow space-y-1">
                             <p className="font-semibold">{part.name}</p>
                             <div className="flex gap-2 items-center">
-                                <p className="text-sm text-muted-foreground">{part.category}</p>
+                                <p className="text-sm text-muted-foreground">{part.subcategory}</p>
                                 {part.brand && <Badge variant="secondary">{part.brand}</Badge>}
                             </div>
                             <div className="font-medium">{renderPrice(part)}</div>
@@ -247,3 +247,5 @@ export default function AdminPage() {
     </>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for detecting a product category from a search query.
@@ -18,7 +19,7 @@ type DetectSearchCategoryInput = z.infer<
 >;
 
 const uniqueCategories = [
-  ...new Set(partsData.map(p => p.category)),
+  ...new Set(partsData.map(p => p.subcategory)),
 ];
 
 const DetectSearchCategoryOutputSchema = z.object({
@@ -48,26 +49,26 @@ const detectSearchCategoryFlow = ai.defineFlow(
 
     const llmResponse = await ai.generate({
       prompt: `You are an e-commerce search assistant for a Reverse Osmosis (RO) parts store.
-        Your task is to determine if a user's search query strongly implies ONE specific product category from the provided list.
+        Your task is to determine if a user's search query strongly implies ONE specific product subcategory from the provided list.
 
         RULES:
-        1. Analyze the user's query for strong category indicators.
-        2. If the query (including common misspellings or transliterations) clearly refers to one of the available categories, return that category name.
+        1. Analyze the user's query for strong subcategory indicators.
+        2. If the query (including common misspellings or transliterations) clearly refers to one of the available subcategories, return that subcategory name.
         3. If the query is for a specific product name (e.g., a model number), a brand, or is ambiguous, you MUST return null.
-        4. Your response MUST be one of the exact strings from the "AVAILABLE CATEGORIES" list, or the literal value null. Do not provide any other text.
+        4. Your response MUST be one of the exact strings from the "AVAILABLE SUBCATEGORIES" list, or the literal value null. Do not provide any other text.
 
-        AVAILABLE CATEGORIES:
+        AVAILABLE SUBCATEGORIES:
         [${uniqueCategories.join(', ')}]
 
         EXAMPLES:
-        - User Query: "membranes" -> Category: "Membranes"
-        - User Query: "filtr" -> Category: "Filters"
-        - User Query: "मेंबराने" -> Category: "Membranes"
-        - User Query: "पंप" -> Category: "Pumps"
+        - User Query: "membranes" -> Category: "RO Membranes"
+        - User Query: "filtr" -> Category: "Pre-Filters / Sediment"
+        - User Query: "मेंबराने" -> Category: "RO Membranes"
+        - User Query: "पंप" -> Category: "Pump (Booster Pump)"
         - User Query: "aqua pure" -> Category: null
-        - User Query: "solenoid" -> Category: "Valves"
-        - User Query: "valves" -> Category: "Valves"
-        - User Query: "housing for membrane" -> Category: "Housing"
+        - User Query: "solenoid" -> Category: "Solenoid Valve"
+        - User Query: "valves" -> Category: "Solenoid Valve"
+        - User Query: "housing for membrane" -> Category: "Membrane Housing"
         - User Query: "ROP-0001" -> Category: null
 
         User Query: "${query}"
@@ -94,5 +95,10 @@ const detectSearchCategoryFlow = ai.defineFlow(
 export async function detectSearchCategory(
   input: DetectSearchCategoryInput
 ): Promise<DetectSearchCategoryOutput> {
-  return await detectSearchCategoryFlow(input);
+  // This flow is currently not used in the application but is kept for potential future use.
+  // It has been superceded by a more robust client-side search (Fuse.js).
+  // return await detectSearchCategoryFlow(input);
+  return { category: null };
 }
+
+    
