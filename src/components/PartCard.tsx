@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -15,7 +16,7 @@ export function PartCard({ part }: PartCardProps) {
   const { addToCart } = useCart();
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
       <CardHeader className="p-0">
         <div className="aspect-square overflow-hidden">
           <Image
@@ -32,9 +33,9 @@ export function PartCard({ part }: PartCardProps) {
         <CardTitle className="text-lg font-headline mb-2">{part.name}</CardTitle>
         <CardDescription className="text-sm text-muted-foreground line-clamp-3">{part.description}</CardDescription>
       </CardContent>
-      <CardFooter className="p-4 flex justify-between items-center">
-        <p className="text-xl font-bold text-primary">₹{part.price.toLocaleString('en-IN')}</p>
-        <Button onClick={() => addToCart(part)} size="sm">
+      <CardFooter className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-2">
+        <p className="text-xl font-bold text-primary self-start sm:self-center">₹{part.price.toLocaleString('en-IN')}</p>
+        <Button onClick={() => addToCart(part)} size="sm" className="w-full sm:w-auto">
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart
         </Button>
