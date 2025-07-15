@@ -23,6 +23,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   const addToCart = useCallback((part: Part) => {
+    const minQuantity = part.minQuantity || 1;
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === part.id);
       if (existingItem) {
@@ -30,35 +31,50 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           item.id === part.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevItems, { ...part, quantity: 1 }];
+      return [...prevItems, { ...part, quantity: minQuantity }];
     });
     setLastAddedItem(part);
-    toast({
-      title: "Added to cart",
-      description: `${part.name} has been added to your cart.`,
-    });
-  }, [toast]);
+
+    const existingItem = cartItems.find(item => item.id === part.id);
+    if (existingItem) {
+        toast({
+            title: "Item quantity updated",
+            description: `${part.name} quantity increased.`,
+        });
+    } else {
+        toast({
+            title: "Added to cart",
+            description: `${minQuantity} unit(s) of ${part.name} added.`,
+        });
+    }
+  }, [toast, cartItems]);
 
   const removeFromCart = useCallback((partId: string) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== partId));
   }, []);
 
   const updateQuantity = useCallback((partId: string, quantity: number) => {
-    if (quantity <= 0) {
+    const itemInCart = cartItems.find(item => item.id === partId);
+    const minQuantity = itemInCart?.minQuantity || 1;
+
+    if (quantity < minQuantity) {
       removeFromCart(partId);
     } else {
       setCartItems(prevItems =>
         prevItems.map(item => (item.id === partId ? { ...item, quantity } : item))
       );
     }
-  }, [removeFromCart]);
+  }, [removeFromCart, cartItems]);
 
   const clearCart = useCallback(() => {
     setCartItems([]);
   }, []);
 
   const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce((total, item) => {
+    const price = item.discountPrice ?? item.price;
+    return total + price * item.quantity;
+  }, 0);
 
   return (
     <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, itemCount, totalPrice, lastAddedItem }}>

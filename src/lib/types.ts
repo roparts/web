@@ -7,6 +7,7 @@ export interface Part {
   image: string;
   category: string;
   features: string;
+  minQuantity?: number;
 }
 
 export interface CartItem extends Part {

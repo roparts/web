@@ -10,6 +10,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Membranes',
     features: 'High rejection rate, Long lifespan',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0002',
@@ -19,6 +20,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Filters',
     features: 'NSF certified, Easy installation',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0003',
@@ -29,6 +31,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Pumps',
     features: 'Durable material, Low energy consumption',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0004',
@@ -38,6 +41,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Valves',
     features: 'Leak-proof design, Universal compatibility',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0005',
@@ -48,6 +52,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Fittings',
     features: 'High flow rate, High rejection rate',
+    minQuantity: 10,
   },
   {
     id: 'ROP-0006',
@@ -57,6 +62,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Housing',
     features: 'Long lifespan, NSF certified',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0007',
@@ -67,6 +73,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Filters',
     features: 'Easy installation, Durable material',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0008',
@@ -76,6 +83,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Valves',
     features: 'Low energy consumption, Leak-proof design',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0009',
@@ -85,6 +93,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Sterilizers',
     features: 'Universal compatibility, High flow rate',
+    minQuantity: 1,
   },
   {
     id: 'ROP-0010',
@@ -95,6 +104,7 @@ export const partsData: Part[] = [
     image: 'https://placehold.co/400x400.png',
     category: 'Filters',
     features: 'High rejection rate, Long lifespan',
+    minQuantity: 1,
   },
   ...Array.from({ length: 40 }, (_, i) => {
     const id = i + 11;
@@ -112,6 +122,7 @@ export const partsData: Part[] = [
       image: 'https://placehold.co/400x400.png',
       category: category,
       features: 'Standard feature set, reliable performance',
+      minQuantity: 1,
     };
   }),
 ];
