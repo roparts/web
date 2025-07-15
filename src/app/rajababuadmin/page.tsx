@@ -166,7 +166,7 @@ export default function AdminPage() {
                           width={40}
                           height={40}
                           className="rounded-sm object-cover"
-                          data-ai-hint={`${part.category} part`}
+                          data-ai-hint={`${part.category.split(' ')[0].toLowerCase()} water`}
                         />
                       </TableCell>
                       <TableCell className="font-medium">{part.name}</TableCell>
@@ -196,7 +196,7 @@ export default function AdminPage() {
                         width={64}
                         height={64}
                         className="rounded-md object-cover"
-                        data-ai-hint={`${part.category} part`}
+                        data-ai-hint={`${part.category.split(' ')[0].toLowerCase()} water`}
                       />
                      <div className="flex-grow space-y-1">
                         <p className="font-semibold">{part.name}</p>

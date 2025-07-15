@@ -84,6 +84,7 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
               <div className="flex flex-col gap-6 pr-6">
                 {cartItems.map(item => {
                   const price = item.discountPrice ?? item.price;
+                  const categoryKeyword = item.category.split(' ')[0].toLowerCase();
                   return (
                     <div key={item.id} className="flex gap-4">
                       <Image
@@ -92,7 +93,7 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
                         width={80}
                         height={80}
                         className="rounded-md object-cover"
-                        data-ai-hint={`${item.category} part`}
+                        data-ai-hint={`${categoryKeyword} water`}
                       />
                       <div className="flex-grow flex flex-col gap-1">
                         <h3 className="font-semibold">{item.name}</h3>

@@ -1,3 +1,4 @@
+
 import type { Part } from './types';
 
 export const partsData: Part[] = [
@@ -9,7 +10,7 @@ export const partsData: Part[] = [
     discountPrice: 2250,
     description: 'A high-quality RO membrane with a 100 GPD capacity, ensuring high rejection rates and long-lasting performance for pure, safe drinking water.',
     description_hi: 'एक उच्च-गुणवत्ता वाली आरओ मेम्ब्रेन जिसकी क्षमता 100 GPD है, जो शुद्ध और सुरक्षित पीने के पानी के लिए उच्च अस्वीकृति दर और लंबे समय तक चलने वाले प्रदर्शन को सुनिश्चित करती है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Membranes',
     category_hi: 'मेम्ब्रेन',
     features: 'High rejection rate, Long lifespan',
@@ -23,7 +24,7 @@ export const partsData: Part[] = [
     price: 550,
     description: '5-micron sediment filter that effectively removes sand, silt, rust, and other suspended particles to protect your RO system.',
     description_hi: '5-माइक्रोन का सेडिमेंट फ़िल्टर जो आपके आरओ सिस्टम की सुरक्षा के लिए रेत, गाद, जंग और अन्य निलंबित कणों को प्रभावी ढंग से हटाता है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Filters',
     category_hi: 'फ़िल्टर',
     features: 'NSF certified, Easy installation',
@@ -38,7 +39,7 @@ export const partsData: Part[] = [
     discountPrice: 4000,
     description: 'Powerful and quiet booster pump to increase water pressure for optimal RO membrane performance, suitable for low-pressure areas.',
     description_hi: 'शक्तिशाली और शांत बूस्टर पंप जो कम दबाव वाले क्षेत्रों के लिए उपयुक्त है और आरओ मेम्ब्रेन के શ્રેષ્ઠ प्रदर्शन के लिए पानी का दबाव बढ़ाता है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Pumps',
     category_hi: 'पंप',
     features: 'Durable material, Low energy consumption',
@@ -52,7 +53,7 @@ export const partsData: Part[] = [
     price: 800,
     description: 'Reliable 24V DC solenoid valve to automatically control water flow, preventing wastage and ensuring efficient operation.',
     description_hi: 'विश्वसनीय 24V DC सोलनॉइड वाल्व जो पानी के प्रवाह को स्वचालित रूप से नियंत्रित करता है, बर्बादी को रोकता है और कुशल संचालन सुनिश्चित करता है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Valves',
     category_hi: 'वाल्व',
     features: 'Leak-proof design, Universal compatibility',
@@ -67,7 +68,7 @@ export const partsData: Part[] = [
     discountPrice: 120,
     description: 'Quick-connect 1/4 inch elbow fitting for secure, leak-free connections between RO components. Made from food-grade plastic.',
     description_hi: 'आरओ घटकों के बीच सुरक्षित, रिसाव-मुक्त कनेक्शन के लिए त्वरित-कनेक्ट 1/4 इंच एल्बो फिटिंग। खाद्य-ग्रेड प्लास्टिक से बना है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Fittings',
     category_hi: 'फिटिंग्स',
     features: 'High flow rate, High rejection rate',
@@ -81,7 +82,7 @@ export const partsData: Part[] = [
     price: 1200,
     description: 'Durable, high-pressure membrane housing compatible with standard residential RO membranes. Includes O-rings for a perfect seal.',
     description_hi: 'टिकाऊ, उच्च दबाव वाली मेम्ब्रेन हाउसिंग जो मानक आवासीय आरओ मेम्ब्रेन के साथ संगत है। एक आदर्श सील के लिए ओ-रिंग्स शामिल हैं।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Housing',
     category_hi: 'हाउसिंग',
     features: 'Long lifespan, NSF certified',
@@ -96,7 +97,7 @@ export const partsData: Part[] = [
     discountPrice: 650,
     description: 'Activated carbon block filter that removes chlorine, tastes, and odors to improve water quality and taste.',
     description_hi: 'सक्रिय कार्बन ब्लॉक फ़िल्टर जो पानी की गुणवत्ता और स्वाद में सुधार के लिए क्लोरीन, स्वाद और गंध को हटाता है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Filters',
     category_hi: 'फ़िल्टर',
     features: 'Easy installation, Durable material',
@@ -110,7 +111,7 @@ export const partsData: Part[] = [
     price: 600,
     description: 'An automatic flush valve that periodically rinses the membrane to prevent scaling and prolong its life.',
     description_hi: 'एक स्वचालित फ्लश वाल्व जो स्केलिंग को रोकने और मेम्ब्रेन के जीवन को बढ़ाने के लिए समय-समय पर मेम्ब्रेन को धोता है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Valves',
     category_hi: 'वाल्व',
     features: 'Low energy consumption, Leak-proof design',
@@ -124,7 +125,7 @@ export const partsData: Part[] = [
     price: 3500,
     description: 'UV sterilizer lamp and chamber to eliminate up to 99.99% of bacteria, viruses, and other microorganisms.',
     description_hi: '99.99% तक बैक्टीरिया, वायरस और अन्य सूक्ष्मजीवों को खत्म करने के लिए यूवी स्टेरिलाइज़र लैंप और कक्ष।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Sterilizers',
     category_hi: 'स्टेरिलाइज़र',
     features: 'Universal compatibility, High flow rate',
@@ -139,7 +140,7 @@ export const partsData: Part[] = [
     discountPrice: 800,
     description: 'Adds essential minerals back into the purified water to improve taste and provide health benefits.',
     description_hi: 'स्वाद में सुधार और स्वास्थ्य लाभ प्रदान करने के लिए शुद्ध पानी में आवश्यक खनिजों को वापस मिलाता है।',
-    image: 'https://placehold.co/400x400.png',
+    image: 'https://placehold.co/600x600.png',
     category: 'Filters',
     category_hi: 'फ़िल्टर',
     features: 'High rejection rate, Long lifespan',
@@ -156,6 +157,8 @@ export const partsData: Part[] = [
     const category_hi = categories_hi[id % categories_hi.length];
     const price = Math.floor(Math.random() * (9000 - 500 + 1)) + 500;
     const hasDiscount = Math.random() > 0.7; // 30% chance of having a discount
+    const imageWidth = 600 + Math.floor(Math.random() * 5) * 10; // 600, 610, 620, 630, 640
+    const imageHeight = 600 + Math.floor(Math.random() * 5) * 10; // 600, 610, 620, 630, 640
     return {
       id: `ROP-${String(id).padStart(4, '0')}`,
       name: `${names[id % names.length]} ${category.slice(0, -1)} ${Math.floor(Math.random() * 1000)}`,
@@ -164,7 +167,7 @@ export const partsData: Part[] = [
       discountPrice: hasDiscount ? Math.floor(price * (Math.random() * (0.9 - 0.7) + 0.7)) : undefined,
       description: 'A high-quality RO part designed for performance and durability. Ideal for various water purification systems.',
       description_hi: 'प्रदर्शन और स्थायित्व के लिए डिज़ाइन किया गया एक उच्च-गुणवत्ता वाला आरओ पार्ट। विभिन्न जल शोधन प्रणालियों के लिए आदर्श।',
-      image: 'https://placehold.co/400x400.png',
+      image: `https://placehold.co/${imageWidth}x${imageHeight}.png`,
       category: category,
       category_hi: category_hi,
       features: 'Standard feature set, reliable performance',

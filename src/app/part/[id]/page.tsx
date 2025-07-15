@@ -36,6 +36,7 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
   
   const features = partFeatures.split(',').map(f => f.trim());
+  const categoryKeyword = part.category.split(' ')[0].toLowerCase();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -51,7 +52,7 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
                   width={600}
                   height={600}
                   className="object-cover w-full h-full"
-                  data-ai-hint={`${part.category} part`}
+                  data-ai-hint={`${categoryKeyword} water`}
                 />
               </div>
                {hasDiscount && (

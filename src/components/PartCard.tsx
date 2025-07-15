@@ -30,6 +30,7 @@ export function PartCard({ part }: PartCardProps) {
   
   const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
   const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
+  const categoryKeyword = part.category.split(' ')[0].toLowerCase();
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
@@ -42,7 +43,7 @@ export function PartCard({ part }: PartCardProps) {
                 width={400}
                 height={400}
                 className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                data-ai-hint={`${part.category} part`}
+                data-ai-hint={`${categoryKeyword} water`}
               />
           </div>
         </Link>
