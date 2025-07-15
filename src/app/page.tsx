@@ -9,7 +9,7 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon, ListFilter } from 'lucide-react';
+import { Search, Mic, History, ShoppingCart, Building, Home as HomeIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion, getRefinedVoiceSearch, getCategoryFromSearch } from './actions';
@@ -20,7 +20,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
 import type { Part } from '@/lib/types';
-import { CategorySheet } from '@/components/CategorySheet';
 
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
@@ -44,8 +43,6 @@ export default function Home() {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-
-  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 150);
 
@@ -379,27 +376,35 @@ export default function Home() {
               </div>
             </div>
             {/* Category and Sort controls */}
-             <div className="flex gap-4">
-                  <div className="md:hidden flex-grow">
-                      <Button variant="outline" className="w-full" onClick={() => setIsCategorySheetOpen(true)}>
-                          <ListFilter className="mr-2 h-4 w-4"/>
-                          {translations.categories.title}
-                      </Button>
-                  </div>
-                  <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
-                    <SelectTrigger className="w-full sm:w-[200px] text-base md:flex-grow">
-                      <SelectValue placeholder={translations.home.sortBy} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="default">{translations.home.sortOptions.default}</SelectItem>
-                      <SelectItem value="price-asc">{translations.home.sortOptions.priceAsc}</SelectItem>
-                      <SelectItem value="price-desc">{translations.home.sortOptions.priceDesc}</SelectItem>
-                      <SelectItem value="name-asc">{translations.home.sortOptions.nameAsc}</SelectItem>
-                      <SelectItem value="name-desc">{translations.home.sortOptions.nameDesc}</SelectItem>
-                      <SelectItem value="discount-desc">{translations.home.sortOptions.discountDesc}</SelectItem>
-                    </SelectContent>
-                  </Select>
-             </div>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="md:hidden flex-grow">
+                <Select onValueChange={handleCategoryChange} value={selectedCategory}>
+                  <SelectTrigger className="w-full text-base">
+                    <SelectValue placeholder={translations.categories.title} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category === 'All' && language === 'hi' ? 'सभी' : category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
+                <SelectTrigger className="w-full md:w-[200px] text-base">
+                  <SelectValue placeholder={translations.home.sortBy} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="default">{translations.home.sortOptions.default}</SelectItem>
+                  <SelectItem value="price-asc">{translations.home.sortOptions.priceAsc}</SelectItem>
+                  <SelectItem value="price-desc">{translations.home.sortOptions.priceDesc}</SelectItem>
+                  <SelectItem value="name-asc">{translations.home.sortOptions.nameAsc}</SelectItem>
+                  <SelectItem value="name-desc">{translations.home.sortOptions.nameDesc}</SelectItem>
+                  <SelectItem value="discount-desc">{translations.home.sortOptions.discountDesc}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {/* Category Tabs for Desktop */}
             <div className="hidden md:block">
               <Tabs 
@@ -455,15 +460,6 @@ export default function Home() {
            </Button>
          </div>
        )}
-
-      <CategorySheet 
-        open={isCategorySheetOpen} 
-        onOpenChange={setIsCategorySheetOpen}
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-      />
-
     </div>
   );
 }
