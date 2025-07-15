@@ -1,47 +1,31 @@
-'use server';
 
+'use server';
 /**
- * @fileOverview This file defines a Genkit flow for generating descriptions for RO parts using AI.
+ * @fileOverview This file defines a Genkit flow for generating product descriptions.
  *
- * - generatePartDescription - A function that generates a part description.
- * - GeneratePartDescriptionInput - The input type for the generatePartDescription function.
- * - GeneratePartDescriptionOutput - The return type for the generatePartDescription function.
+ * - generatePartDescription: A function to generate a description for a part based on its name, category, and features.
+ * - GeneratePartDescriptionInput: The input schema for the flow.
+ * - GeneratePartDescriptionOutput: The output schema for the flow.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
+import {ai} from '../genkit';
 
-const GeneratePartDescriptionInputSchema = z.object({
-  partName: z.string().describe('The name of the RO part.'),
-  partCategory: z.string().describe('The category of the RO part.'),
-  partFeatures: z.string().describe('The features of the RO part.'),
+export const GeneratePartDescriptionInputSchema = z.object({
+  partName: z.string(),
+  partCategory: z.string(),
+  partFeatures: z.string(),
 });
-export type GeneratePartDescriptionInput = z.infer<typeof GeneratePartDescriptionInputSchema>;
+export type GeneratePartDescriptionInput = z.infer<
+  typeof GeneratePartDescriptionInputSchema
+>;
 
-const GeneratePartDescriptionOutputSchema = z.object({
-  description: z.string().describe('A compelling and informative description of the RO part.'),
-  relatedParts: z.array(z.string()).describe('Suggested related parts based on the current selection.'),
+export const GeneratePartDescriptionOutputSchema = z.object({
+  description: z.string(),
 });
-export type GeneratePartDescriptionOutput = z.infer<typeof GeneratePartDescriptionOutputSchema>;
-
-export async function generatePartDescription(input: GeneratePartDescriptionInput): Promise<GeneratePartDescriptionOutput> {
-  return generatePartDescriptionFlow(input);
-}
-
-const generatePartDescriptionPrompt = ai.definePrompt({
-  name: 'generatePartDescriptionPrompt',
-  input: {schema: GeneratePartDescriptionInputSchema},
-  output: {schema: GeneratePartDescriptionOutputSchema},
-  prompt: `You are an AI assistant that generates descriptions and suggests related parts for RO parts.
-
-  Given the part name, category and its features, generate a compelling and informative description for the RO part.
-  Also, suggest related parts based on the current selection.
-
-  Part Name: {{{partName}}}
-  Part Category: {{{partCategory}}}
-  Part Features: {{{partFeatures}}}
-  `,
-});
+export type GeneratePartDescriptionOutput = z.infer<
+  typeof GeneratePartDescriptionOutputSchema
+>;
 
 const generatePartDescriptionFlow = ai.defineFlow(
   {
@@ -49,8 +33,30 @@ const generatePartDescriptionFlow = ai.defineFlow(
     inputSchema: GeneratePartDescriptionInputSchema,
     outputSchema: GeneratePartDescriptionOutputSchema,
   },
-  async input => {
-    const {output} = await generatePartDescriptionPrompt(input);
-    return output!;
+  async ({partName, partCategory, partFeatures}) => {
+    const llmResponse = await ai.generate({
+      prompt: `Generate a compelling, one-paragraph product description for an RO system part.
+        The description should be concise, professional, and highlight the key benefits.
+
+        Part Details:
+        - Name: ${partName}
+        - Category: ${partCategory}
+        - Key Features: ${partFeatures}
+
+        Description:`,
+      config: {
+        temperature: 0.5,
+      },
+    });
+
+    return {
+      description: llmResponse.text,
+    };
   }
 );
+
+export async function generatePartDescription(
+  input: GeneratePartDescriptionInput
+): Promise<GeneratePartDescriptionOutput> {
+  return await generatePartDescriptionFlow(input);
+}

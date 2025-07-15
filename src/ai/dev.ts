@@ -1,7 +1,10 @@
-import { config } from 'dotenv';
-config();
+/**
+ * @fileoverview This file is the entrypoint for the Genkit developer UI.
+ *
+ * To run this file, you can use the command:
+ * `genkit start`
+ */
 
-import '@/ai/flows/generate-part-description.ts';
-import '@/ai/flows/suggest-related-parts.ts';
-import '@/ai/flows/suggest-search-term.ts';
-import '@/ai/flows/refine-voice-search.ts';
+import {run} from 'genkit/dev';
+
+run();
