@@ -118,10 +118,11 @@ export default function Home() {
       const detectedCategory = await getCategoryFromSearch(term);
       
       if (detectedCategory) {
-        let categoryToSet = detectedCategory;
-        if (language === 'hi' && categoriesMap.has(detectedCategory)) {
-          categoryToSet = categoriesMap.get(detectedCategory) || detectedCategory;
-        }
+        // The AI always returns the English category name.
+        // If the current language is Hindi, we need to find the corresponding Hindi category name.
+        const categoryToSet = language === 'hi' 
+          ? categoriesMap.get(detectedCategory) || detectedCategory 
+          : detectedCategory;
         
         setSelectedCategory(categoryToSet);
         setActiveSearch(''); 
