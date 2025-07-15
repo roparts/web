@@ -1,0 +1,22 @@
+# Configuration for Netlify
+
+[build]
+  # This command is run to build the project.
+  command = "npm run build"
+
+  # This is the directory that Netlify will deploy.
+  publish = ".next"
+
+[dev]
+  # This is the command that will be run when you run `netlify dev`
+  command = "npm run dev"
+  # The port for the local development server.
+  port = 9002
+  # The port for the framework's development server.
+  targetPort = 9002
+  # Automatically start the framework's development server.
+  autoLaunch = true
+
+[[plugins]]
+  # Essential plugin for Next.js on Netlify
+  package = "@netlify/plugin-nextjs"
