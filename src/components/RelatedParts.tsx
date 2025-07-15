@@ -3,7 +3,6 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useCart } from '@/context/CartContext';
-import { getRelatedParts } from '@/app/actions';
 import { Skeleton } from './ui/skeleton';
 import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
@@ -14,37 +13,38 @@ interface RelatedPartsProps {
   currentPart?: Part;
 }
 
+// Simple shuffle function
+const shuffleArray = <T>(array: T[]): T[] => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const { lastAddedItem } = useCart();
   const [suggestions, setSuggestions] = useState<Part[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { translations } = useLanguage();
 
-  const partToFetch = currentPart || lastAddedItem || partsData[partsData.length - 1];
-
-  const allPartsMap = useMemo(() => new Map(partsData.map(p => [p.name.toLowerCase(), p])), []);
+  const partToFetchFor = currentPart || lastAddedItem || partsData[partsData.length - 1];
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getRelatedParts(partToFetch);
-        const suggestedParts = result
-          .map(name => allPartsMap.get(name.toLowerCase()))
-          .filter((p): p is Part => !!p && p.id !== partToFetch.id)
-          .slice(0, 3);
-        
-        setSuggestions(suggestedParts);
-      } catch (error) {
-        console.error("Failed to fetch related parts:", error);
-        setSuggestions([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
+    
+    // Find related parts by category
+    const relatedByCategory = partsData.filter(p => 
+      p.category === partToFetchFor.category && p.id !== partToFetchFor.id
+    );
 
-    fetchSuggestions();
-  }, [partToFetch, allPartsMap]);
+    // Shuffle and take the first 3
+    const shuffledSuggestions = shuffleArray(relatedByCategory).slice(0, 3);
+    
+    setSuggestions(shuffledSuggestions);
+    setIsLoading(false);
+  }, [partToFetchFor]);
 
   if (isLoading) {
     return (
