@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,30 +11,37 @@ import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { EditPartDialog } from './EditPartDialog';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [parts, setParts] = useState<Part[]>(partsData);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [parts, setParts] = useState<Part[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPart, setEditingPart] = useState<Part | null>(null);
 
   useEffect(() => {
-    // Simple password protection for demo purposes.
-    // In a real app, use a proper authentication system.
+    // Check session storage for authentication status on component mount
     if (sessionStorage.getItem('ro-admin-auth') === 'true') {
       setIsAuthenticated(true);
-      return;
+      setParts(partsData); // Load parts data only after authentication
     }
+  }, []);
 
-    const password = prompt('Enter admin password:');
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault();
     if (password === 'rajababuadmin') {
       sessionStorage.setItem('ro-admin-auth', 'true');
       setIsAuthenticated(true);
+      setParts(partsData); // Load parts data
+      setError('');
     } else {
-      alert('Incorrect password. Redirecting to home.');
-      window.location.href = '/';
+      setError('Incorrect password. Please try again.');
     }
-  }, []);
+  };
+
 
   const handleAddNew = () => {
     setEditingPart(null);
@@ -65,8 +72,35 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <p>Authenticating...</p>
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl font-headline">Admin Access</CardTitle>
+            <CardDescription>
+              Enter the password to manage your products.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="********"
+                  required
+                />
+              </div>
+              {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+              <Button type="submit" className="w-full">
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign In
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
