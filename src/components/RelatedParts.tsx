@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
@@ -9,15 +10,21 @@ import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { PartCard } from './PartCard';
 
-export function RelatedParts() {
+interface RelatedPartsProps {
+  currentPart?: Part;
+}
+
+export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const { lastAddedItem } = useCart();
   const [suggestions, setSuggestions] = useState<Part[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const partToFetch = currentPart || lastAddedItem;
+
   const allPartsMap = useMemo(() => new Map(partsData.map(p => [p.name.toLowerCase(), p])), []);
 
   useEffect(() => {
-    if (!lastAddedItem) {
+    if (!partToFetch) {
       setSuggestions([]);
       return;
     }
@@ -25,10 +32,11 @@ export function RelatedParts() {
     const fetchSuggestions = async () => {
       setIsLoading(true);
       try {
-        const result = await getRelatedParts(lastAddedItem);
+        const result = await getRelatedParts(partToFetch);
         const suggestedParts = result
           .map(name => allPartsMap.get(name.toLowerCase()))
-          .filter((p): p is Part => !!p)
+          // Filter out the current part and any falsy values
+          .filter((p): p is Part => !!p && p.id !== partToFetch.id)
           .slice(0, 3); // Limit to 3 suggestions
         
         setSuggestions(suggestedParts);
@@ -42,9 +50,9 @@ export function RelatedParts() {
     };
 
     fetchSuggestions();
-  }, [lastAddedItem, allPartsMap]);
+  }, [partToFetch, allPartsMap]);
 
-  if (!lastAddedItem) return null;
+  if (!partToFetch || (suggestions.length === 0 && !isLoading)) return null;
 
   return (
     <div className="my-16">

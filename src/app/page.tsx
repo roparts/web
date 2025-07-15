@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useCart } from '@/context/CartContext';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 
@@ -18,6 +19,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
+  const { lastAddedItem } = useCart();
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => part.category);
@@ -122,7 +124,7 @@ export default function Home() {
             </div>
           )}
 
-          <RelatedParts />
+          {lastAddedItem && <RelatedParts />}
         </section>
       </main>
       <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
