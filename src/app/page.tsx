@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import Fuse from 'fuse.js';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 const SEARCH_HISTORY_KEY = 'ro-search-history';
@@ -38,6 +39,15 @@ export default function Home() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  const fuse = useMemo(() => {
+    const options = {
+      keys: ['name', 'name_hi'],
+      includeScore: true,
+      threshold: 0.4, // Adjust threshold for fuzziness
+    };
+    return new Fuse(partsData, options);
+  }, []);
 
   useEffect(() => {
     try {
@@ -78,6 +88,8 @@ export default function Home() {
       setActiveSearch(searchQuery);
       updateSearchHistory(searchQuery);
       setSuggestions([]); // Close suggestions on search
+    } else {
+      setActiveSearch('');
     }
   };
 
@@ -98,53 +110,47 @@ export default function Home() {
 
 
   const filteredAndSortedParts = useMemo(() => {
-    const filtered = partsData.filter(part => {
+    let partsToFilter = partsData;
+
+    // Fuzzy search with Fuse.js if there is an active search query
+    if (activeSearch.trim()) {
+      partsToFilter = fuse.search(activeSearch).map(result => result.item);
+    }
+
+    const filteredByCategory = partsToFilter.filter(part => {
       const currentCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
-      const matchesCategory = selectedCategory === 'All' || currentCategory === selectedCategory;
-      
-      const nameToSearch = language === 'hi' && part.name_hi ? part.name_hi : part.name;
-      const matchesSearch = nameToSearch.toLowerCase().includes(activeSearch.toLowerCase());
-      
-      return matchesCategory && matchesSearch;
+      return selectedCategory === 'All' || currentCategory === selectedCategory;
     });
+    
+    const sorted = [...filteredByCategory];
 
     switch (sortOption) {
       case 'price-asc':
-        return filtered.sort((a, b) => (a.discountPrice ?? a.price) - (b.discountPrice ?? b.price));
+        return sorted.sort((a, b) => (a.discountPrice ?? a.price) - (b.discountPrice ?? b.price));
       case 'price-desc':
-        return filtered.sort((a, b) => (b.discountPrice ?? b.price) - (a.discountPrice ?? a.price));
+        return sorted.sort((a, b) => (b.discountPrice ?? b.price) - (a.discountPrice ?? a.price));
       case 'name-asc':
-        return filtered.sort((a, b) => {
+        return sorted.sort((a, b) => {
             const nameA = language === 'hi' && a.name_hi ? a.name_hi : a.name;
             const nameB = language === 'hi' && b.name_hi ? b.name_hi : b.name;
             return nameA.localeCompare(nameB, language === 'hi' ? 'hi' : 'en');
         });
       case 'name-desc':
-        return filtered.sort((a, b) => {
+        return sorted.sort((a, b) => {
             const nameA = language === 'hi' && a.name_hi ? a.name_hi : a.name;
             const nameB = language === 'hi' && b.name_hi ? b.name_hi : b.name;
             return nameB.localeCompare(nameA, language === 'hi' ? 'hi' : 'en');
         });
       case 'discount-desc':
-        return filtered.sort((a, b) => {
+        return sorted.sort((a, b) => {
           const discountA = a.discountPrice ? (a.price - a.discountPrice) / a.price : 0;
           const discountB = b.discountPrice ? (b.price - b.discountPrice) / b.price : 0;
           return discountB - discountA;
         });
       default:
-        // Use activeSearch for filtering, not searchQuery
-        if (!activeSearch) return filtered;
-        return partsData.filter(part => {
-            const currentCategory = language === 'hi' && part.category_hi ? part.category_hi : part.category;
-            const matchesCategory = selectedCategory === 'All' || currentCategory === selectedCategory;
-            
-            const nameToSearch = language === 'hi' && part.name_hi ? part.name_hi : part.name;
-            const matchesSearch = nameToSearch.toLowerCase().includes(activeSearch.toLowerCase());
-            
-            return matchesCategory && matchesSearch;
-        });
+        return sorted;
     }
-  }, [activeSearch, selectedCategory, sortOption, language]);
+  }, [activeSearch, selectedCategory, sortOption, language, fuse]);
   
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -198,6 +204,11 @@ export default function Home() {
       setSuggestions([]);
     }
   }, [debouncedSearchQuery]);
+
+  // Update activeSearch in real-time as user types for instant filtering
+  useEffect(() => {
+    setActiveSearch(searchQuery);
+  }, [searchQuery]);
   
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
