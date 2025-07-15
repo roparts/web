@@ -37,6 +37,7 @@ export default function Home() {
   
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -58,6 +59,19 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to load search history:', error);
     }
+  }, []);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsInputFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const updateSearchHistory = (query: string) => {
@@ -82,16 +96,18 @@ export default function Home() {
     }
   };
 
-  const handleSearchSubmit = useCallback((e?: FormEvent) => {
+  const handleSearchSubmit = useCallback((query: string, e?: FormEvent) => {
     e?.preventDefault();
-    if (searchQuery.trim()) {
-      setActiveSearch(searchQuery);
-      updateSearchHistory(searchQuery);
-      setSuggestions([]); // Close suggestions on search
+    const term = query.trim();
+    if (term) {
+      setActiveSearch(term);
+      updateSearchHistory(term);
     } else {
       setActiveSearch('');
     }
-  }, [searchQuery]);
+    setSuggestions([]);
+    setIsInputFocused(false);
+  }, []);
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => language === 'hi' && part.category_hi ? part.category_hi : part.category);
@@ -182,8 +198,7 @@ export default function Home() {
       setIsRecording(false);
       const refinedQuery = await getRefinedVoiceSearch(transcript);
       setSearchQuery(refinedQuery);
-      setActiveSearch(refinedQuery);
-      updateSearchHistory(refinedQuery);
+      handleSearchSubmit(refinedQuery);
     };
     
     recognition.onerror = (event) => {
@@ -196,19 +211,7 @@ export default function Home() {
     return () => {
       recognitionRef.current?.abort();
     };
-  }, [language]);
-  
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchQuery === debouncedSearchQuery) {
-        setActiveSearch(debouncedSearchQuery);
-        if (debouncedSearchQuery.trim()) {
-          updateSearchHistory(debouncedSearchQuery);
-        }
-      }
-    }, 0);
-    return () => clearTimeout(timeoutId);
-  }, [debouncedSearchQuery, searchQuery]);
+  }, [language, handleSearchSubmit]);
 
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
@@ -223,9 +226,7 @@ export default function Home() {
 
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
-    setActiveSearch(term);
-    updateSearchHistory(term);
-    setSuggestions([]);
+    handleSearchSubmit(term);
   };
 
   const handleVoiceSearch = () => {
@@ -267,8 +268,8 @@ export default function Home() {
 
           <div className="mb-8 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-grow z-30">
-                <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+              <div ref={searchContainerRef} className="relative flex-grow z-30">
+                <form onSubmit={(e) => handleSearchSubmit(searchQuery, e)} className="relative flex items-center">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
@@ -276,7 +277,6 @@ export default function Home() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsInputFocused(true)}
-                    onBlur={() => setTimeout(() => setIsInputFocused(false), 150)}
                     className="w-full pl-10 pr-10 text-base"
                   />
                   {recognitionRef.current && (
