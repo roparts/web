@@ -1,11 +1,33 @@
 
+"use client";
+
+import { useMemo, useState } from 'react';
 import { Header } from '@/components/Header';
 import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
 import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search } from 'lucide-react';
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const categories = useMemo(() => {
+    const allCategories = partsData.map(part => part.category);
+    return ['All', ...Array.from(new Set(allCategories))];
+  }, []);
+
+  const filteredParts = useMemo(() => {
+    return partsData.filter(part => {
+      const matchesCategory = selectedCategory === 'All' || part.category === selectedCategory;
+      const matchesSearch = part.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [searchQuery, selectedCategory]);
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -19,11 +41,42 @@ export default function Home() {
               Find everything you need for your water purification system. High-quality, reliable, and ready to ship.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-            {partsData.map((part) => (
-              <PartCard key={part.id} part={part} />
-            ))}
+
+          <div className="mb-8 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search for parts by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 text-base"
+              />
+            </div>
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap h-auto">
+                {categories.map(category => (
+                  <TabsTrigger key={category} value={category} className="flex-1 lg:flex-none">
+                    {category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
+          
+          {filteredParts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+              {filteredParts.map((part) => (
+                <PartCard key={part.id} part={part} />
+              ))}
+            </div>
+          ) : (
+             <div className="text-center py-16">
+              <h2 className="text-2xl font-headline font-semibold">No Parts Found</h2>
+              <p className="mt-2 text-muted-foreground">Try adjusting your search or category filters.</p>
+            </div>
+          )}
+
           <RelatedParts />
         </section>
       </main>
