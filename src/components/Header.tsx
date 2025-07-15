@@ -1,24 +1,40 @@
+
 "use client";
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { CartSheet } from './CartSheet';
+import { CategorySheet } from './CategorySheet';
 import { useState } from 'react';
+import type { Part } from '@/lib/types';
 
-export function Header() {
+interface HeaderProps {
+  categories?: string[];
+  selectedCategory?: string;
+  onCategoryChange?: (category: string) => void;
+}
+
+
+export function Header({ categories, selectedCategory, onCategoryChange }: HeaderProps) {
   const { itemCount } = useCart();
   const [isCartOpen, setCartOpen] = useState(false);
+  const [isCategoryMenuOpen, setCategoryMenuOpen] = useState(false);
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center">
+          <div className="md:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setCategoryMenuOpen(true)} aria-label="Open categories menu">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image src="/logo.svg" alt="RoParts Hub Logo" width={40} height={40} />
-            <span className="font-bold font-headline text-2xl text-primary">
+            <span className="font-bold font-headline text-2xl text-primary hidden sm:inline-block">
               RoParts Hub
             </span>
           </Link>
@@ -39,6 +55,15 @@ export function Header() {
         </div>
       </header>
       <CartSheet open={isCartOpen} onOpenChange={setCartOpen} />
+      {categories && onCategoryChange && (
+         <CategorySheet 
+            open={isCategoryMenuOpen} 
+            onOpenChange={setCategoryMenuOpen} 
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategoryChange={onCategoryChange}
+        />
+      )}
     </>
   );
 }

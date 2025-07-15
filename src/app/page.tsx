@@ -30,7 +30,11 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Header 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 sm:py-12">
           <div className="text-center mb-8 sm:mb-12">
@@ -53,15 +57,18 @@ export default function Home() {
                 className="w-full pl-10 text-base"
               />
             </div>
-            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap h-auto">
-                {categories.map(category => (
-                  <TabsTrigger key={category} value={category} className="flex-1 lg:flex-none">
-                    {category}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+            {/* Category Tabs for Desktop */}
+            <div className="hidden md:block">
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap h-auto">
+                  {categories.map(category => (
+                    <TabsTrigger key={category} value={category} className="flex-1 lg:flex-none">
+                      {category}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
           
           {filteredParts.length > 0 ? (
