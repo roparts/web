@@ -77,7 +77,7 @@
     "addDialogTitle": "नया पार्ट जोड़ें",
     "editDialogDescription": "इस पार्ट के लिए विवरण अपडेट करें।",
     "addDialogDescription": "नए पार्ट के लिए विवरण भरें।",
-    "uploadImageButton": "छवि अपलोड करें",
+    "uploadImageButton": "छवि यूआरएल",
     "partNameLabel": "पार्ट का नाम",
     "partNamePlaceholder": "जैसे, एक्वाप्योर आरओ मेम्ब्रेन",
     "priceLabel": "कीमत (₹)",

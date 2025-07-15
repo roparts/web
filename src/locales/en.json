@@ -77,7 +77,7 @@
     "addDialogTitle": "Add New Part",
     "editDialogDescription": "Update the details for this part.",
     "addDialogDescription": "Fill in the details for the new part.",
-    "uploadImageButton": "Upload Image",
+    "uploadImageButton": "Image URL",
     "partNameLabel": "Part Name",
     "partNamePlaceholder": "e.g., AquaPure RO Membrane",
     "priceLabel": "Price (₹)",

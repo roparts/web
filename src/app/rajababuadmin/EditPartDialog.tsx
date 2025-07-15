@@ -24,7 +24,7 @@ const partSchema = z.object({
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  image: z.string().url("A valid image URL or Data URL is required."),
+  image: z.string().url("A valid image URL is required."),
   minQuantity: z.coerce.number().min(1, 'Minimum quantity must be at least 1').optional(),
 });
 
@@ -37,7 +37,6 @@ interface EditPartDialogProps {
 
 export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
   const { translations } = useLanguage();
   const t = translations.admin;
@@ -56,6 +55,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     },
   });
 
+  const imageValue = form.watch('image');
+
   useEffect(() => {
     if (isOpen) {
       if (part) {
@@ -64,7 +65,6 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           discountPrice: part.discountPrice ?? undefined,
           minQuantity: part.minQuantity ?? 1,
         });
-        setImagePreview(part.image);
       } else {
         form.reset({
           name: '',
@@ -76,23 +76,10 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           image: 'https://placehold.co/400x400.png',
           minQuantity: 1,
         });
-        setImagePreview('https://placehold.co/400x400.png');
       }
     }
   }, [part, form, isOpen]);
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        setImagePreview(dataUrl);
-        form.setValue('image', dataUrl, { shouldValidate: true });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleGenerateDescription = async () => {
     const { name, category, features } = form.getValues();
@@ -151,33 +138,26 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
             <div className="flex flex-col items-center gap-4">
-                {imagePreview && (
+                {imageValue && (
                   <Image
-                    src={imagePreview}
+                    src={imageValue}
                     alt="Part preview"
                     width={128}
                     height={128}
                     className="rounded-md object-cover border"
+                    onError={(e) => e.currentTarget.src = 'https://placehold.co/400x400.png'}
                   />
                 )}
                 <FormField
                   control={form.control}
                   name="image"
                   render={({ field }) => (
-                    <FormItem className="w-full text-center">
-                       <Button asChild variant="outline">
-                        <label htmlFor="image-upload" className="cursor-pointer">
-                          <Upload className="mr-2 h-4 w-4" />
-                          {t.uploadImageButton}
-                        </label>
-                      </Button>
+                    <FormItem className="w-full">
+                       <FormLabel>{t.uploadImageButton}</FormLabel>
                       <FormControl>
                         <Input 
-                            id="image-upload" 
-                            type="file" 
-                            className="hidden"
-                            accept="image/png, image/jpeg, image/webp"
-                            onChange={handleImageUpload} 
+                            placeholder="https://your-repo/image.png"
+                            {...field}
                         />
                       </FormControl>
                       <FormMessage />
