@@ -4,6 +4,7 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "./ui/scroll-area";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CategorySheetProps {
   open: boolean;
@@ -20,6 +21,7 @@ export function CategorySheet({
   selectedCategory, 
   onCategoryChange 
 }: CategorySheetProps) {
+  const { translations } = useLanguage();
 
   const handleCategoryClick = (category: string) => {
     onCategoryChange(category);
@@ -30,7 +32,7 @@ export function CategorySheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="flex flex-col w-full sm:max-w-xs">
         <SheetHeader>
-          <SheetTitle className="font-headline text-2xl">Categories</SheetTitle>
+          <SheetTitle className="font-headline text-2xl">{translations.categories.title}</SheetTitle>
         </SheetHeader>
         <ScrollArea className="flex-grow my-4">
           <div className="flex flex-col gap-2 pr-4">
@@ -50,4 +52,3 @@ export function CategorySheet({
     </Sheet>
   );
 }
-

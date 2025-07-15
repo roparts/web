@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { Part } from '@/lib/types';
 import { generateDescriptionAction } from '../actions';
 import { useToast } from "@/hooks/use-toast"
-
+import { useLanguage } from '@/context/LanguageContext';
 
 const partSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -39,6 +39,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
   const [isGenerating, setIsGenerating] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
+  const { translations } = useLanguage();
+  const t = translations.admin;
 
   const form = useForm<z.infer<typeof partSchema>>({
     resolver: zodResolver(partSchema),
@@ -97,8 +99,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     if (!name || !category || !features) {
       toast({
         variant: "destructive",
-        title: "Missing Information",
-        description: "Please fill in Name, Category, and Features to generate a description.",
+        title: t.toast.missingInfoTitle,
+        description: t.toast.missingInfoDescription,
       });
       return;
     }
@@ -112,15 +114,15 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       });
       form.setValue('description', description, { shouldValidate: true });
        toast({
-        title: "Description Generated!",
-        description: "The AI has created a new description for your part.",
+        title: t.toast.generationSuccessTitle,
+        description: t.toast.generationSuccessDescription,
       });
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Generation Failed",
-        description: "Could not generate description.",
+        title: t.toast.generationFailedTitle,
+        description: t.toast.generationFailedDescription,
       });
     } finally {
       setIsGenerating(false);
@@ -140,9 +142,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">{part ? 'Edit Part' : 'Add New Part'}</DialogTitle>
+          <DialogTitle className="font-headline text-2xl">{part ? t.editDialogTitle : t.addDialogTitle}</DialogTitle>
           <DialogDescription>
-            {part ? 'Update the details for this part.' : 'Fill in the details for the new part.'}
+            {part ? t.editDialogDescription : t.addDialogDescription}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -165,7 +167,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                        <Button asChild variant="outline">
                         <label htmlFor="image-upload" className="cursor-pointer">
                           <Upload className="mr-2 h-4 w-4" />
-                          Upload Image
+                          {t.uploadImageButton}
                         </label>
                       </Button>
                       <FormControl>
@@ -187,9 +189,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Part Name</FormLabel>
+                  <FormLabel>{t.partNameLabel}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., AquaPure RO Membrane" {...field} />
+                    <Input placeholder={t.partNamePlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -201,7 +203,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price (₹)</FormLabel>
+                    <FormLabel>{t.priceLabel}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -214,9 +216,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                 name="discountPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Discount Price (₹)</FormLabel>
+                    <FormLabel>{t.discountPriceLabel}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Optional" {...field} value={field.value ?? ''}/>
+                      <Input type="number" placeholder={t.optionalPlaceholder} {...field} value={field.value ?? ''}/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -229,9 +231,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>{t.categoryLabel}</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Filters" {...field} />
+                      <Input placeholder={t.categoryPlaceholder} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -242,9 +244,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                 name="minQuantity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Min. Quantity</FormLabel>
+                    <FormLabel>{t.minQuantityLabel}</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 1" {...field} />
+                      <Input type="number" placeholder={t.minQuantityPlaceholder} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -256,9 +258,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
               name="features"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Features</FormLabel>
+                  <FormLabel>{t.featuresLabel}</FormLabel>
                    <FormControl>
-                    <Input placeholder="e.g., High rejection rate, Long lifespan" {...field} />
+                    <Input placeholder={t.featuresPlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -270,22 +272,22 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between items-center">
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t.descriptionLabel}</FormLabel>
                     <Button type="button" variant="outline" size="sm" onClick={handleGenerateDescription} disabled={isGenerating}>
                       <Wand2 className="mr-2 h-4 w-4" />
-                      {isGenerating ? 'Generating...' : 'Generate with AI'}
+                      {isGenerating ? t.generatingButton : t.generateButton}
                     </Button>
                   </div>
                   <FormControl>
-                    <Textarea placeholder="A compelling description of the part." className="min-h-[100px]" {...field} />
+                    <Textarea placeholder={t.descriptionPlaceholder} className="min-h-[100px]" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-              <Button type="submit">Save Part</Button>
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>{t.cancelButton}</Button>
+              <Button type="submit">{t.saveButton}</Button>
             </DialogFooter>
           </form>
         </Form>

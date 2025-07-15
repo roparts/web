@@ -26,12 +26,88 @@
     "clearCart": "कार्ट साफ़ करें",
     "emptyTitle": "आपकी कार्ट खाली है",
     "emptySubtitle": "शुरू करने के लिए कुछ पार्ट्स जोड़ें!",
-    "continueShopping": "खरीदारी जारी रखें"
+    "continueShopping": "खरीदारी जारी रखें",
+    "itemUpdated": "आइटम मात्रा अपडेट की गई",
+    "itemAdded": "कार्ट में जोड़ा गया",
+    "quantityIncreased": "{partName} की मात्रा बढ़ाई गई।",
+    "unitsAdded": "{partName} की {quantity} इकाई(याँ) जोड़ी गईं।"
   },
   "footer": {
     "rightsReserved": "सर्वाधिकार सुरक्षित।",
     "adminPanel": "एडमिन पैनल"
+  },
+  "header": {
+    "openCategories": "श्रेणियाँ मेनू खोलें",
+    "openCart": "कार्ट खोलें",
+    "english": "English",
+    "hindi": "हिन्दी"
+  },
+  "partDetails": {
+    "category": "श्रेणी",
+    "keyFeatures": "मुख्य विशेषताएँ:",
+    "minQuantity": "न्यूनतम आदेश मात्रा",
+    "discount": "% की छूट",
+    "addToCart": "कार्ट में डालें",
+    "productDescription": "उत्पाद विवरण",
+    "relatedTitle": "आपको यह भी पसंद आ सकता है",
+    "noSuggestions": "अभी कोई सुझाव उपलब्ध नहीं है।"
+  },
+  "partCard": {
+    "addToCart": "कार्ट में डालें",
+    "minQty": "न्यूनतम मात्रा"
+  },
+  "admin": {
+    "loginTitle": "एडमिन एक्सेस",
+    "loginDescription": "अपने उत्पादों का प्रबंधन करने के लिए पासवर्ड दर्ज करें।",
+    "passwordLabel": "पासवर्ड",
+    "signInButton": "साइन इन करें",
+    "incorrectPassword": "गलत पासवर्ड। कृपया पुनः प्रयास करें।",
+    "headerTitle": "एडमिन पैनल",
+    "addNewPart": "नया पार्ट जोड़ें",
+    "manageTitle": "पार्ट्स प्रबंधित करें",
+    "manageDescription": "अपने कैटलॉग से आरओ पार्ट्स जोड़ें, संपादित करें या हटाएं।",
+    "imageColumn": "छवि",
+    "nameColumn": "नाम",
+    "categoryColumn": "श्रेणी",
+    "priceColumn": "कीमत",
+    "actionsColumn": "कार्रवाइयाँ",
+    "deleteConfirm": "क्या आप वाकई इस पार्ट को हटाना चाहते हैं?",
+    "editDialogTitle": "पार्ट संपादित करें",
+    "addDialogTitle": "नया पार्ट जोड़ें",
+    "editDialogDescription": "इस पार्ट के लिए विवरण अपडेट करें।",
+    "addDialogDescription": "नए पार्ट के लिए विवरण भरें।",
+    "uploadImageButton": "छवि अपलोड करें",
+    "partNameLabel": "पार्ट का नाम",
+    "partNamePlaceholder": "जैसे, एक्वाप्योर आरओ मेम्ब्रेन",
+    "priceLabel": "कीमत (₹)",
+    "discountPriceLabel": "छूट मूल्य (₹)",
+    "optionalPlaceholder": "वैकल्पिक",
+    "categoryLabel": "श्रेणी",
+    "categoryPlaceholder": "जैसे, फ़िल्टर",
+    "minQuantityLabel": "न्यूनतम मात्रा",
+    "minQuantityPlaceholder": "जैसे, 1",
+    "featuresLabel": "विशेषताएँ",
+    "featuresPlaceholder": "जैसे, उच्च अस्वीकृति दर, लंबी उम्र",
+    "descriptionLabel": "विवरण",
+    "generateButton": "एआई से उत्पन्न करें",
+    "generatingButton": "उत्पन्न हो रहा है...",
+    "descriptionPlaceholder": "पार्ट का एक आकर्षक विवरण।",
+    "cancelButton": "रद्द करें",
+    "saveButton": "पार्ट सहेजें",
+    "toast": {
+      "missingInfoTitle": "जानकारी अधूरी है",
+      "missingInfoDescription": "विवरण उत्पन्न करने के लिए कृपया नाम, श्रेणी और विशेषताएँ भरें।",
+      "generationSuccessTitle": "विवरण उत्पन्न हुआ!",
+      "generationSuccessDescription": "एआई ने आपके पार्ट के लिए एक नया विवरण बनाया है।",
+      "generationFailedTitle": "उत्पन्न करने में विफल",
+      "generationFailedDescription": "विवरण उत्पन्न नहीं किया जा सका।"
+    }
+  },
+  "categories": {
+    "title": "श्रेणियाँ"
+  },
+  "metadata": {
+    "title": "रो पार्ट्स हब - आरओ स्पेयर्स के लिए आपकी वन-स्टॉप शॉप",
+    "description": "रो पार्ट्स हब पर फिल्टर से लेकर मेम्ब्रेन तक, उच्च गुणवत्ता वाले रिवर्स ऑस्मोसिस सिस्टम पार्ट्स खोजें।"
   }
 }
-
-    

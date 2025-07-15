@@ -4,11 +4,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useCart } from '@/context/CartContext';
 import { getRelatedParts } from '@/app/actions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from './ui/skeleton';
 import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { PartCard } from './PartCard';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface RelatedPartsProps {
   currentPart?: Part;
@@ -18,6 +18,7 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const { lastAddedItem } = useCart();
   const [suggestions, setSuggestions] = useState<Part[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { translations } = useLanguage();
 
   const partToFetch = currentPart || lastAddedItem;
 
@@ -56,7 +57,7 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
 
   return (
     <div className="my-16">
-      <h2 className="text-3xl font-bold text-center mb-8 font-headline">You Might Also Like</h2>
+      <h2 className="text-3xl font-bold text-center mb-8 font-headline">{translations.partDetails.relatedTitle}</h2>
       {isLoading ? (
         <div className="grid md:grid-cols-3 gap-8">
           <Skeleton className="h-96 w-full" />
@@ -70,7 +71,7 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
           ))}
         </div>
       ) : (
-         <p className="text-center text-muted-foreground">No suggestions available right now.</p>
+         <p className="text-center text-muted-foreground">{translations.partDetails.noSuggestions}</p>
       )}
     </div>
   );

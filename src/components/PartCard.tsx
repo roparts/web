@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from './ui/badge';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PartCardProps {
   part: Part;
@@ -16,9 +17,10 @@ interface PartCardProps {
 
 export function PartCard({ part }: PartCardProps) {
   const { addToCart } = useCart();
+  const { translations } = useLanguage();
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
-  const showMinQuantity = !!part.minQuantity;
+  const showMinQuantity = !!part.minQuantity && part.minQuantity > 1;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,11 +31,6 @@ export function PartCard({ part }: PartCardProps) {
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
       <CardHeader className="p-0 relative">
-        {hasDiscount && (
-          <Badge variant="destructive" className="absolute top-2 right-2 z-10">
-            {discountPercentage}% OFF
-          </Badge>
-        )}
         <Link href={`/part/${part.id}`}>
           <div className="aspect-square overflow-hidden">
               <Image
@@ -46,6 +43,11 @@ export function PartCard({ part }: PartCardProps) {
               />
           </div>
         </Link>
+        {hasDiscount && (
+          <Badge variant="destructive" className="absolute top-2 right-2 z-10">
+            {discountPercentage}{translations.partDetails.discount}
+          </Badge>
+        )}
       </CardHeader>
       <div className="p-4 flex-grow flex flex-col">
           <Link href={`/part/${part.id}`} className="flex-grow">
@@ -64,12 +66,12 @@ export function PartCard({ part }: PartCardProps) {
                 <p className="text-xl font-bold text-primary">₹{part.price.toLocaleString('en-IN')}</p>
             )}
             {showMinQuantity && (
-                <p className="text-xs text-muted-foreground mt-1">Min. Qty: {part.minQuantity}</p>
+                <p className="text-xs text-muted-foreground mt-1">{translations.partCard.minQty}: {part.minQuantity}</p>
             )}
         </div>
         <Button onClick={handleAddToCart} size="sm" className="w-full sm:w-auto self-end">
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to Cart
+          {translations.partCard.addToCart}
         </Button>
       </CardFooter>
     </Card>

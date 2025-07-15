@@ -8,14 +8,16 @@ import { partsData } from '@/lib/parts-data';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, CheckCircle, Package } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { RelatedParts } from '@/components/RelatedParts';
 import type { Part } from '@/lib/types';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function PartDetailPage({ params }: { params: { id: string } }) {
   const { addToCart } = useCart();
+  const { translations } = useLanguage();
   
   const part = useMemo(() => {
     return partsData.find(p => p.id === params.id);
@@ -49,17 +51,17 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
               </div>
                {hasDiscount && (
                 <Badge variant="destructive" className="absolute top-4 right-4 z-10 text-base">
-                  {discountPercentage}% OFF
+                  {discountPercentage}{translations.partDetails.discount}
                 </Badge>
               )}
             </div>
             
             <div className="flex flex-col">
               <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight">{part.name}</h1>
-              <p className="mt-2 text-muted-foreground">Category: <Link href="/" className="text-primary hover:underline">{part.category}</Link></p>
+              <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{part.category}</Link></p>
               
               <div className="mt-6">
-                <p className="text-lg font-semibold">Key Features:</p>
+                <p className="text-lg font-semibold">{translations.partDetails.keyFeatures}</p>
                 <ul className="mt-2 space-y-2 list-disc list-inside text-muted-foreground">
                   {features.map((feature, index) => (
                     <li key={index}>{feature}</li>
@@ -69,7 +71,7 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
 
               <div className="mt-6">
                  <p className="text-sm text-muted-foreground">
-                    Minimum Order Quantity: <span className="font-bold text-foreground">{part.minQuantity || 1}</span>
+                    {translations.partDetails.minQuantity}: <span className="font-bold text-foreground">{part.minQuantity || 1}</span>
                 </p>
               </div>
 
@@ -86,14 +88,14 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
               
               <Button onClick={() => addToCart(part)} size="lg" className="mt-8 w-full sm:w-auto">
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
+                {translations.partDetails.addToCart}
               </Button>
 
             </div>
           </div>
 
           <div className="mt-12 lg:mt-16">
-            <h2 className="text-2xl font-bold font-headline">Product Description</h2>
+            <h2 className="text-2xl font-bold font-headline">{translations.partDetails.productDescription}</h2>
             <div className="mt-4 prose max-w-none text-muted-foreground">
               <p>{part.description}</p>
             </div>
@@ -105,9 +107,9 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
       </main>
       <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
         <div className="container mx-auto text-center text-sm">
-           <p>&copy; {new Date().getFullYear()} RoParts Hub. All Rights Reserved.</p>
+           <p>&copy; {new Date().getFullYear()} RoParts Hub. {translations.footer.rightsReserved}</p>
            <p className="mt-2">
-              <Link href="/rajababuadmin" className="hover:text-primary transition-colors">Admin Panel</Link>
+              <Link href="/rajababuadmin" className="hover:text-primary transition-colors">{translations.footer.adminPanel}</Link>
             </p>
         </div>
       </footer>

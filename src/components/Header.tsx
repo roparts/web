@@ -28,7 +28,7 @@ export function Header({ categories, selectedCategory, onCategoryChange }: Heade
   const { itemCount } = useCart();
   const [isCartOpen, setCartOpen] = useState(false);
   const [isCategoryMenuOpen, setCategoryMenuOpen] = useState(false);
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, translations } = useLanguage();
 
   return (
     <>
@@ -36,7 +36,7 @@ export function Header({ categories, selectedCategory, onCategoryChange }: Heade
         <div className="container flex h-16 items-center">
           <div className="md:hidden">
              {categories && onCategoryChange && (
-              <Button variant="ghost" size="icon" onClick={() => setCategoryMenuOpen(true)} aria-label="Open categories menu">
+              <Button variant="ghost" size="icon" onClick={() => setCategoryMenuOpen(true)} aria-label={translations.header.openCategories}>
                 <Menu className="h-6 w-6" />
               </Button>
             )}
@@ -56,16 +56,16 @@ export function Header({ categories, selectedCategory, onCategoryChange }: Heade
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setLanguage('en')} disabled={language === 'en'}>
-                  English
+                  {translations.header.english}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setLanguage('hi')} disabled={language === 'hi'}>
-                  हिन्दी
+                  {translations.header.hindi}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <nav className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={() => setCartOpen(true)} aria-label="Open cart">
+              <Button variant="ghost" size="icon" onClick={() => setCartOpen(true)} aria-label={translations.header.openCart}>
                 <div className="relative">
                   <ShoppingCart className="h-6 w-6" />
                   {itemCount > 0 && (
@@ -92,5 +92,3 @@ export function Header({ categories, selectedCategory, onCategoryChange }: Heade
     </>
   );
 }
-
-    
