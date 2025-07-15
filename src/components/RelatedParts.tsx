@@ -25,25 +25,16 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const allPartsMap = useMemo(() => new Map(partsData.map(p => [p.name.toLowerCase(), p])), []);
 
   useEffect(() => {
-    // This check is removed to allow fetching even if partToFetch is the default
-    // if (!partToFetch) {
-    //   setSuggestions([]);
-    //   setIsLoading(false);
-    //   return;
-    // }
-
     const fetchSuggestions = async () => {
       setIsLoading(true);
       try {
         const result = await getRelatedParts(partToFetch);
         const suggestedParts = result
           .map(name => allPartsMap.get(name.toLowerCase()))
-          // Filter out the current part and any falsy values
           .filter((p): p is Part => !!p && p.id !== partToFetch.id)
-          .slice(0, 3); // Limit to 3 suggestions
+          .slice(0, 3);
         
         setSuggestions(suggestedParts);
-
       } catch (error) {
         console.error("Failed to fetch related parts:", error);
         setSuggestions([]);
@@ -69,7 +60,7 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
   }
 
   if (suggestions.length === 0) {
-    return null; // Don't render anything if there are no suggestions and it's not loading.
+    return null; 
   }
 
   return (
