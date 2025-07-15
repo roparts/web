@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from '@/components/Header';
 import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
@@ -9,11 +9,13 @@ import { partsData } from '@/lib/parts-data';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
+import { Search, Mic } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/context/CartContext';
 import { getSearchSuggestion } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 
@@ -25,6 +27,9 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
   
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const categories = useMemo(() => {
@@ -60,6 +65,36 @@ export default function Home() {
   }, [searchQuery, selectedCategory, sortOption]);
   
   useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsRecording(true);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchQuery(transcript);
+      };
+      
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
@@ -73,6 +108,12 @@ export default function Home() {
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
     setSuggestions([]);
+  };
+
+  const handleVoiceSearch = () => {
+    if (recognitionRef.current && !isRecording) {
+      recognitionRef.current.start();
+    }
   };
 
   return (
@@ -96,15 +137,27 @@ export default function Home() {
           <div className="mb-8 space-y-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-grow z-30">
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Search for parts by name..."
+                    placeholder="Search for parts by name or voice..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 text-base"
+                    className="w-full pl-10 pr-10 text-base"
                   />
+                  {recognitionRef.current && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={handleVoiceSearch}
+                      disabled={isRecording}
+                      aria-label="Search by voice"
+                    >
+                      <Mic className={cn("h-5 w-5", isRecording ? "text-destructive animate-pulse" : "text-muted-foreground")} />
+                    </Button>
+                  )}
                 </div>
                  {(isSuggestionLoading || suggestions.length > 0) && (
                     <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg">
