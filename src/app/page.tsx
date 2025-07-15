@@ -20,6 +20,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
 import type { Part } from '@/lib/types';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
@@ -407,19 +408,22 @@ export default function Home() {
             </div>
             {/* Category Tabs for Desktop */}
             <div className="hidden md:block">
-              <Tabs 
-                value={selectedCategory} 
-                onValueChange={handleCategoryChange} 
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:flex lg:flex-wrap h-auto">
-                  {categories.map(category => (
-                    <TabsTrigger key={category} value={category} className="flex-1 lg:flex-none">
-                      {category === 'All' && language === 'hi' ? 'सभी' : category}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+              <ScrollArea className="w-full whitespace-nowrap">
+                <Tabs
+                  value={selectedCategory}
+                  onValueChange={handleCategoryChange}
+                  className="w-full"
+                >
+                  <TabsList className="h-auto justify-start">
+                    {categories.map((category) => (
+                      <TabsTrigger key={category} value={category} className="flex-shrink-0">
+                        {category === 'All' && language === 'hi' ? 'सभी' : category}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+                <ScrollBar orientation="horizontal" className="mt-2" />
+              </ScrollArea>
             </div>
           </div>
           
