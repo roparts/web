@@ -32,14 +32,14 @@ export async function getRelatedParts(part: Part) {
 }
 
 export async function getSearchSuggestion(query: string) {
-  if (!query || query.trim().length < 3) {
-    return "";
+  if (!query || query.trim().length < 2) {
+    return [];
   }
   try {
     const result = await suggestSearchTerm({ query });
-    return result.suggestion;
+    return result.suggestions;
   } catch (error) {
     console.error("Error getting search suggestion:", error);
-    return "";
+    return [];
   }
 }

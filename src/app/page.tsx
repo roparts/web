@@ -22,10 +22,10 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortOption, setSortOption] = useState<SortOption>('default');
   const { lastAddedItem } = useCart();
-  const [suggestion, setSuggestion] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
   
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   const categories = useMemo(() => {
     const allCategories = partsData.map(part => part.category);
@@ -60,19 +60,19 @@ export default function Home() {
   }, [searchQuery, selectedCategory, sortOption]);
   
   useEffect(() => {
-    if (debouncedSearchQuery && debouncedSearchQuery.length > 2) {
+    if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       getSearchSuggestion(debouncedSearchQuery)
-        .then(result => setSuggestion(result))
+        .then(result => setSuggestions(result))
         .finally(() => setIsSuggestionLoading(false));
     } else {
-      setSuggestion('');
+      setSuggestions([]);
     }
   }, [debouncedSearchQuery]);
   
-  const handleSuggestionClick = () => {
+  const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
-    setSuggestion('');
+    setSuggestions([]);
   };
 
   return (
@@ -104,19 +104,26 @@ export default function Home() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 text-base"
                 />
-                 {suggestion && !isSuggestionLoading && (
-                  <div className="absolute top-full mt-2 text-sm text-muted-foreground">
-                    Did you mean:{" "}
-                    <button onClick={handleSuggestionClick} className="font-semibold text-primary hover:underline">
-                      {suggestion}
-                    </button>
-                  </div>
-                )}
-                 {isSuggestionLoading && (
-                  <div className="absolute top-full mt-2 text-sm text-muted-foreground">
-                    Checking spelling...
-                  </div>
-                )}
+                 {(isSuggestionLoading || suggestions.length > 0) && (
+                    <div className="absolute top-full mt-1 w-full rounded-md border bg-background shadow-lg z-20">
+                      {isSuggestionLoading ? (
+                        <div className="p-3 text-sm text-muted-foreground">Searching...</div>
+                      ) : (
+                        <ul className="py-1">
+                          {suggestions.map((suggestion, index) => (
+                            <li key={index}>
+                              <button
+                                onClick={() => handleSuggestionClick(suggestion)}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-accent"
+                              >
+                                {suggestion}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
               </div>
               <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
                 <SelectTrigger className="w-full sm:w-[200px] text-base">
