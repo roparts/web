@@ -54,7 +54,9 @@ export default function Home() {
     const map = new Map<string, string>();
     partsData.forEach(part => {
       // Maps English category to its Hindi translation
-      map.set(part.category, part.category_hi || part.category);
+      if(part.category && part.category_hi) {
+        map.set(part.category, part.category_hi);
+      }
     });
     return map;
   }, []);
@@ -116,21 +118,19 @@ export default function Home() {
       const detectedCategory = await getCategoryFromSearch(term);
       
       if (detectedCategory) {
-        // AI detected a category. Filter by that category.
-        const localizedCategory = language === 'hi' 
-          ? categoriesMap.get(detectedCategory) || detectedCategory 
-          : detectedCategory;
+        let categoryToSet = detectedCategory;
+        if (language === 'hi' && categoriesMap.has(detectedCategory)) {
+          categoryToSet = categoriesMap.get(detectedCategory) || detectedCategory;
+        }
         
-        setSelectedCategory(localizedCategory);
-        setActiveSearch(''); // Clear text search to show all items in category
-        setSearchQuery(''); // Also clear the input bar
+        setSelectedCategory(categoryToSet);
+        setActiveSearch(''); 
+        setSearchQuery('');
       } else {
-        // No category detected, perform a standard text search.
          setActiveSearch(term);
-         setSelectedCategory('All'); // Reset category filter for text search
+         setSelectedCategory('All');
       }
     } else {
-      // Search is empty, show all items.
       setActiveSearch('');
       setSelectedCategory('All');
     }
