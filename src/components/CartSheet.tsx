@@ -40,7 +40,8 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
 `;
     
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    // Use the confirmed working URL structure
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
