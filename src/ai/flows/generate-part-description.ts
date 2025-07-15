@@ -1,13 +1,11 @@
-
 'use server';
 /**
- * @fileOverview This file defines a Genkit flow for generating product descriptions.
+ * @fileOverview This file defines a Genkit flow for generating a product description.
  *
- * - generatePartDescription: A function to generate a description for a part based on its name, category, and features.
+ * - generatePartDescription: A function that generates a compelling product description based on part details.
  * - GeneratePartDescriptionInput: The input schema for the flow.
  * - GeneratePartDescriptionOutput: The output schema for the flow.
  */
-
 import {z} from 'zod';
 import {ai} from '../genkit';
 
@@ -35,22 +33,30 @@ const generatePartDescriptionFlow = ai.defineFlow(
   },
   async ({partName, partCategory, partFeatures}) => {
     const llmResponse = await ai.generate({
-      prompt: `Generate a compelling, one-paragraph product description for an RO system part.
-        The description should be concise, professional, and highlight the key benefits.
+      prompt: `You are a product marketing expert for an e-commerce store that sells Reverse Osmosis (RO) parts.
+Your task is to write a concise, compelling, and SEO-friendly product description.
 
-        Part Details:
-        - Name: ${partName}
-        - Category: ${partCategory}
-        - Key Features: ${partFeatures}
+Guidelines:
+1.  **Start Strong**: Begin with a clear statement of what the product is.
+2.  **Highlight Benefits**: Focus on how the features benefit the customer (e.g., "ensuring pure water" instead of just "high rejection rate").
+3.  **Incorporate Keywords**: Naturally include the part name, category, and key features.
+4.  **Keep it Concise**: Aim for 1-2 sentences.
+5.  **Output**: Respond with only the generated description text.
 
-        Description:`,
+Part Details:
+- Name: ${partName}
+- Category: ${partCategory}
+- Features: ${partFeatures}
+
+Description:
+`,
       config: {
-        temperature: 0.5,
+        temperature: 0.7,
       },
     });
 
     return {
-      description: llmResponse.text,
+      description: llmResponse.text.trim(),
     };
   }
 );
