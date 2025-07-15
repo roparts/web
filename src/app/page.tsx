@@ -16,11 +16,14 @@ import { getSearchSuggestion } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 const SEARCH_HISTORY_KEY = 'ro-search-history';
 
 export default function Home() {
+  const { translations, language, isLanguageSelected } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -121,7 +124,7 @@ export default function Home() {
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
-      recognition.lang = 'en-US';
+      recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
       recognition.interimResults = false;
 
       recognition.onstart = () => {
@@ -146,7 +149,7 @@ export default function Home() {
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
@@ -175,6 +178,10 @@ export default function Home() {
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
   const showSuggestions = suggestions.length > 0 || isSuggestionLoading;
 
+  if (!isLanguageSelected) {
+    return <LanguageSelector />;
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header 
@@ -186,10 +193,10 @@ export default function Home() {
         <section className="container mx-auto px-4 py-8 sm:py-12">
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-headline text-primary tracking-tighter">
-              Ultimate RO Parts Collection
+              {translations.home.title}
             </h1>
             <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">
-              Find everything you need for your water purification system. High-quality, reliable, and ready to ship.
+              {translations.home.subtitle}
             </p>
           </div>
 
@@ -200,7 +207,7 @@ export default function Home() {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Search for parts by name or voice..."
+                    placeholder={translations.home.searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsInputFocused(true)}
@@ -226,7 +233,7 @@ export default function Home() {
                       {showSuggestions ? (
                         <>
                           {isSuggestionLoading ? (
-                            <div className="p-3 text-sm text-muted-foreground">Searching...</div>
+                            <div className="p-3 text-sm text-muted-foreground">{translations.home.searching}</div>
                           ) : (
                             <ul className="py-1">
                               {suggestions.map((suggestion, index) => (
@@ -246,8 +253,8 @@ export default function Home() {
                       ) : showHistory ? (
                         <div>
                            <div className="px-3 py-2 flex justify-between items-center">
-                              <span className="text-sm font-semibold">Recent Searches</span>
-                              <button onClick={clearSearchHistory} className="text-xs text-primary hover:underline">Clear</button>
+                              <span className="text-sm font-semibold">{translations.home.recentSearches}</span>
+                              <button onClick={clearSearchHistory} className="text-xs text-primary hover:underline">{translations.home.clear}</button>
                            </div>
                            <ul className="py-1">
                             {searchHistory.map((item, index) => (
@@ -269,15 +276,15 @@ export default function Home() {
               </div>
               <Select onValueChange={(value) => setSortOption(value as SortOption)} defaultValue="default">
                 <SelectTrigger className="w-full sm:w-[200px] text-base">
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder={translations.home.sortBy} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                  <SelectItem value="name-asc">Name: A-Z</SelectItem>
-                  <SelectItem value="name-desc">Name: Z-A</SelectItem>
-                  <SelectItem value="discount-desc">Biggest Discount</SelectItem>
+                  <SelectItem value="default">{translations.home.sortOptions.default}</SelectItem>
+                  <SelectItem value="price-asc">{translations.home.sortOptions.priceAsc}</SelectItem>
+                  <SelectItem value="price-desc">{translations.home.sortOptions.priceDesc}</SelectItem>
+                  <SelectItem value="name-asc">{translations.home.sortOptions.nameAsc}</SelectItem>
+                  <SelectItem value="name-desc">{translations.home.sortOptions.nameDesc}</SelectItem>
+                  <SelectItem value="discount-desc">{translations.home.sortOptions.discountDesc}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -303,8 +310,8 @@ export default function Home() {
             </div>
           ) : (
              <div className="text-center py-16">
-              <h2 className="text-2xl font-headline font-semibold">No Parts Found</h2>
-              <p className="mt-2 text-muted-foreground">Try adjusting your search or category filters.</p>
+              <h2 className="text-2xl font-headline font-semibold">{translations.home.noPartsFound}</h2>
+              <p className="mt-2 text-muted-foreground">{translations.home.noPartsHint}</p>
             </div>
           )}
 
@@ -313,12 +320,14 @@ export default function Home() {
       </main>
       <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
         <div className="container mx-auto text-center text-sm">
-           <p>&copy; {new Date().getFullYear()} RoParts Hub. All Rights Reserved.</p>
+           <p>&copy; {new Date().getFullYear()} RoParts Hub. {translations.footer.rightsReserved}</p>
             <p className="mt-2">
-              <Link href="/rajababuadmin" className="hover:text-primary transition-colors">Admin Panel</Link>
+              <Link href="/rajababuadmin" className="hover:text-primary transition-colors">{translations.footer.adminPanel}</Link>
             </p>
         </div>
       </footer>
     </div>
   );
 }
+
+    

@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { CartProvider } from '@/context/CartContext';
 import { Toaster } from "@/components/ui/toaster"
+import { LanguageProvider } from '@/context/LanguageContext';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -39,11 +40,15 @@ export default function RootLayout({
           fontHeadline.variable
         )}
       >
-        <CartProvider>
-          {children}
-        </CartProvider>
-        <Toaster />
+        <LanguageProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );
 }
+
+    

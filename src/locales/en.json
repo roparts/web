@@ -1,0 +1,37 @@
+
+{
+  "home": {
+    "title": "Ultimate RO Parts Collection",
+    "subtitle": "Find everything you need for your water purification system. High-quality, reliable, and ready to ship.",
+    "searchPlaceholder": "Search for parts by name or voice...",
+    "sortBy": "Sort by",
+    "sortOptions": {
+      "default": "Default",
+      "priceAsc": "Price: Low to High",
+      "priceDesc": "Price: High to Low",
+      "nameAsc": "Name: A-Z",
+      "nameDesc": "Name: Z-A",
+      "discountDesc": "Biggest Discount"
+    },
+    "noPartsFound": "No Parts Found",
+    "noPartsHint": "Try adjusting your search or category filters.",
+    "searching": "Searching...",
+    "recentSearches": "Recent Searches",
+    "clear": "Clear"
+  },
+  "cart": {
+    "title": "Your Cart",
+    "total": "Total",
+    "getQuote": "Get Quote on WhatsApp",
+    "clearCart": "Clear Cart",
+    "emptyTitle": "Your cart is empty",
+    "emptySubtitle": "Add some parts to get started!",
+    "continueShopping": "Continue Shopping"
+  },
+  "footer": {
+    "rightsReserved": "All Rights Reserved.",
+    "adminPanel": "Admin Panel"
+  }
+}
+
+    

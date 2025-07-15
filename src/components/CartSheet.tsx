@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, X } from "lucide-react";
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface CartSheetProps {
   open: boolean;
@@ -20,6 +21,7 @@ const RFQ_COUNTER_KEY = 'roparts-rfq-counter';
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
+  const { translations } = useLanguage();
 
   const getNextRfqNumber = () => {
     let currentCount = 10001; // Starting number
@@ -73,7 +75,7 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col w-full sm:max-w-lg">
         <SheetHeader className="pr-10">
-          <SheetTitle className="font-headline text-2xl">Your Cart ({itemCount})</SheetTitle>
+          <SheetTitle className="font-headline text-2xl">{translations.cart.title} ({itemCount})</SheetTitle>
         </SheetHeader>
         <Separator />
         {cartItems.length > 0 ? (
@@ -117,24 +119,24 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
             <SheetFooter className="mt-4">
               <div className="w-full space-y-4">
                 <div className="flex justify-between items-center font-bold text-lg">
-                  <span>Total</span>
+                  <span>{translations.cart.total}</span>
                   <span>₹{totalPrice.toLocaleString('en-IN')}</span>
                 </div>
                  <Button onClick={handleWhatsAppOrder} className="w-full bg-green-500 hover:bg-green-600 text-white">
-                  Get Quote on WhatsApp
+                  {translations.cart.getQuote}
                 </Button>
                 <Button variant="outline" className="w-full" onClick={clearCart}>
-                  Clear Cart
+                  {translations.cart.clearCart}
                 </Button>
               </div>
             </SheetFooter>
           </>
         ) : (
           <div className="flex-grow flex flex-col items-center justify-center gap-4 text-center">
-            <h3 className="font-headline text-xl">Your cart is empty</h3>
-            <p className="text-muted-foreground">Add some parts to get started!</p>
+            <h3 className="font-headline text-xl">{translations.cart.emptyTitle}</h3>
+            <p className="text-muted-foreground">{translations.cart.emptySubtitle}</p>
             <SheetClose asChild>
-              <Button>Continue Shopping</Button>
+              <Button>{translations.cart.continueShopping}</Button>
             </SheetClose>
           </div>
         )}
@@ -142,3 +144,5 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
     </Sheet>
   );
 }
+
+    
