@@ -24,6 +24,8 @@ export async function generateDescriptionAction(input: {
 export async function getRelatedParts(part: Part) {
   try {
     const result = await suggestRelatedParts({
+      partId: part.id,
+      partCategory: part.category,
       partDescription: `${part.name}: ${part.description}`,
     });
     return result.relatedParts;

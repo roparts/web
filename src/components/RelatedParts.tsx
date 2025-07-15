@@ -8,20 +8,11 @@ import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { PartCard } from './PartCard';
 import { useLanguage } from '@/context/LanguageContext';
+import { getRelatedParts } from '@/app/actions';
 
 interface RelatedPartsProps {
   currentPart?: Part;
 }
-
-// Simple shuffle function
-const shuffleArray = <T>(array: T[]): T[] => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-};
 
 export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const { lastAddedItem } = useCart();
@@ -29,21 +20,41 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const { translations } = useLanguage();
 
-  const partToFetchFor = currentPart || lastAddedItem || partsData[partsData.length - 1];
+  const partToFetchFor = currentPart || lastAddedItem;
 
   useEffect(() => {
-    setIsLoading(true);
+    let isMounted = true;
     
-    // Find related parts by category
-    const relatedByCategory = partsData.filter(p => 
-      p.category === partToFetchFor.category && p.id !== partToFetchFor.id
-    );
+    async function fetchSuggestions() {
+      if (!partToFetchFor) {
+        setIsLoading(false);
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        const suggestedNames = await getRelatedParts(partToFetchFor);
+        if (isMounted) {
+          const suggestedParts = partsData.filter(p => suggestedNames.includes(p.name));
+          setSuggestions(suggestedParts);
+        }
+      } catch (error) {
+        console.error("Failed to fetch related parts:", error);
+        if (isMounted) {
+          setSuggestions([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
 
-    // Shuffle and take the first 3
-    const shuffledSuggestions = shuffleArray(relatedByCategory).slice(0, 3);
+    fetchSuggestions();
     
-    setSuggestions(shuffledSuggestions);
-    setIsLoading(false);
+    return () => {
+      isMounted = false;
+    }
   }, [partToFetchFor]);
 
   if (isLoading) {
