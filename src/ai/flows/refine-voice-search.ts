@@ -43,27 +43,29 @@ const refineVoiceSearchFlow = ai.defineFlow(
   },
   async ({transcript}) => {
     const llmResponse = await ai.generate({
-      prompt: `You are a search entity mapping assistant for an RO (Reverse Osmosis) parts store.
-Your ONLY task is to find the single best matching keyword from the provided list for the user's voice transcript.
+      prompt: `You are a search term translator and entity mapper for an RO (Reverse Osmosis) parts store.
+Your ONLY task is to identify the product or category in the user's voice transcript and return its corresponding ENGLISH name from the provided list.
 
 STRICT RULES:
-1.  Analyze the user's transcript (which may be in English, Hindi, or Hinglish) for the most likely product or category they are asking for.
-2.  Find the single best, most relevant keyword from the "AVAILABLE KEYWORDS" list.
-3.  Consider common misspellings, mispronunciations, and transliterations (e.g., "pamp" -> "Pump", "filtr" -> "Filter", "मेंबराने" -> "मेम्ब्रेन").
-4.  If a clear match is found, your response MUST be the exact keyword from the list.
-5.  If you cannot find a clear match, return the original transcript. Do not guess or make up a keyword.
-6.  Your output MUST ONLY be the single matched keyword or the original transcript. No other text.
+1. Analyze the user's transcript (which may be in English, Hindi, or Hinglish).
+2. Find the single best, most relevant keyword from the "AVAILABLE KEYWORDS" list that matches the user's intent.
+3. YOUR RESPONSE MUST BE THE EXACT **ENGLISH** NAME for the matched entity. Do not return the Hindi name.
+4. Consider common misspellings, mispronunciations, and transliterations.
+5. If a clear match is found, return the corresponding English keyword.
+6. If you cannot find a clear match, return the original transcript.
+7. Your output MUST ONLY be the single matched English keyword or the original transcript. No other text.
 
-AVAILABLE KEYWORDS:
+AVAILABLE KEYWORDS (includes both English and Hindi terms for your reference):
 [${allKeywords.join(', ')}]
 
 EXAMPLES:
 - Transcript: "I need a new water pump" -> Refined Query: "Pump (Booster Pump)"
 - Transcript: "show me filters for my RO" -> Refined Query: "Pre-Filters / Sediment"
 - Transcript: "membrane dikhao" -> Refined Query: "RO Membranes"
-- Transcript: "मेंबराने" -> Refined Query: "मेम्ब्रेन"
+- Transcript: "मेंबराने" -> Refined Query: "RO Membranes"
 - Transcript: "75 gpd wala vontron" -> Refined Query: "75 GPD RO Membrane - Vontron Brand"
 - Transcript: "aqua pure" -> Refined Query: "aqua pure" (No clear match from list)
+- Transcript: "solenoid valv" -> Refined Query: "Solenoid Valve"
 
 Transcript to process: "${transcript}"
 
