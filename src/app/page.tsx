@@ -207,7 +207,7 @@ export default function Home() {
 
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
-    recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+    recognition.lang = 'en-US'; // Always listen for English
     recognition.interimResults = false;
 
     recognition.onstart = () => setIsRecording(true);
@@ -228,7 +228,7 @@ export default function Home() {
     recognitionRef.current = recognition;
 
     return () => recognitionRef.current?.abort();
-  }, [language, handleSearchSubmit]);
+  }, [handleSearchSubmit]);
 
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
