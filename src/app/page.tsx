@@ -8,8 +8,7 @@ import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
 import { partsData } from '@/lib/parts-data';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Mic, History, ListFilter, Filter, Home as HomeIcon, Building, Wrench, Package, Star } from 'lucide-react';
+import { Search, Mic, History, ListFilter, Filter } from 'lucide-react';
 import { getSearchSuggestion, getRefinedVoiceSearch } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
@@ -18,8 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
 import type { Part, MainCategory } from '@/lib/types';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 
@@ -31,14 +29,6 @@ const MAIN_CATEGORIES: MainCategory[] = [
   'Complete RO Systems',
   'Service Kits & Combo Packs',
 ];
-
-const categoryIcons = {
-  'Domestic RO Parts': HomeIcon,
-  'Commercial RO Parts': Building,
-  'RO Accessories & Tools': Wrench,
-  'Complete RO Systems': Package,
-  'Service Kits & Combo Packs': Star,
-};
 
 export default function Home() {
   const { translations, language, isLanguageSelected } = useLanguage();
@@ -130,6 +120,14 @@ export default function Home() {
       setSelectedSubcategory('All');
     }
   }, [updateSearchHistory]);
+
+  const handleMainCategoryChange = (cat: MainCategory) => {
+    setSelectedMainCategory(cat);
+    setSelectedSubcategory('All');
+    setSelectedBrand('All');
+    setActiveSearch('');
+    setSearchQuery('');
+  }
   
   const subcategories = useMemo(() => {
     const relevantParts = partsData.filter(part => part.mainCategory === selectedMainCategory);
@@ -144,13 +142,15 @@ export default function Home() {
   }, [selectedMainCategory]);
 
   const filteredAndSortedParts = useMemo(() => {
-    let partsToFilter: Part[] = partsData.filter(part => part.mainCategory === selectedMainCategory);
+    let partsToFilter: Part[] = partsData;
 
     if (activeSearch.trim()) {
-      partsToFilter = fuse.search(activeSearch).map(result => result.item).filter(part => part.mainCategory === selectedMainCategory);
+      partsToFilter = fuse.search(activeSearch).map(result => result.item);
     }
     
-    const filteredBySubcategory = partsToFilter.filter(part => {
+    const filteredByMainCategory = partsToFilter.filter(part => part.mainCategory === selectedMainCategory);
+
+    const filteredBySubcategory = filteredByMainCategory.filter(part => {
       if (selectedSubcategory === 'All') return true;
       return part.subcategory === selectedSubcategory;
     });
@@ -188,7 +188,7 @@ export default function Home() {
       default:
         return filteredByBrand;
     }
-  }, [activeSearch, selectedSubcategory, selectedBrand, sortOption, language, fuse, selectedMainCategory]);
+  }, [activeSearch, selectedMainCategory, selectedSubcategory, selectedBrand, sortOption, language, fuse]);
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -256,14 +256,6 @@ export default function Home() {
     }
   };
 
-  const handleMainCategoryChange = (cat: MainCategory) => {
-    setSelectedMainCategory(cat);
-    setSelectedSubcategory('All');
-    setSelectedBrand('All');
-    setActiveSearch('');
-    setSearchQuery('');
-  }
-  
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
   const showSuggestions = isInputFocused && searchQuery.length > 0 && (suggestions.length > 0 || isSuggestionLoading);
 
@@ -271,8 +263,6 @@ export default function Home() {
     return <LanguageSelector />;
   }
   
-  const CurrentCategoryIcon = categoryIcons[selectedMainCategory];
-
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -288,23 +278,6 @@ export default function Home() {
           </div>
 
           <div className="mb-8 space-y-4">
-             <Tabs value={selectedMainCategory} onValueChange={(v) => handleMainCategoryChange(v as MainCategory)} className="w-full">
-              <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList className="h-12 justify-start">
-                  {MAIN_CATEGORIES.map(cat => {
-                    const Icon = categoryIcons[cat];
-                    return (
-                      <TabsTrigger key={cat} value={cat} className="text-sm sm:text-base gap-2 px-3 sm:px-4">
-                        <Icon className="h-5 w-5"/>
-                        <span className="hidden sm:inline">{cat}</span>
-                      </TabsTrigger>
-                    );
-                   })}
-                </TabsList>
-                <ScrollBar orientation="horizontal" className="mt-2" />
-              </ScrollArea>
-            </Tabs>
-
             <div className="relative flex-grow z-30">
               <form onSubmit={(e) => handleSearchSubmit(searchQuery, e)} className="relative flex items-center">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -375,84 +348,74 @@ export default function Home() {
                   </div>
                 )}
             </div>
-            {/* Filter and Sort controls */}
-            <div className="flex gap-4 justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex-shrink-0">
-                    <Filter className="h-4 w-4 md:mr-2" />
-                    <span className="hidden md:inline">{translations.home.filterBy}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>{translations.categories.title}</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
-                        {subcategories.map((category) => (
-                          <DropdownMenuRadioItem key={category} value={category}>
-                            {category === 'All' ? translations.categories.all : category}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>{translations.brands.title}</DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuRadioGroup value={selectedBrand} onValueChange={setSelectedBrand}>
-                        {brands.map((brand) => (
-                          <DropdownMenuRadioItem key={brand} value={brand}>
-                             {brand === 'All' ? translations.brands.all : brand}
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                </DropdownMenuContent>
-              </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex-shrink-0">
-                    <ListFilter className="h-4 w-4 md:mr-2" />
-                    <span className="hidden md:inline">{translations.home.sortBy}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuRadioGroup value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
-                      <DropdownMenuRadioItem value="default">{translations.home.sortOptions.default}</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="price-asc">{translations.home.sortOptions.priceAsc}</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="price-desc">{translations.home.sortOptions.priceDesc}</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="name-asc">{translations.home.sortOptions.nameAsc}</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="name-desc">{translations.home.sortOptions.nameDesc}</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="discount-desc">{translations.home.sortOptions.discountDesc}</DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-             {/* Sub-category tabs for larger screens */}
-            <div className="hidden md:block">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-2">
-                <CurrentCategoryIcon className="h-5 w-5 text-primary" />
-                {selectedMainCategory}
-              </h2>
-              <ScrollArea className="w-full whitespace-nowrap">
-                  <Tabs
-                    value={selectedSubcategory}
-                    onValueChange={setSelectedSubcategory}
-                    className="w-full"
-                  >
-                    <TabsList className="h-auto justify-start">
-                      {subcategories.map((category) => (
-                        <TabsTrigger key={category} value={category} className="flex-shrink-0">
-                          {category === 'All' ? translations.categories.all : category}
-                        </TabsTrigger>
+            <div className="flex gap-4 justify-between items-center">
+              <h2 className="text-lg font-semibold text-primary">{selectedMainCategory}</h2>
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex-shrink-0">
+                      <Filter className="h-4 w-4 md:mr-2" />
+                      <span className="hidden md:inline">{translations.home.filterBy}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Main Category</DropdownMenuLabel>
+                    <DropdownMenuRadioGroup value={selectedMainCategory} onValueChange={(v) => handleMainCategoryChange(v as MainCategory)}>
+                      {MAIN_CATEGORIES.map((category) => (
+                        <DropdownMenuRadioItem key={category} value={category}>
+                          {category}
+                        </DropdownMenuRadioItem>
                       ))}
-                    </TabsList>
-                  </Tabs>
-                  <ScrollBar orientation="horizontal" className="mt-2" />
-              </ScrollArea>
+                    </DropdownMenuRadioGroup>
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>{translations.categories.title}</DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuRadioGroup value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
+                          {subcategories.map((category) => (
+                            <DropdownMenuRadioItem key={category} value={category}>
+                              {category === 'All' ? translations.categories.all : category}
+                            </DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>{translations.brands.title}</DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        <DropdownMenuRadioGroup value={selectedBrand} onValueChange={setSelectedBrand}>
+                          {brands.map((brand) => (
+                            <DropdownMenuRadioItem key={brand} value={brand}>
+                               {brand === 'All' ? translations.brands.all : brand}
+                            </DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex-shrink-0">
+                      <ListFilter className="h-4 w-4 md:mr-2" />
+                      <span className="hidden md:inline">{translations.home.sortBy}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+                        <DropdownMenuRadioItem value="default">{translations.home.sortOptions.default}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="price-asc">{translations.home.sortOptions.priceAsc}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="price-desc">{translations.home.sortOptions.priceDesc}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="name-asc">{translations.home.sortOptions.nameAsc}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="name-desc">{translations.home.sortOptions.nameDesc}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="discount-desc">{translations.home.sortOptions.discountDesc}</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
           
