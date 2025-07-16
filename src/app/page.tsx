@@ -124,7 +124,6 @@ export default function Home() {
       setSelectedBrand('All');
     } else {
       setActiveSearch('');
-      setSelectedSubcategory('All');
     }
   }, [updateSearchHistory]);
 
@@ -243,6 +242,9 @@ export default function Home() {
       setIsSuggestionLoading(false);
     } else {
       setSuggestions([]);
+      if (debouncedSearchQuery.length <=1) {
+        setActiveSearch('');
+      }
     }
   }, [debouncedSearchQuery, fuse, language]);
 
