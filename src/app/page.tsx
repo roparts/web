@@ -265,7 +265,10 @@ export default function Home() {
   
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Header 
+        selectedMainCategory={selectedMainCategory}
+        onMainCategoryChange={handleMainCategoryChange}
+      />
       <main className="flex-1">
         <section className="container mx-auto px-4 py-8 sm:py-12">
           <div className="text-center mb-8 sm:mb-12">

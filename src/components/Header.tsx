@@ -14,9 +14,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MobileNavSheet } from './MobileNavSheet';
+import type { MainCategory } from '@/lib/types';
 
+interface HeaderProps {
+  selectedMainCategory: MainCategory;
+  onMainCategoryChange: (category: MainCategory) => void;
+}
 
-export function Header() {
+export function Header({ selectedMainCategory, onMainCategoryChange }: HeaderProps) {
   const { itemCount, setSheetOpen } = useCart();
   const { language, setLanguage, translations } = useLanguage();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -74,7 +79,12 @@ export function Header() {
           </div>
         </div>
       </header>
-      <MobileNavSheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen} />
+      <MobileNavSheet 
+        open={isMobileNavOpen} 
+        onOpenChange={setIsMobileNavOpen}
+        selectedMainCategory={selectedMainCategory}
+        onMainCategoryChange={onMainCategoryChange}
+       />
     </>
   );
 }

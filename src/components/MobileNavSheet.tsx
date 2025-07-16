@@ -10,6 +10,8 @@ import type { MainCategory } from "@/lib/types";
 interface MobileNavSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  selectedMainCategory: MainCategory;
+  onMainCategoryChange: (category: MainCategory) => void;
 }
 
 const MAIN_CATEGORIES: MainCategory[] = [
@@ -22,14 +24,14 @@ const MAIN_CATEGORIES: MainCategory[] = [
 
 export function MobileNavSheet({ 
   open, 
-  onOpenChange, 
+  onOpenChange,
+  selectedMainCategory,
+  onMainCategoryChange
 }: MobileNavSheetProps) {
   const { translations } = useLanguage();
 
-  const handleCategoryClick = (category: string) => {
-    // In a real app, this would likely navigate to a category page
-    // For now, it just closes the sheet.
-    console.log("Navigating to:", category);
+  const handleCategoryClick = (category: MainCategory) => {
+    onMainCategoryChange(category);
     onOpenChange(false);
   }
 
@@ -44,7 +46,7 @@ export function MobileNavSheet({
             {MAIN_CATEGORIES.map(category => (
               <Button
                 key={category}
-                variant={'ghost'}
+                variant={selectedMainCategory === category ? 'default' : 'ghost'}
                 className="w-full justify-start text-base"
                 onClick={() => handleCategoryClick(category)}
               >
