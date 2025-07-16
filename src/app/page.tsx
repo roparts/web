@@ -235,13 +235,16 @@ export default function Home() {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
       const results = fuse.search(debouncedSearchQuery).slice(0, 5);
-      const uniqueSuggestions = Array.from(new Set(results.map(r => r.item.name)));
+      const uniqueSuggestions = Array.from(new Set(results.map(r => {
+        const item = r.item;
+        return (language === 'hi' && item.name_hi) ? item.name_hi : item.name;
+      })));
       setSuggestions(uniqueSuggestions);
       setIsSuggestionLoading(false);
     } else {
       setSuggestions([]);
     }
-  }, [debouncedSearchQuery, fuse]);
+  }, [debouncedSearchQuery, fuse, language]);
 
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
@@ -367,7 +370,7 @@ export default function Home() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Main Category</DropdownMenuLabel>
+                    <DropdownMenuLabel>{translations.categories.title}</DropdownMenuLabel>
                     <DropdownMenuRadioGroup value={selectedMainCategory} onValueChange={(v) => handleMainCategoryChange(v as MainCategory)}>
                       {MAIN_CATEGORIES.map((category) => (
                         <DropdownMenuRadioItem key={category} value={category}>
@@ -378,7 +381,7 @@ export default function Home() {
                     <DropdownMenuSeparator />
 
                     <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>{translations.categories.title}</DropdownMenuSubTrigger>
+                      <DropdownMenuSubTrigger>{translations.categories.all}</DropdownMenuSubTrigger>
                       <DropdownMenuSubContent>
                         <DropdownMenuRadioGroup value={selectedSubcategory} onValueChange={setSelectedSubcategory}>
                           {subcategories.map((category) => (
