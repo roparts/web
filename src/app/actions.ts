@@ -36,12 +36,14 @@ export async function getRelatedParts(part: Part) {
 }
 
 export async function getSearchSuggestion(query: string) {
+  // This function is deprecated in favor of client-side Fuse.js search.
   if (!query || query.trim().length < 2) {
     return [];
   }
   try {
-    const result = await suggestSearchTerm({ query });
-    return result.suggestions;
+    // const result = await suggestSearchTerm({ query });
+    // return result.suggestions;
+    return [];
   } catch (error) {
     console.error("Error getting search suggestion:", error);
     return [];

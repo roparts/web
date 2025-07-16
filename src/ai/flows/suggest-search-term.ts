@@ -2,6 +2,7 @@
 'use server';
 /**
  * @fileOverview A Genkit flow that provides intelligent search suggestions.
+ * THIS FLOW IS DEPRECATED in favor of client-side Fuse.js search for better performance.
  *
  * - suggestSearchTerm - A function that suggests search terms based on a user's query.
  * - SuggestSearchTermInput - The input type for the suggestSearchTerm function.
@@ -95,7 +96,7 @@ const suggestSearchTermFlow = ai.defineFlow(
 export async function suggestSearchTerm(
   input: SuggestSearchTermInput
 ): Promise<SuggestSearchTermOutput> {
-  return await suggestSearchTermFlow(input);
+  // This flow is deprecated.
+  // return await suggestSearchTermFlow(input);
+  return { suggestions: [] };
 }
-
-    

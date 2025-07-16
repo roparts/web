@@ -9,7 +9,7 @@ import { RelatedParts } from '@/components/RelatedParts';
 import { partsData } from '@/lib/parts-data';
 import { Input } from '@/components/ui/input';
 import { Search, Mic, History, ListFilter, Filter } from 'lucide-react';
-import { getSearchSuggestion, getRefinedVoiceSearch } from './actions';
+import { getRefinedVoiceSearch } from './actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -51,9 +51,16 @@ export default function Home() {
 
   const fuse = useMemo(() => {
     const options = {
-      keys: ['name', 'name_hi', 'subcategory', 'brand', 'mainCategory'],
+      keys: [
+        { name: 'name', weight: 3 }, 
+        { name: 'name_hi', weight: 3 },
+        { name: 'subcategory', weight: 2 },
+        { name: 'brand', weight: 1.5 },
+        'id'
+      ],
       includeScore: true,
       threshold: 0.4,
+      ignoreLocation: true,
     };
     return new Fuse(partsData, options);
   }, []);
@@ -227,17 +234,14 @@ export default function Home() {
   useEffect(() => {
     if (debouncedSearchQuery && debouncedSearchQuery.length > 1) {
       setIsSuggestionLoading(true);
-      getSearchSuggestion(debouncedSearchQuery)
-        .then(setSuggestions)
-        .catch(err => {
-          console.error("Error fetching suggestions:", err);
-          setSuggestions([]);
-        })
-        .finally(() => setIsSuggestionLoading(false));
+      const results = fuse.search(debouncedSearchQuery).slice(0, 5);
+      const uniqueSuggestions = Array.from(new Set(results.map(r => r.item.name)));
+      setSuggestions(uniqueSuggestions);
+      setIsSuggestionLoading(false);
     } else {
       setSuggestions([]);
     }
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, fuse]);
 
   const handleSuggestionClick = (term: string) => {
     setSearchQuery(term);
