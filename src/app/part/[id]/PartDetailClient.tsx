@@ -2,10 +2,11 @@
 "use client";
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { RelatedParts } from '@/components/RelatedParts';
 import type { Part } from '@/lib/types';
@@ -16,6 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
 export function PartDetailClient({ part }: { part: Part }) {
   const { addToCart } = useCart();
   const { translations, language } = useLanguage();
+  const router = useRouter();
 
   const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
   const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
@@ -33,6 +35,11 @@ export function PartDetailClient({ part }: { part: Part }) {
       <Header />
       <main className="flex-1 py-8 sm:py-12">
         <div className="container mx-auto px-4">
+          <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {translations.partDetails.backToProducts}
+          </Button>
+
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             <div className="relative">
               <div className="aspect-square overflow-hidden rounded-lg border">

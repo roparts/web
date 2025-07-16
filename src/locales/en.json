@@ -53,7 +53,8 @@
     "addToCart": "Add to Cart",
     "productDescription": "Product Description",
     "relatedTitle": "You Might Also Like",
-    "noSuggestions": "No suggestions available right now."
+    "noSuggestions": "No suggestions available right now.",
+    "backToProducts": "Back to products"
   },
   "partCard": {
     "addToCart": "Add to Cart",
@@ -111,7 +112,14 @@
   },
   "categories": {
     "title": "Category",
-    "all": "All Categories"
+    "all": "All Categories",
+    "main": {
+      "Domestic RO Parts": "Domestic RO Parts",
+      "Commercial RO Parts": "Commercial RO Parts",
+      "RO Accessories & Tools": "RO Accessories & Tools",
+      "Complete RO Systems": "Complete RO Systems",
+      "Service Kits & Combo Packs": "Service Kits & Combo Packs"
+    }
   },
    "brands": {
     "title": "Brand",

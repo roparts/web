@@ -53,7 +53,8 @@
     "addToCart": "कार्ट में डालें",
     "productDescription": "उत्पाद विवरण",
     "relatedTitle": "आपको यह भी पसंद आ सकता है",
-    "noSuggestions": "अभी कोई सुझाव उपलब्ध नहीं है।"
+    "noSuggestions": "अभी कोई सुझाव उपलब्ध नहीं है।",
+    "backToProducts": "उत्पादों पर वापस"
   },
   "partCard": {
     "addToCart": "कार्ट में डालें",
