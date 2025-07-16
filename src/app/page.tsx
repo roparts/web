@@ -18,6 +18,7 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import Fuse from 'fuse.js';
 import type { Part, MainCategory } from '@/lib/types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' | 'discount-desc';
 
@@ -31,7 +32,7 @@ const MAIN_CATEGORIES: MainCategory[] = [
 ];
 
 export default function Home() {
-  const { translations, language, isLanguageSelected } = useLanguage();
+  const { translations, language, isLanguageSelected, isLoading } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory>('Domestic RO Parts');
@@ -62,7 +63,14 @@ export default function Home() {
       threshold: 0.4,
       ignoreLocation: true,
     };
-    return new Fuse(partsData, options);
+    const allParts = partsData.map(part => {
+      return {
+        ...part,
+        name: part.name,
+        name_hi: part.name_hi || '',
+      };
+    });
+    return new Fuse(allParts, options);
   }, []);
 
   useEffect(() => {
@@ -207,7 +215,7 @@ export default function Home() {
 
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
-    recognition.lang = 'en-US'; // Always listen for English
+    recognition.lang = 'en-US';
     recognition.interimResults = false;
 
     recognition.onstart = () => setIsRecording(true);
@@ -267,6 +275,18 @@ export default function Home() {
 
   const showHistory = isInputFocused && !searchQuery && searchHistory.length > 0;
   const showSuggestions = isInputFocused && searchQuery.length > 0 && (suggestions.length > 0 || isSuggestionLoading);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="space-y-4 w-full max-w-sm">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   if (!isLanguageSelected) {
     return <LanguageSelector />;
@@ -363,7 +383,7 @@ export default function Home() {
 
             <div className="flex gap-4 justify-between items-center">
               <h2 className="text-lg font-semibold text-primary">
-                 {language === 'hi' ? translations.categories.main[selectedMainCategory] : selectedMainCategory}
+                 {language === 'hi' && selectedMainCategory ? translations.categories.main[selectedMainCategory] : selectedMainCategory}
               </h2>
               <div className="flex gap-2">
                 <DropdownMenu>

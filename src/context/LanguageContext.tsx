@@ -14,6 +14,7 @@ interface LanguageContextType {
   setLanguage: (language: Language) => void;
   translations: typeof en;
   isLanguageSelected: boolean;
+  isLoading: boolean;
 }
 
 const LANGUAGE_STORAGE_KEY = 'ro-language';
@@ -23,6 +24,7 @@ const isServer = typeof window === 'undefined';
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>('en');
   const [isLanguageSelected, setIsLanguageSelected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (isServer) return;
@@ -34,6 +36,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         }
     } catch (error) {
         console.error("Could not access localStorage for language setting:", error);
+    } finally {
+        setIsLoading(false);
     }
   }, []);
 
@@ -56,6 +60,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     setLanguage,
     translations: translations[language],
     isLanguageSelected,
+    isLoading
   };
 
   return (
