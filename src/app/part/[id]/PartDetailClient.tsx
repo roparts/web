@@ -114,5 +114,3 @@ export function PartDetailClient({ part }: { part: Part }) {
     </div>
   );
 }
-
-    

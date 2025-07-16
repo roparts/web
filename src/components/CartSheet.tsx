@@ -144,5 +144,3 @@ Total: ₹${totalPrice.toLocaleString('en-IN')}
     </Sheet>
   );
 }
-
-    

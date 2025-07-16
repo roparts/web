@@ -32,5 +32,3 @@ export interface Part {
 export interface CartItem extends Part {
   quantity: number;
 }
-
-    

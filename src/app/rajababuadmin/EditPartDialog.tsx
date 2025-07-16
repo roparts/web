@@ -336,5 +336,3 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     </Dialog>
   );
 }
-
-    

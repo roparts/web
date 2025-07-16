@@ -82,5 +82,3 @@ export function PartCard({ part }: PartCardProps) {
     </Card>
   );
 }
-
-    
