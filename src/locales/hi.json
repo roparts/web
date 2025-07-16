@@ -111,7 +111,14 @@
   },
   "categories": {
     "title": "श्रेणी",
-    "all": "सभी श्रेणियाँ"
+    "all": "सभी श्रेणियाँ",
+    "main": {
+      "Domestic RO Parts": "घरेलू आरओ पार्ट्स",
+      "Commercial RO Parts": "वाणिज्यिक आरओ पार्ट्स",
+      "RO Accessories & Tools": "आरओ एक्सेसरीज और टूल्स",
+      "Complete RO Systems": "पूर्ण आरओ सिस्टम",
+      "Service Kits & Combo Packs": "सर्विस किट और कॉम्बो पैक"
+    }
   },
    "brands": {
     "title": "ब्रांड",

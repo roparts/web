@@ -362,7 +362,9 @@ export default function Home() {
             </div>
 
             <div className="flex gap-4 justify-between items-center">
-              <h2 className="text-lg font-semibold text-primary">{selectedMainCategory}</h2>
+              <h2 className="text-lg font-semibold text-primary">
+                 {language === 'hi' ? translations.categories.main[selectedMainCategory] : selectedMainCategory}
+              </h2>
               <div className="flex gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -376,7 +378,7 @@ export default function Home() {
                     <DropdownMenuRadioGroup value={selectedMainCategory} onValueChange={(v) => handleMainCategoryChange(v as MainCategory)}>
                       {MAIN_CATEGORIES.map((category) => (
                         <DropdownMenuRadioItem key={category} value={category}>
-                          {category}
+                           {language === 'hi' ? translations.categories.main[category] : category}
                         </DropdownMenuRadioItem>
                       ))}
                     </DropdownMenuRadioGroup>

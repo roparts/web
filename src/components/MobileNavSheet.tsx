@@ -28,7 +28,7 @@ export function MobileNavSheet({
   selectedMainCategory,
   onMainCategoryChange
 }: MobileNavSheetProps) {
-  const { translations } = useLanguage();
+  const { translations, language } = useLanguage();
 
   const handleCategoryClick = (category: MainCategory) => {
     onMainCategoryChange(category);
@@ -50,7 +50,7 @@ export function MobileNavSheet({
                 className="w-full justify-start text-base"
                 onClick={() => handleCategoryClick(category)}
               >
-                {category}
+                {language === 'hi' ? translations.categories.main[category] : category}
               </Button>
             ))}
           </div>
