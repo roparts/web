@@ -49,6 +49,8 @@ Examples:
 - Transcript (English): "I am looking for a aqua pure member" -> Refined Query: "AquaPure Membrane"
 - Transcript (Hindi): "मुझे एक पानी का पंप चाहिए" -> Refined Query: "water pump"
 - Transcript (Hindi): "80 gpd वाला मेंबराने" -> Refined Query: "80 gpd membrane"
+- Transcript (Hinglish): "membrane dikhao" -> Refined Query: "membrane"
+- Transcript (Hindi): "मेंबराने" -> Refined Query: "membrane"
 
 Transcript to process: "${transcript}"
 
