@@ -63,7 +63,7 @@ const detectSearchCategoryFlow = ai.defineFlow(
         EXAMPLES:
         - User Query: "membranes" -> Category: "RO Membranes"
         - User Query: "filtr" -> Category: "Pre-Filters / Sediment"
-        - User Query: "मेंबराने" -> Category: "RO Membranes"
+        - User Query: "मेम्ब्रेन" -> Category: "RO Membranes"
         - User Query: "पंप" -> Category: "Pump (Booster Pump)"
         - User Query: "aqua pure" -> Category: null
         - User Query: "solenoid" -> Category: "Solenoid Valve"

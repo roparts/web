@@ -64,7 +64,7 @@ const suggestSearchTermFlow = ai.defineFlow(
         - User Query: "filtr" -> Suggestions: ["Pre-Filters / Sediment", "Carbon Filters", "5 Micron Spun Filter"]
         - User Query: "meme" -> Suggestions: ["RO Membranes", "Vontron 80 GPD RO Membrane"]
         - User Query: "membr" -> Suggestions: ["RO Membranes", "Vontron 80 GPD RO Membrane"]
-        - User Query: "मेंबराने" -> Suggestions: ["मेम्ब्रेन", "Vontron 80 GPD RO Membrane"]
+        - User Query: "मेम्ब्रेन" -> Suggestions: ["RO Membranes", "Vontron 80 GPD RO Membrane"]
         - User Query: "valv" -> Suggestions: ["Solenoid Valve", "RO Solenoid Valve (SV)"]
         - User Query: "xyz" -> Suggestions: []
 

@@ -232,7 +232,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-MEM-016',
     name: '150 GPD RO Membrane - Domestic',
-    name_hi: '150 जीपीडी आरओ मेम्ब्रेन - घरेलू',
+    name_hi: '150 जीपीडी आरओ मेम्ब्रेन - डोमेस्टिक',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Membranes',
     brand: 'Generic',
@@ -247,7 +247,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-MEM-017',
     name: 'High TDS RO Membrane - 80 GPD',
-    name_hi: 'उच्च टीडीएस आरओ मेम्ब्रेन - 80 जीपीडी',
+    name_hi: 'हाई टीडीएस आरओ मेम्ब्रेन - 80 जीपीडी',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Membranes',
     brand: 'Generic',
@@ -262,7 +262,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-MEM-018',
     name: 'High TDS RO Membrane - 100 GPD',
-    name_hi: 'उच्च टीडीएस आरओ मेम्ब्रेन - 100 जीपीडी',
+    name_hi: 'हाई टीडीएस आरओ मेम्ब्रेन - 100 जीपीडी',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Membranes',
     brand: 'Generic',
@@ -277,7 +277,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-MEM-019',
     name: 'Low Pressure RO Membrane - 80 GPD',
-    name_hi: 'कम दबाव आरओ मेम्ब्रेन - 80 जीपीडी',
+    name_hi: 'लो प्रेशर आरओ मेम्ब्रेन - 80 जीपीडी',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Membranes',
     brand: 'Generic',
@@ -292,7 +292,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-MEM-020',
     name: 'Low Pressure RO Membrane - 100 GPD',
-    name_hi: 'कम दबाव आरओ मेम्ब्रेन - 100 जीपीडी',
+    name_hi: 'लो प्रेशर आरओ मेम्ब्रेन - 100 जीपीडी',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Membranes',
     brand: 'Generic',
@@ -349,7 +349,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-MEM-024',
     name: '125 GPD RO Membrane - Domestic',
-    name_hi: '125 जीपीडी आरओ मेम्ब्रेन - घरेलू',
+    name_hi: '125 जीपीडी आरओ मेम्ब्रेन - डोमेस्टिक',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Membranes',
     brand: 'Generic',
@@ -535,7 +535,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-SPUN-037',
     name: '10" Spun Filter - Graded Density',
-    name_hi: '10" स्पन फ़िल्टर - ग्रेडेड घनत्व',
+    name_hi: '10" स्पन फ़िल्टर - ग्रेडेड डेंसिटी',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pre-Filters / Sediment',
     brand: 'Generic',
@@ -549,7 +549,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-SPUN-038',
     name: '10" Spun Filter - Grooved Type',
-    name_hi: '10" स्पन फ़िल्टर - ग्रूव्ड प्रकार',
+    name_hi: '10" स्पन फ़िल्टर - ग्रूव्ड टाइप',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pre-Filters / Sediment',
     brand: 'Generic',
@@ -577,7 +577,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-SPUN-040',
     name: '10" Coconut Shell Carbon Block Filter',
-    name_hi: '10" नारियल खोल कार्बन ब्लॉक फ़िल्टर',
+    name_hi: '10" कोकोनट शेल कार्बन ब्लॉक फ़िल्टर',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Carbon Filters',
     brand: 'Generic',
@@ -742,7 +742,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-INLINE-051',
     name: 'Inline Mineral Cartridge - Standard',
-    name_hi: 'इनलाइन मिनरल कार्ट्रिज - मानक',
+    name_hi: 'इनलाइन मिनरल कार्ट्रिज - स्टैंडर्ड',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Inline Filters',
     brand: 'Generic',
@@ -772,7 +772,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-INLINE-053',
     name: 'Inline Alkaline Filter - Standard',
-    name_hi: 'इनलाइन एल्कलाइन फ़िल्टर - मानक',
+    name_hi: 'इनलाइन एल्कलाइन फ़िल्टर - स्टैंडर्ड',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Inline Filters',
     brand: 'Generic',
@@ -833,7 +833,7 @@ export const partsData: Part[] = [
     id: 'DOM-INLINE-057',
     name: 'Inline Antiscalant Balls Cartridge',
     name_hi: 'इनलाइन एंटीस्केलेंट बॉल्स कार्ट्रिज',
-    mainCategory: 'Domestic RO Parts',
+    mainCategory: 'RO Accessories & Tools',
     subcategory: 'Inline Filters',
     brand: 'Generic',
     price: 350,
@@ -982,8 +982,8 @@ export const partsData: Part[] = [
   {
     id: 'DOM-INLINE-067',
     name: 'Magnetic Softener Cartridge',
-    name_hi: 'मैग्नेटिक सॉफ़्नर कार्ट्रिज',
-    mainCategory: 'Domestic RO Parts',
+    name_hi: 'मैग्नेटिक सॉफ्टनर कार्ट्रिज',
+    mainCategory: 'RO Accessories & Tools',
     subcategory: 'Inline Filters',
     brand: 'Generic',
     price: 500,
@@ -991,7 +991,7 @@ export const partsData: Part[] = [
     description_hi: 'कठोर पानी को कंडीशन करने और स्केलिंग को कम करने के लिए मैग्नेटिक कार्ट्रिज।',
     image: 'https://placehold.co/400x400.png',
     features: 'Magnetic Softener, Reduces Scaling',
-    features_hi: 'मैग्नेटिक सॉफ़्नर, स्केलिंग कम करता है',
+    features_hi: 'मैग्नेटिक सॉफ्टनर, स्केलिंग कम करता है',
     inletOutletSize: '1/4"',
   },
   {
@@ -1027,7 +1027,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-INLINE-070',
     name: 'Heavy Metal Removal Cartridge',
-    name_hi: 'भारी धातु हटाने वाला कार्ट्रिज',
+    name_hi: 'हेवी मेटल रिमूवल कार्ट्रिज',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Inline Filters',
     brand: 'Generic',
@@ -1044,7 +1044,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-071',
     name: 'Commercial RO Membrane - 250 GPD',
-    name_hi: 'वाणिज्यिक आरओ मेम्ब्रेन - 250 जीपीडी',
+    name_hi: 'कमर्शियल आरओ मेम्ब्रेन - 250 जीपीडी',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1059,7 +1059,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-072',
     name: 'Commercial RO Membrane - 300 GPD',
-    name_hi: 'वाणिज्यिक आरओ मेम्ब्रेन - 300 जीपीडी',
+    name_hi: 'कमर्शियल आरओ मेम्ब्रेन - 300 जीपीडी',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1074,7 +1074,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-073',
     name: 'Commercial RO Membrane - 400 GPD',
-    name_hi: 'वाणिज्यिक आरओ मेम्ब्रेन - 400 जीपीडी',
+    name_hi: 'कमर्शियल आरओ मेम्ब्रेन - 400 जीपीडी',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1089,7 +1089,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-074',
     name: 'Commercial RO Membrane - 500 GPD',
-    name_hi: 'वाणिज्यिक आरओ मेम्ब्रेन - 500 जीपीडी',
+    name_hi: 'कमर्शियल आरओ मेम्ब्रेन - 500 जीपीडी',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1104,7 +1104,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-075',
     name: 'Commercial RO Membrane - 600 GPD',
-    name_hi: 'वाणिज्यिक आरओ मेम्ब्रेन - 600 जीपीडी',
+    name_hi: 'कमर्शियल आरओ मेम्ब्रेन - 600 जीपीडी',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1119,7 +1119,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-076',
     name: 'Industrial RO Membrane - 4040 Brackish Water (BW)',
-    name_hi: 'औद्योगिक आरओ मेम्ब्रेन - 4040 खारा पानी (बीडब्ल्यू)',
+    name_hi: 'इंडस्ट्रियल आरओ मेम्ब्रेन - 4040 ब्रैकिस वाटर (BW)',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1134,7 +1134,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-077',
     name: 'Industrial RO Membrane - 8040 Brackish Water (BW)',
-    name_hi: 'औद्योगिक आरओ मेम्ब्रेन - 8040 खारा पानी (बीडब्ल्यू)',
+    name_hi: 'इंडस्ट्रियल आरओ मेम्ब्रेन - 8040 ब्रैकिस वाटर (BW)',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Generic',
@@ -1149,7 +1149,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-078',
     name: 'Industrial RO Membrane - 4040 Dow Filmtec',
-    name_hi: 'औद्योगिक आरओ मेम्ब्रेन - 4040 डॉव फिल्मटेक',
+    name_hi: 'इंडस्ट्रियल आरओ मेम्ब्रेन - 4040 डॉव फिल्मटेक',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Dow Filmtec',
@@ -1164,7 +1164,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-MEM-079',
     name: 'Industrial RO Membrane - 4040 Hydranautics',
-    name_hi: 'औद्योगिक आरओ मेम्ब्रेन - 4040 हाइड्रानॉटिक्स',
+    name_hi: 'इंडस्ट्रियल आरओ मेम्ब्रेन - 4040 हाइड्रानॉटिक्स',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Commercial RO Membranes',
     brand: 'Hydranautics',
@@ -1267,7 +1267,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-PUMP-126',
     name: 'Booster Pump 75 GPD - 24V',
-    name_hi: 'बूस्टर पंप 75 जीपीडी - 24वी',
+    name_hi: 'बूस्टर पंप 75 जीपीडी - 24V',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pump (Booster Pump)',
     brand: 'Generic',
@@ -1283,7 +1283,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-PUMP-127',
     name: 'Booster Pump 100 GPD - 24V',
-    name_hi: 'बूस्टर पंप 100 जीपीडी - 24वी',
+    name_hi: 'बूस्टर पंप 100 जीपीडी - 24V',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pump (Booster Pump)',
     brand: 'Generic',
@@ -1299,7 +1299,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-PUMP-128',
     name: 'Booster Pump 150 GPD - 24V',
-    name_hi: 'बूस्टर पंप 150 जीपीडी - 24वी',
+    name_hi: 'बूस्टर पंप 150 जीपीडी - 24V',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pump (Booster Pump)',
     brand: 'Generic',
@@ -1315,7 +1315,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-PUMP-129',
     name: 'Booster Pump 100 GPD - 36V',
-    name_hi: 'बूस्टर पंप 100 जीपीडी - 36वी',
+    name_hi: 'बूस्टर पंप 100 जीपीडी - 36V',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pump (Booster Pump)',
     brand: 'Generic',
@@ -1347,7 +1347,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-PUMP-131',
     name: 'Grand Forest (GF) Pump - 100 GPD',
-    name_hi: 'ग्रैंड फॉरेस्ट (जीएफ) पंप - 100 जीपीडी',
+    name_hi: 'ग्रैंड फॉरेस्ट (GF) पंप - 100 जीपीडी',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Pump (Booster Pump)',
     brand: 'Grand Forest',
@@ -1379,7 +1379,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-ELEC-151',
     name: 'SMPS Power Supply - 24V, 2.5A',
-    name_hi: 'एसएमपीएस बिजली की आपूर्ति - 24वी, 2.5ए',
+    name_hi: 'एसएमपीएस पावर सप्लाई - 24V, 2.5A',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'SMPS / Adapter',
     brand: 'Generic',
@@ -1394,7 +1394,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-ELEC-152',
     name: 'Solenoid Valve (SV) - 24V DC, Push Fit',
-    name_hi: 'सोलेनॉइड वाल्व (एसवी) - 24वी डीसी, पुश फ़िट',
+    name_hi: 'सोलेनॉइड वाल्व (SV) - 24V DC, पुश फ़िट',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Solenoid Valve',
     brand: 'Generic',
@@ -1410,7 +1410,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-ELEC-153',
     name: 'Low-Pressure Switch (LPS) - Push Fit',
-    name_hi: 'कम दबाव स्विच (एलपीएस) - पुश फ़िट',
+    name_hi: 'लो-प्रेशर स्विच (LPS) - पुश फ़िट',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Low & High Pressure Switches',
     brand: 'Generic',
@@ -1424,7 +1424,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-ELEC-154',
     name: 'High-Pressure Switch (HPS) - Push Fit',
-    name_hi: 'उच्च दबाव स्विच (एचपीएस) - पुश फ़िट',
+    name_hi: 'हाई-प्रेशर स्विच (HPS) - पुश फ़िट',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Low & High Pressure Switches',
     brand: 'Generic',
@@ -1496,7 +1496,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-PUMP-181',
     name: 'High-Pressure Pump - 250 LPH',
-    name_hi: 'उच्च दबाव पंप - 250 एलपीएच',
+    name_hi: 'हाई-प्रेशर पंप - 250 LPH',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'High-Pressure Pumps',
     brand: 'Generic',
@@ -1510,7 +1510,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-PUMP-182',
     name: 'Vertical Multistage Pump - 1 HP',
-    name_hi: 'ऊर्ध्वाधर मल्टीस्टेज पंप - 1 एचपी',
+    name_hi: 'वर्टिकल मल्टीस्टेज पंप - 1 HP',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'High-Pressure Pumps',
     brand: 'Generic',
@@ -1524,7 +1524,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-PUMP-183',
     name: 'CNP Pump - 1 HP',
-    name_hi: 'सीएनपी पंप - 1 एचपी',
+    name_hi: 'CNP पंप - 1 HP',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'High-Pressure Pumps',
     brand: 'CNP',
@@ -1538,7 +1538,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-PUMP-184',
     name: 'Raw Water Feed Pump - 1 HP Monoblock',
-    name_hi: 'कच्चा पानी फ़ीड पंप - 1 एचपी मोनोब्लॉक',
+    name_hi: 'रॉ वाटर फीड पंप - 1 HP मोनोब्लॉक',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Raw Water Pump',
     brand: 'Generic',
@@ -1566,7 +1566,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-ELEC-186',
     name: 'RO Control Panel - 250 LPH, Relay Based',
-    name_hi: 'आरओ कंट्रोल पैनल - 250 एलपीएच, रिले आधारित',
+    name_hi: 'आरओ कंट्रोल पैनल - 250 LPH, रिले बेस्ड',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Control Panels',
     brand: 'Generic',
@@ -1580,7 +1580,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-ELEC-187',
     name: 'Pressure Gauge - 0-21 kg/cm², Panel Mount, Liquid Filled',
-    name_hi: 'दबाव गेज - 0-21 किग्रा/सेमी², पैनल माउंट, तरल भरा हुआ',
+    name_hi: 'प्रेशर गेज - 0-21 kg/cm², पैनल माउंट, लिक्विड फिल्ड',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Pressure Gauges',
     brand: 'Generic',
@@ -1589,12 +1589,12 @@ export const partsData: Part[] = [
     description_hi: 'स्थिर उच्च दबाव रीडिंग के लिए तरल (ग्लिसरीन) भरा दबाव गेज। 0-21 किग्रा/सेमी² (लगभग 300 पीएसआई)।',
     image: 'https://placehold.co/400x400.png',
     features: 'Liquid Filled, Stable Reading, Panel Mount, 0-21 kg/cm²',
-    features_hi: 'तरल भरा, स्थिर पठन, पैनल माउंट, 0-21 किग्रा/सेमी²',
+    features_hi: 'लिक्विड फिल्ड, स्थिर पठन, पैनल माउंट, 0-21 किग्रा/सेमी²',
   },
   {
     id: 'COM-ELEC-188',
     name: 'Rotameter (Flow Meter) - 0-600 LPH',
-    name_hi: 'रोटामीटर (फ्लो मीटर) - 0-600 एलपीएच',
+    name_hi: 'रोटामीटर (फ्लो मीटर) - 0-600 LPH',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Rotameter / Flow Meter',
     brand: 'Generic',
@@ -1608,7 +1608,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-ELEC-189',
     name: 'Online TDS/Conductivity Meter',
-    name_hi: 'ऑनलाइन टीडीएस/चालकता मीटर',
+    name_hi: 'ऑनलाइन टीडीएस/कंडक्टिविटी मीटर',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Conductivity/TDS Controller',
     brand: 'Generic',
@@ -1622,7 +1622,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-ELEC-190',
     name: 'Commercial UV System - 1000 LPH',
-    name_hi: 'वाणिज्यिक यूवी प्रणाली - 1000 एलपीएच',
+    name_hi: 'कमर्शियल यूवी सिस्टम - 1000 LPH',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'UV Systems',
     brand: 'Generic',
@@ -1652,7 +1652,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-FIT-251',
     name: 'RO Pipe 1/4" - White (per meter)',
-    name_hi: 'आरओ पाइप 1/4" - सफेद (प्रति मीटर)',
+    name_hi: 'आरओ पाइप 1/4" - सफ़ेद (प्रति मीटर)',
     mainCategory: 'RO Accessories & Tools',
     subcategory: 'Pipe / Tubing',
     brand: 'Generic',
@@ -1713,7 +1713,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-FIT-255',
     name: 'Flow Restrictor (FR) 450',
-    name_hi: 'फ्लो रेस्ट्रिक्टर (एफआर) 450',
+    name_hi: 'फ्लो रेस्ट्रिक्टर (FR) 450',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Check Valve / NRV',
     brand: 'Generic',
@@ -1759,7 +1759,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-HOUSE-321',
     name: '10" Pre-Filter Housing - White Bowl, Double O-Ring',
-    name_hi: '10" प्री-फ़िल्टर हाउसिंग - सफ़ेद कटोरा, डबल ओ-रिंग',
+    name_hi: '10" प्री-फ़िल्टर हाउसिंग - व्हाइट बाउल, डबल ओ-रिंग',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Filter Housing',
     brand: 'Generic',
@@ -1773,7 +1773,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-HOUSE-322',
     name: 'Domestic Membrane Housing - 1812, Ribbed',
-    name_hi: 'घरेलू मेम्ब्रेन हाउसिंग - 1812, रिब्ड',
+    name_hi: 'डोमेस्टिक मेम्ब्रेन हाउसिंग - 1812, रिब्ड',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'Membrane Housing',
     brand: 'Generic',
@@ -1787,7 +1787,7 @@ export const partsData: Part[] = [
   {
     id: 'DOM-HOUSE-323',
     name: 'RO Storage Tank - 3.2 Gallon Steel',
-    name_hi: 'आरओ भंडारण टैंक - 3.2 गैलन स्टील',
+    name_hi: 'आरओ स्टोरेज टैंक - 3.2 गैलन स्टील',
     mainCategory: 'Domestic RO Parts',
     subcategory: 'RO Tank',
     brand: 'Generic',
@@ -1832,7 +1832,7 @@ export const partsData: Part[] = [
   {
     id: 'ACC-FAUCET-371',
     name: 'RO Faucet - Long Reach, Steel',
-    name_hi: 'आरओ नल - लंबी पहुंच, स्टील',
+    name_hi: 'आरओ फॉसेट - लॉन्ग रीच, स्टील',
     mainCategory: 'RO Accessories & Tools',
     subcategory: 'Taps / Faucets',
     brand: 'Generic',
@@ -1861,7 +1861,7 @@ export const partsData: Part[] = [
   {
     id: 'ACC-TOOL-373',
     name: 'RO Pipe Cutter Tool',
-    name_hi: 'आरओ पाइप कटर उपकरण',
+    name_hi: 'आरओ पाइप कटर टूल',
     mainCategory: 'RO Accessories & Tools',
     subcategory: 'Wrenches / Tools',
     brand: 'Generic',
@@ -1907,7 +1907,7 @@ export const partsData: Part[] = [
   {
     id: 'COM-HOUSE-402',
     name: 'FRP Pressure Vessel - 4040, 300 PSI',
-    name_hi: 'एफआरपी दबाव पोत - 4040, 300 पीएसआई',
+    name_hi: 'एफआरपी प्रेशर वेसल - 4040, 300 PSI',
     mainCategory: 'Commercial RO Parts',
     subcategory: 'Pressure Vessels (FRP)',
     brand: 'Generic',
@@ -1939,7 +1939,7 @@ export const partsData: Part[] = [
   {
     id: 'KIT-SVC-426',
     name: 'Annual Service Kit (3 Spun, 1 Sediment, 1 Carbon, 1 Post-Carbon)',
-    name_hi: 'वार्षिक सेवा किट (3 स्पन, 1 सेडिमेंट, 1 कार्बन, 1 पोस्ट-कार्बन)',
+    name_hi: 'एनुअल सर्विस किट (3 स्पन, 1 सेडिमेंट, 1 कार्बन, 1 पोस्ट-कार्बन)',
     mainCategory: 'Service Kits & Combo Packs',
     subcategory: 'Annual Maintenance Kits',
     brand: 'Generic',
@@ -1954,7 +1954,7 @@ export const partsData: Part[] = [
   {
     id: 'KIT-SVC-427',
     name: 'Full Service Kit (Annual Kit + 80 GPD Membrane)',
-    name_hi: 'पूर्ण सेवा किट (वार्षिक किट + 80 जीपीडी मेम्ब्रेन)',
+    name_hi: 'फुल सर्विस किट (एनुअल किट + 80 जीपीडी मेम्ब्रेन)',
     mainCategory: 'Service Kits & Combo Packs',
     subcategory: 'Annual Maintenance Kits',
     brand: 'Generic',
@@ -1968,7 +1968,7 @@ export const partsData: Part[] = [
   {
     id: 'KIT-SVC-428',
     name: 'Brand-Specific Compatible Filter Kit (for Kent Grand)',
-    name_hi: 'ब्रांड-विशिष्ट संगत फ़िल्टर किट (केंट ग्रैंड के लिए)',
+    name_hi: 'ब्रांड-स्पेसिफिक कम्पेटिबल फ़िल्टर किट (केंट ग्रैंड के लिए)',
     mainCategory: 'Service Kits & Combo Packs',
     subcategory: 'Brand-Specific Kits',
     brand: 'Kent',
@@ -1982,7 +1982,7 @@ export const partsData: Part[] = [
   {
     id: 'KIT-SVC-429',
     name: 'Installation Kit (Pipe, Inlet Valve, Drain Clamp, Wrench, Teflon)',
-    name_hi: 'स्थापना किट (पाइप, इनलेट वाल्व, ड्रेन क्लैंप, रिंच, टेफ्लॉन)',
+    name_hi: 'इंस्टॉलेशन किट (पाइप, इनलेट वाल्व, ड्रेन क्लैंप, रिंच, टेफ्लॉन)',
     mainCategory: 'Service Kits & Combo Packs',
     subcategory: 'Startup Installation Kits',
     brand: 'Generic',
@@ -1996,7 +1996,7 @@ export const partsData: Part[] = [
   {
     id: 'SYS-DOM-430',
     name: 'Complete Domestic RO System - RO+UV+UF+TDS Adjuster',
-    name_hi: 'पूर्ण घरेलू आरओ सिस्टम - आरओ+यूवी+यूएफ+टीडीएस एडजस्टर',
+    name_hi: 'कम्पलीट डोमेस्टिक आरओ सिस्टम - आरओ+यूवी+यूएफ+टीडीएस एडजस्टर',
     mainCategory: 'Complete RO Systems',
     subcategory: 'Domestic RO Systems',
     brand: 'Generic',
@@ -2011,7 +2011,7 @@ export const partsData: Part[] = [
   {
     id: 'SYS-COM-431',
     name: 'Complete Commercial RO Plant - 250 LPH',
-    name_hi: 'पूर्ण वाणिज्यिक आरओ प्लांट - 250 एलपीएच',
+    name_hi: 'कम्पलीट कमर्शियल आरओ प्लांट - 250 LPH',
     mainCategory: 'Complete RO Systems',
     subcategory: 'Commercial RO Plants',
     brand: 'Generic',
@@ -2025,7 +2025,7 @@ export const partsData: Part[] = [
   {
     id: 'SYS-COM-432',
     name: 'Complete Commercial RO Plant - 500 LPH',
-    name_hi: 'पूर्ण वाणिज्यिक आरओ प्लांट - 500 एलपीएच',
+    name_hi: 'कम्पलीट कमर्शियल आरओ प्लांट - 500 LPH',
     mainCategory: 'Complete RO Systems',
     subcategory: 'Commercial RO Plants',
     brand: 'Generic',
