@@ -49,7 +49,9 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
             file: imageDataUri,
             fileName: uniqueFileName,
             folder: "/ro-parts/",
-            useUniqueFileName: false, 
+            useUniqueFileName: false,
+            format: 'webp',
+            transformation: [{ quality: 80 }],
         });
 
         return response.url;
