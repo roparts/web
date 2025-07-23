@@ -16,21 +16,21 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
       !process.env.IMAGEKIT_PRIVATE_KEY ||
       !process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT
     ) {
-      console.error("ImageKit credentials are not configured.");
-      throw new Error("ImageKit credentials are not configured. Please check your .env file and CREDENTIALS_SETUP.md.");
+      console.error("ImageKit credentials are not configured in .env file.");
+      throw new Error("ImageKit credentials are not configured. Please check your .env file and follow the CREDENTIALS_SETUP.md guide.");
     }
 
-    const imagekit = new ImageKit({
-      publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
-      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
-    });
-    
-    // Generate a unique filename
-    const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
-    const fileName = `ro-part-${uniqueSuffix}.webp`;
-
     try {
+        const imagekit = new ImageKit({
+          publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+          privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+          urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT,
+        });
+        
+        // Generate a unique filename
+        const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
+        const fileName = `ro-part-${uniqueSuffix}.webp`;
+
         const result = await imagekit.upload({
             file: imageDataUri,
             fileName: fileName,
@@ -47,7 +47,7 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
         return result.url;
     } catch (error) {
         console.error("ImageKit upload failed:", error);
-        throw new Error("Failed to upload image.");
+        throw new Error("Failed to upload image. This may be due to incorrect ImageKit credentials or a network issue. Please verify your keys in the .env file.");
     }
 }
 
