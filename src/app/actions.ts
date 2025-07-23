@@ -8,13 +8,6 @@ import { suggestSearchTerm } from "@/ai/flows/suggest-search-term";
 import type { Part } from "@/lib/types";
 import ImageKit from 'imagekit';
 
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
-  urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
-});
-
-
 export async function uploadImageAction(imageDataUri: string): Promise<string> {
     if (
       !process.env.IMAGEKIT_PUBLIC_KEY ||
@@ -24,6 +17,13 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
       console.error("ImageKit credentials are not configured.");
       throw new Error("ImageKit credentials are not configured. Please check your .env file and CREDENTIALS_SETUP.md.");
     }
+
+    // Moved initialization inside the function
+    const imagekit = new ImageKit({
+      publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
+    });
 
     try {
         const result = await imagekit.upload({
