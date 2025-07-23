@@ -26,7 +26,8 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
               "width": "600",
               "aspectRatio": "1-1",
               "crop": "pad_resize",
-              "format": "webp"
+              "format": "webp",
+              "quality": "20"
             }]
         });
         return result.url;
