@@ -7,6 +7,10 @@ import type { Part } from './types';
 const PARTS_COLLECTION = 'parts';
 
 export async function getPartsAdmin(): Promise<Part[]> {
+  if (!adminDb) {
+    console.log("Admin DB not available in getPartsAdmin");
+    return [];
+  }
   try {
     const snapshot = await adminDb.collection(PARTS_COLLECTION).orderBy('name').get();
     if (snapshot.empty) {
@@ -20,6 +24,9 @@ export async function getPartsAdmin(): Promise<Part[]> {
 }
 
 export async function addPart(partData: Omit<Part, 'id'>): Promise<Part> {
+  if (!adminDb) {
+    throw new Error("Admin DB not available. Cannot add part.");
+  }
   try {
     const docRef = await adminDb.collection(PARTS_COLLECTION).add(partData);
     revalidatePath('/rajababuadmin');
@@ -32,6 +39,9 @@ export async function addPart(partData: Omit<Part, 'id'>): Promise<Part> {
 }
 
 export async function updatePart(partData: Part): Promise<Part> {
+    if (!adminDb) {
+    throw new Error("Admin DB not available. Cannot update part.");
+  }
   try {
     const { id, ...dataToUpdate } = partData;
     await adminDb.collection(PARTS_COLLECTION).doc(id).set(dataToUpdate, { merge: true });
@@ -46,6 +56,9 @@ export async function updatePart(partData: Part): Promise<Part> {
 }
 
 export async function deletePart(partId: string): Promise<void> {
+    if (!adminDb) {
+    throw new Error("Admin DB not available. Cannot delete part.");
+  }
   try {
     await adminDb.collection(PARTS_COLLECTION).doc(partId).delete();
     revalidatePath('/rajababuadmin');

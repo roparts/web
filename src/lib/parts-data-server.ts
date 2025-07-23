@@ -8,6 +8,10 @@ const PARTS_COLLECTION = 'parts';
 
 export async function getAllParts(): Promise<Part[]> {
   noStore(); // Opt out of caching for this function
+  if (!adminDb) {
+     console.log("Admin DB not available in getAllParts");
+    return [];
+  }
   try {
     const snapshot = await adminDb.collection(PARTS_COLLECTION).get();
     if (snapshot.empty) {
@@ -25,6 +29,10 @@ export async function getAllParts(): Promise<Part[]> {
 
 export async function getPartById(id: string): Promise<Part | null> {
     noStore();
+    if (!adminDb) {
+        console.log("Admin DB not available in getPartById");
+        return null;
+    }
     try {
         const docRef = adminDb.collection(PARTS_COLLECTION).doc(id);
         const docSnap = await docRef.get();
