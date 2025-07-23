@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for generating a product image.
@@ -34,10 +35,10 @@ const generatePartImageFlow = ai.defineFlow(
   async ({partName, partCategory}) => {
     // Note: Image generation can take a few seconds.
     const {media} = await ai.generate({
-      model: googleAI('gemini-2.0-flash-preview-image-generation'),
+      model: 'googleai/gemini-2.0-flash-preview-image-generation',
       prompt: `Generate a professional, high-quality, photorealistic product photograph of a single '${partName}' against a clean, plain, light-colored studio background. The item should be the only subject. The item is a type of '${partCategory}'. Do not include any text or logos.`,
       config: {
-        responseModalities: ['IMAGE'],
+        responseModalities: ['IMAGE', 'TEXT'],
       },
     });
 
