@@ -17,6 +17,7 @@ export interface Part {
   description: string;
   description_hi?: string;
   image: string;
+  imageFileId?: string; // Add this to store the ImageKit file ID
   features: string;
   features_hi?: string;
   minQuantity?: number;
@@ -31,5 +32,3 @@ export interface Part {
 export interface CartItem extends Part {
   quantity: number;
 }
-
-    

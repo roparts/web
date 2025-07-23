@@ -28,6 +28,7 @@ const partSchema = z.object({
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   image: z.string().min(1, "An image is required.").url("Must be a valid URL."),
+  imageFileId: z.string().optional(), // Add imageFileId to the schema
   minQuantity: z.coerce.number().min(1, 'Minimum quantity must be at least 1').optional(),
 });
 
@@ -57,6 +58,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       features: '',
       description: '',
       image: 'https://placehold.co/600x600.png',
+      imageFileId: '',
       minQuantity: 1,
     },
   });
@@ -71,6 +73,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           brand: part.brand ?? '',
           discountPrice: part.discountPrice ?? undefined,
           minQuantity: part.minQuantity ?? 1,
+          imageFileId: part.imageFileId ?? '',
         });
       } else {
         form.reset({
@@ -83,6 +86,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           features: '',
           description: '',
           image: 'https://placehold.co/600x600.png',
+          imageFileId: '',
           minQuantity: 1,
         });
       }
@@ -98,8 +102,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       reader.onloadend = async () => {
         try {
           const base64data = reader.result as string;
-          const imageUrl = await uploadImageAction(base64data);
-          form.setValue('image', imageUrl, { shouldValidate: true });
+          const { url, fileId } = await uploadImageAction(base64data);
+          form.setValue('image', url, { shouldValidate: true });
+          form.setValue('imageFileId', fileId, { shouldValidate: true });
           toast({ title: "Image uploaded successfully!" });
         } catch (error) {
           console.error("Image upload failed", error);
