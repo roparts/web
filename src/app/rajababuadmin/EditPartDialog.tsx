@@ -6,14 +6,14 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Wand2, Upload, Loader2 } from 'lucide-react';
+import { Wand2, Upload, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { Part } from '@/lib/types';
-import { generateDescriptionAction, uploadImageAction, deleteImageAction } from '@/app/actions';
+import { generateDescriptionAction, uploadImageAction, deleteImageAction, generateImageAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from '@/context/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -40,7 +40,8 @@ interface EditPartDialogProps {
 }
 
 export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartDialogProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+  const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   // This state will track an image uploaded during the current session but not yet saved.
   const [tempImageFileId, setTempImageFileId] = useState<string | null>(null);
@@ -70,7 +71,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
   const resetDialogState = () => {
     form.reset();
     setTempImageFileId(null);
-    setIsGenerating(false);
+    setIsGeneratingDesc(false);
+    setIsGeneratingImg(false);
     setIsUploading(false);
   }
 
@@ -167,7 +169,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       return;
     }
 
-    setIsGenerating(true);
+    setIsGeneratingDesc(true);
     try {
       const description = await generateDescriptionAction({
         partName: name,
@@ -187,7 +189,51 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
         description: t.toast.generationFailedDescription,
       });
     } finally {
-      setIsGenerating(false);
+      setIsGeneratingDesc(false);
+    }
+  };
+
+  const handleGenerateImage = async () => {
+    const { name, subcategory } = form.getValues();
+     if (!name || !subcategory) {
+      toast({
+        variant: "destructive",
+        title: t.toast.missingInfoTitle,
+        description: "Please fill in Name and Category to generate an image.",
+      });
+      return;
+    }
+    
+    setIsGeneratingImg(true);
+
+    // If there's an existing temporary image, clean it up.
+    if (tempImageFileId) {
+      await deleteImageAction(tempImageFileId);
+      setTempImageFileId(null);
+    }
+
+    try {
+        const { url, fileId } = await generateImageAction({ partName: name, partCategory: subcategory });
+        form.setValue('image', url, { shouldValidate: true });
+        form.setValue('imageFileId', fileId, { shouldValidate: true });
+        
+        // Track the newly generated image as the temporary one.
+        setTempImageFileId(fileId);
+
+        toast({
+            title: "AI Image Generated!",
+            description: "A new image has been generated for your part.",
+        });
+
+    } catch (error) {
+        console.error("AI image generation failed:", error);
+        toast({
+            variant: 'destructive',
+            title: "AI Image Generation Failed",
+            description: "Please try again or upload an image manually.",
+        });
+    } finally {
+        setIsGeneratingImg(false);
     }
   };
 
@@ -211,6 +257,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     }
     onOpenChange(open);
   }
+
+  const isGenerating = isGeneratingDesc || isGeneratingImg || isUploading;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -243,16 +291,16 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                         <FormItem className="w-full">
                            <FormLabel className="sr-only">Image</FormLabel>
                             <FormControl>
-                                <div className="w-full">
+                                <div className="w-full grid grid-cols-2 gap-2">
                                     <Input 
                                         id="image-upload"
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
                                         onChange={handleImageUpload}
-                                        disabled={isUploading}
+                                        disabled={isGenerating}
                                     />
-                                    <Button asChild variant="outline" className="w-full" disabled={isUploading}>
+                                    <Button asChild variant="outline" className="w-full" disabled={isGenerating}>
                                         <label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center">
                                             {isUploading ? (
                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -261,6 +309,14 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                                             )}
                                             {isUploading ? "Uploading..." : t.uploadImageButton}
                                         </label>
+                                    </Button>
+                                    <Button type="button" variant="outline" className="w-full" onClick={handleGenerateImage} disabled={isGenerating}>
+                                        {isGeneratingImg ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Sparkles className="mr-2 h-4 w-4" />
+                                        )}
+                                        {isGeneratingImg ? t.generatingButton : "Generate Image"}
                                     </Button>
                                 </div>
                             </FormControl>
@@ -388,7 +444,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                         <FormLabel>{t.descriptionLabel}</FormLabel>
                         <Button type="button" variant="outline" size="sm" onClick={handleGenerateDescription} disabled={isGenerating}>
                           <Wand2 className="mr-2 h-4 w-4" />
-                          {isGenerating ? t.generatingButton : t.generateButton}
+                          {isGeneratingDesc ? t.generatingButton : t.generateButton}
                         </Button>
                       </div>
                       <FormControl>

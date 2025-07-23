@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, useTransition, type FormEvent } from 'react';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, LogIn, Loader2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, LogIn, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,8 @@ import { useLanguage } from '@/context/LanguageContext';
 import Head from 'next/head';
 import { Badge } from '@/components/ui/badge';
 import { addPart, deletePart, getPartsAdmin, updatePart } from '@/lib/parts-data-admin';
+import { batchGenerateImagesAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,6 +26,8 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPart, setEditingPart] = useState<Part | null>(null);
+  const [isBatchGenerating, startBatchTransition] = useTransition();
+  const { toast } = useToast();
   const { translations } = useLanguage();
   const t = translations.admin;
 
@@ -37,15 +41,17 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const fetchParts = async () => {
-        setIsLoading(true);
-        const fetchedParts = await getPartsAdmin();
-        setParts(fetchedParts);
-        setIsLoading(false);
-      };
       fetchParts();
     }
   }, [isAuthenticated]);
+
+  const fetchParts = async () => {
+    setIsLoading(true);
+    const fetchedParts = await getPartsAdmin();
+    setParts(fetchedParts);
+    setIsLoading(false);
+  };
+
 
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
@@ -99,6 +105,25 @@ export default function AdminPage() {
        console.error("Failed to save part", error);
        alert("Could not save part.");
     }
+  };
+
+  const handleBatchGenerate = () => {
+    if (!confirm("This will generate AI images for all products with placeholders. This may take some time and incur costs. Are you sure?")) {
+        return;
+    }
+
+    startBatchTransition(async () => {
+        toast({ title: "Starting batch image generation...", description: "This may take a few minutes. Please don't navigate away." });
+        const { successCount, failureCount } = await batchGenerateImagesAction();
+        
+        toast({
+            title: "Batch Generation Complete!",
+            description: `${successCount} images generated successfully. ${failureCount} failed. The product list will now refresh.`,
+        });
+
+        // Refresh the parts list to show new images
+        await fetchParts();
+    });
   };
 
   if (isLoading && isAuthenticated) {
@@ -179,10 +204,20 @@ export default function AdminPage() {
             </svg>
             <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">{t.headerTitle}</h1>
         </div>
-        <Button onClick={handleAddNew} size="sm" className="sm:size-auto">
-            <PlusCircle className="mr-0 sm:mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">{t.addNewPart}</span>
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button onClick={handleBatchGenerate} size="sm" variant="outline" disabled={isBatchGenerating}>
+                {isBatchGenerating ? (
+                    <Loader2 className="mr-0 sm:mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Sparkles className="mr-0 sm:mr-2 h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">{isBatchGenerating ? "Generating..." : "Generate All Images"}</span>
+            </Button>
+            <Button onClick={handleAddNew} size="sm" className="sm:size-auto">
+                <PlusCircle className="mr-0 sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">{t.addNewPart}</span>
+            </Button>
+        </div>
         </div>
     </header>
     <main className="container mx-auto p-4 sm:p-6">
@@ -279,4 +314,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
