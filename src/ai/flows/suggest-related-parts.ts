@@ -55,7 +55,7 @@ Original Part Details:
 `,
       config: {
         temperature: 0.5,
-        responseFormat: 'json',
+        response_mime_type: 'application/json',
       },
     });
 
