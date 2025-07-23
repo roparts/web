@@ -82,6 +82,7 @@
     "editDialogDescription": "Update the details for this part.",
     "addDialogDescription": "Fill in the details for the new part.",
     "uploadImageButton": "Upload Image",
+    "generateImageButton": "Generate Image",
     "partNameLabel": "Part Name",
     "partNamePlaceholder": "e.g., AquaPure RO Membrane",
     "brandLabel": "Brand",
@@ -130,3 +131,5 @@
     "description": "Find high-quality reverse osmosis system parts, from filters to membranes, at RoParts Hub."
   }
 }
+
+    

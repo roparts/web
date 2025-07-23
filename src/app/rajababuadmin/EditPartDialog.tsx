@@ -316,7 +316,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                                         ) : (
                                             <Sparkles className="mr-2 h-4 w-4" />
                                         )}
-                                        {isGeneratingImg ? t.generatingButton : "Generate Image"}
+                                        {isGeneratingImg ? t.generatingButton : t.generateImageButton}
                                     </Button>
                                 </div>
                             </FormControl>
@@ -466,3 +466,5 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     </Dialog>
   );
 }
+
+    
