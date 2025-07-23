@@ -1,20 +1,20 @@
 
 "use client";
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Skeleton } from './ui/skeleton';
-import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { PartCard } from './PartCard';
 import { useLanguage } from '@/context/LanguageContext';
 import { getRelatedParts } from '@/app/actions';
 
 interface RelatedPartsProps {
+  allParts: Part[];
   currentPart?: Part;
 }
 
-export function RelatedParts({ currentPart }: RelatedPartsProps) {
+export function RelatedParts({ allParts, currentPart }: RelatedPartsProps) {
   const { lastAddedItem } = useCart();
   const [suggestions, setSuggestions] = useState<Part[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,9 +33,9 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
       
       setIsLoading(true);
       try {
-        const suggestedNames = await getRelatedParts(partToFetchFor);
+        const suggestedNames = await getRelatedParts(partToFetchFor, allParts);
         if (isMounted) {
-          const suggestedParts = partsData.filter(p => suggestedNames.includes(p.name));
+          const suggestedParts = allParts.filter(p => suggestedNames.includes(p.name));
           setSuggestions(suggestedParts);
         }
       } catch (error) {
@@ -55,7 +55,7 @@ export function RelatedParts({ currentPart }: RelatedPartsProps) {
     return () => {
       isMounted = false;
     }
-  }, [partToFetchFor]);
+  }, [partToFetchFor, allParts]);
 
   if (isLoading) {
     return (

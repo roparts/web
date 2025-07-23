@@ -9,10 +9,11 @@
  */
 import {z} from 'zod';
 import {ai} from '../genkit';
-import { partsData } from '@/lib/parts-data';
+import type { Part } from '@/lib/types';
 
 const RefineVoiceSearchInputSchema = z.object({
   transcript: z.string(),
+  allParts: z.any(), // Pass the full parts data to extract keywords
 });
 export type RefineVoiceSearchInput = z.infer<
   typeof RefineVoiceSearchInputSchema
@@ -25,23 +26,23 @@ export type RefineVoiceSearchOutput = z.infer<
   typeof RefineVoiceSearchOutputSchema
 >;
 
-// Create a comprehensive list of all searchable keywords from the product data.
-const allKeywords = [
-  ...new Set([
-    ...partsData.map(p => p.name),
-    ...partsData.map(p => p.name_hi || '').filter(Boolean),
-    ...partsData.map(p => p.subcategory),
-    ...partsData.map(p => p.brand || '').filter(Boolean),
-  ]),
-];
-
 const refineVoiceSearchFlow = ai.defineFlow(
   {
     name: 'refineVoiceSearchFlow',
     inputSchema: RefineVoiceSearchInputSchema,
     outputSchema: RefineVoiceSearchOutputSchema,
   },
-  async ({transcript}) => {
+  async ({transcript, allParts}) => {
+    // Create a comprehensive list of all searchable keywords from the product data.
+    const allKeywords = [
+      ...new Set([
+        ...allParts.map((p: Part) => p.name),
+        ...allParts.map((p: Part) => p.name_hi || '').filter(Boolean),
+        ...allParts.map((p: Part) => p.subcategory),
+        ...allParts.map((p: Part) => p.brand || '').filter(Boolean),
+      ]),
+    ];
+
     const llmResponse = await ai.generate({
       prompt: `You are a search term translator and entity mapper for an RO (Reverse Osmosis) parts store.
 Your ONLY task is to identify the product or category in the user's voice transcript and return its corresponding ENGLISH name from the provided list.
@@ -63,6 +64,7 @@ EXAMPLES:
 - Transcript: "show me filters for my RO" -> Refined Query: "Pre-Filters / Sediment"
 - Transcript: "membrane dikhao" -> Refined Query: "RO Membranes"
 - Transcript: "मेंबराने" -> Refined Query: "RO Membranes"
+- Transcript: "मेम्ब्रेन" -> Refined Query: "RO Membranes"
 - Transcript: "75 gpd wala vontron" -> Refined Query: "75 GPD RO Membrane - Vontron Brand"
 - Transcript: "aqua pure" -> Refined Query: "aqua pure" (No clear match from list)
 - Transcript: "solenoid valv" -> Refined Query: "Solenoid Valve"

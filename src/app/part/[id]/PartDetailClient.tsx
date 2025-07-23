@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 
 
-export function PartDetailClient({ part }: { part: Part }) {
+export function PartDetailClient({ part, allParts }: { part: Part, allParts: Part[] }) {
   const { addToCart } = useCart();
   const { translations, language } = useLanguage();
   const router = useRouter();
@@ -106,7 +106,7 @@ export function PartDetailClient({ part }: { part: Part }) {
             </div>
           </div>
           
-           <RelatedParts currentPart={part} />
+           <RelatedParts allParts={allParts} currentPart={part} />
 
         </div>
       </main>

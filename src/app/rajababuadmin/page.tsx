@@ -3,11 +3,10 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import Image from 'next/image';
-import { PlusCircle, Edit, Trash2, LogIn } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, LogIn, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { partsData } from '@/lib/parts-data';
 import type { Part } from '@/lib/types';
 import { EditPartDialog } from './EditPartDialog';
 import { Input } from '@/components/ui/input';
@@ -15,31 +14,46 @@ import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/context/LanguageContext';
 import Head from 'next/head';
 import { Badge } from '@/components/ui/badge';
+import { addPart, deletePart, getPartsAdmin, updatePart } from '@/lib/parts-data-admin';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [parts, setParts] = useState<Part[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPart, setEditingPart] = useState<Part | null>(null);
   const { translations } = useLanguage();
   const t = translations.admin;
 
   useEffect(() => {
-    // Check session storage for authentication status on component mount
     if (sessionStorage.getItem('ro-admin-auth') === 'true') {
       setIsAuthenticated(true);
-      setParts(partsData); // Load parts data only after authentication
+    } else {
+        setIsLoading(false);
     }
   }, []);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchParts = async () => {
+        setIsLoading(true);
+        const fetchedParts = await getPartsAdmin();
+        setParts(fetchedParts);
+        setIsLoading(false);
+      };
+      fetchParts();
+    }
+  }, [isAuthenticated]);
+
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
+    // IMPORTANT: This is a simple password check for demonstration purposes.
+    // For a real application, use a proper authentication system.
     if (password === 'rajababuadmin') {
       sessionStorage.setItem('ro-admin-auth', 'true');
       setIsAuthenticated(true);
-      setParts(partsData); // Load parts data
       setError('');
     } else {
       setError(t.incorrectPassword);
@@ -57,22 +71,43 @@ export default function AdminPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (partId: string) => {
+  const handleDelete = async (partId: string) => {
     if (confirm(t.deleteConfirm)) {
-      setParts(prevParts => prevParts.filter(p => p.id !== partId));
+      try {
+        await deletePart(partId);
+        setParts(prevParts => prevParts.filter(p => p.id !== partId));
+      } catch (error) {
+        console.error("Failed to delete part", error);
+        alert("Could not delete part.");
+      }
     }
   };
 
-  const handleSave = (part: Part) => {
-    if (editingPart) {
-      // Update existing part
-      setParts(prevParts => prevParts.map(p => (p.id === part.id ? part : p)));
-    } else {
-      // Add new part
-      setParts(prevParts => [{ ...part, id: `ROP-${Date.now()}` }, ...prevParts]);
+  const handleSave = async (part: Part) => {
+    try {
+      if (editingPart) {
+        // Update existing part
+        const updated = await updatePart(part);
+        setParts(prevParts => prevParts.map(p => (p.id === updated.id ? updated : p)));
+      } else {
+        // Add new part
+        const newPart = await addPart(part);
+        setParts(prevParts => [newPart, ...prevParts]);
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+       console.error("Failed to save part", error);
+       alert("Could not save part.");
     }
-    setIsDialogOpen(false);
   };
+
+  if (isLoading && isAuthenticated) {
+    return (
+        <div className="flex min-h-screen items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return (
@@ -141,7 +176,10 @@ export default function AdminPage() {
         <header className="bg-background border-b sticky top-0 z-10">
             <div className="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
             <div className="flex items-center gap-2 sm:gap-3">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="hsl(var(--primary))" /><path d="M12 2L2 7V17L12 22L22 17V7L12 2ZM5.5 16.5L12 20L18.5 16.5V8.5L12 5L5.5 8.5V16.5Z" stroke="hsl(var(--primary-foreground))" strokeOpacity="0.5" /><path d="M10.1929 14.5459C9.92133 13.9284 9.75 13.2388 9.75 12.5C9.75 10.2909 11.5409 8.5 13.75 8.5C14.0322 8.5 14.3069 8.53501 14.5682 8.59868C14.0736 8.01991 13.3364 7.66667 12.5 7.66667C10.597 7.66667 9 9.26364 9 11.1667C9 12.4293 9.70469 13.5357 10.6978 14.1613L10.1929 14.5459Z" fill="hsl(var(--accent))"/><path d="M12 12.5C12 11.12 13.12 10 14.5 10C15.88 10 17 11.12 17 12.5C17 13.88 15.88 15 14.5 15C13.12 15 12 13.88 12 12.5Z" fill="hsl(var(--primary-foreground))"/></svg>
+                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="hsl(var(--primary))"/>
+                    <path d="M12 18C15.31 18 18 15.31 18 12C18 8.69 15.31 6 12 6C8.69 6 6 8.69 6 12C6 15.31 8.69 18 12 18ZM12 10C13.1 10 14 10.9 14 12C14 13.1 13.1 14 12 14C10.9 14 10 13.1 10 12C10 10.9 10.9 10 12 10Z" fill="hsl(var(--accent))"/>
+                </svg>
                 <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">{t.headerTitle}</h1>
             </div>
             <Button onClick={handleAddNew} size="sm" className="sm:size-auto">
@@ -180,7 +218,6 @@ export default function AdminPage() {
                             width={40}
                             height={40}
                             className="rounded-sm object-cover"
-                            data-ai-hint={`${part.subcategory.split(' ')[0].toLowerCase()} water`}
                             />
                         </TableCell>
                         <TableCell className="font-medium">{part.name}</TableCell>
@@ -211,7 +248,6 @@ export default function AdminPage() {
                             width={64}
                             height={64}
                             className="rounded-md object-cover"
-                            data-ai-hint={`${part.subcategory.split(' ')[0].toLowerCase()} water`}
                         />
                         <div className="flex-grow space-y-1">
                             <p className="font-semibold">{part.name}</p>

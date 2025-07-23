@@ -1,8 +1,8 @@
+
 import { notFound } from 'next/navigation';
-import { partsData } from '@/lib/parts-data';
-import type { Part } from '@/lib/types';
 import type { Metadata, ResolvingMetadata } from 'next';
 import { PartDetailClient } from './PartDetailClient';
+import { getPartById, getAllParts } from '@/lib/parts-data-server';
 
 type Props = {
   params: { id: string };
@@ -10,13 +10,19 @@ type Props = {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9002';
 
-// Note: generateMetadata is a server-only function.
-// It can coexist in this file because the file itself is a Server Component.
+// This function allows Next.js to pre-render all the part pages at build time
+export async function generateStaticParams() {
+  const parts = await getAllParts();
+  return parts.map((part) => ({
+    id: part.id,
+  }));
+}
+
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const part = partsData.find(p => p.id === params.id);
+  const part = await getPartById(params.id);
 
   if (!part) {
     return {
@@ -59,8 +65,8 @@ export async function generateMetadata(
 }
 
 
-export default function PartDetailPage({ params }: { params: { id: string } }) {
-  const part = partsData.find(p => p.id === params.id);
+export default async function PartDetailPage({ params }: { params: { id: string } }) {
+  const part = await getPartById(params.id);
 
   if (!part) {
     notFound();
@@ -68,5 +74,6 @@ export default function PartDetailPage({ params }: { params: { id: string } }) {
 
   // The page itself is a server component, which fetches data.
   // It then renders the PartDetailClient component, which handles the interactive parts.
-  return <PartDetailClient part={part} />;
+  const allParts = await getAllParts();
+  return <PartDetailClient part={part} allParts={allParts} />;
 }

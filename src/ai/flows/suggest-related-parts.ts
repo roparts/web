@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for suggesting related parts.
@@ -9,12 +10,12 @@
 
 import {z} from 'zod';
 import {ai} from '../genkit';
-import {partsData} from '@/lib/parts-data';
 
 const SuggestRelatedPartsInputSchema = z.object({
   partId: z.string(),
   partCategory: z.string(),
   partDescription: z.string(),
+  allPartNames: z.array(z.string()), // Pass all available part names to the flow
 });
 export type SuggestRelatedPartsInput = z.infer<
   typeof SuggestRelatedPartsInputSchema
@@ -27,22 +28,20 @@ export type SuggestRelatedPartsOutput = z.infer<
   typeof SuggestRelatedPartsOutputSchema
 >;
 
-const allPartNames = partsData.map(p => p.name).join(', ');
-
 const suggestRelatedPartsFlow = ai.defineFlow(
   {
     name: 'suggestRelatedPartsFlow',
     inputSchema: SuggestRelatedPartsInputSchema,
     outputSchema: SuggestRelatedPartsOutputSchema,
   },
-  async ({partId, partCategory, partDescription}) => {
+  async ({partId, partCategory, partDescription, allPartNames}) => {
     const llmResponse = await ai.generate({
       prompt: `You are an expert at recommending related products for a Reverse Osmosis (RO) parts store.
 Based on the provided part, suggest 3 other parts that are commonly bought with it or are functionally related.
 For example, a membrane should be paired with a housing. A filter might be paired with a different type of filter (e.g., sediment with carbon).
 
 Your suggestions MUST come from this list of available parts:
-[${allPartNames}]
+[${allPartNames.join(', ')}]
 
 Do not suggest the original part itself or parts from the exact same category unless it makes functional sense (e.g., different types of filters).
 Return ONLY a JSON array of the part names.

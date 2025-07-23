@@ -6,14 +6,14 @@ import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Wand2, Upload } from 'lucide-react';
+import { Wand2, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { Part } from '@/lib/types';
-import { generateDescriptionAction } from '../actions';
+import { generateDescriptionAction, uploadImageAction } from '../actions';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from '@/context/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -27,7 +27,7 @@ const partSchema = z.object({
   discountPrice: z.coerce.number().optional(),
   features: z.string().min(5, 'Please list at least one feature'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  image: z.string().min(1, "An image is required."), // Accepts URL or data URI
+  image: z.string().min(1, "An image is required.").url("Must be a valid URL."),
   minQuantity: z.coerce.number().min(1, 'Minimum quantity must be at least 1').optional(),
 });
 
@@ -40,6 +40,7 @@ interface EditPartDialogProps {
 
 export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const { translations } = useLanguage();
   const t = translations.admin;
@@ -88,14 +89,29 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     }
   }, [part, form, isOpen]);
 
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        form.setValue('image', reader.result as string, { shouldValidate: true });
-      };
-      reader.readAsDataURL(file);
+      setIsUploading(true);
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = async () => {
+          const base64data = reader.result as string;
+          const imageUrl = await uploadImageAction(base64data);
+          form.setValue('image', imageUrl, { shouldValidate: true });
+           toast({ title: "Image uploaded successfully!" });
+        };
+      } catch (error) {
+        console.error("Image upload failed", error);
+        toast({
+          variant: 'destructive',
+          title: "Image upload failed",
+          description: "Please try again.",
+        });
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -137,8 +153,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
 
   const onSubmit = (values: z.infer<typeof partSchema>) => {
     onSave({
-      ...(values as any), // Cast to any to bypass type errors on schema mismatch
-      id: part?.id || '', // Keep existing ID if editing
+      ...(values as any),
+      id: part?.id || '',
     });
     onOpenChange(false);
   };
@@ -181,11 +197,16 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                                         accept="image/*"
                                         className="hidden"
                                         onChange={handleImageUpload}
+                                        disabled={isUploading}
                                     />
-                                    <Button asChild variant="outline" className="w-full">
+                                    <Button asChild variant="outline" className="w-full" disabled={isUploading}>
                                         <label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center">
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            {t.uploadImageButton}
+                                            {isUploading ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Upload className="mr-2 h-4 w-4" />
+                                            )}
+                                            {isUploading ? "Uploading..." : t.uploadImageButton}
                                         </label>
                                     </Button>
                                 </>
