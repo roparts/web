@@ -16,6 +16,15 @@ const imagekit = new ImageKit({
 
 
 export async function uploadImageAction(imageDataUri: string): Promise<string> {
+    if (
+      !process.env.IMAGEKIT_PUBLIC_KEY ||
+      !process.env.IMAGEKIT_PRIVATE_KEY ||
+      !process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT
+    ) {
+      console.error("ImageKit credentials are not configured.");
+      throw new Error("ImageKit credentials are not configured. Please check your .env file and CREDENTIALS_SETUP.md.");
+    }
+
     try {
         const result = await imagekit.upload({
             file: imageDataUri,
