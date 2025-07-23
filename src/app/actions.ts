@@ -31,7 +31,7 @@ export async function generateDescriptionAction(input: { partName: string, partC
 
 export async function uploadImageAction(imageDataUri: string): Promise<{ url: string; fileId: string }> {
     // Basic validation for data URI
-    if (!imageDataUri.startsWith('data:image/') || !imageData.includes(';base64,')) {
+    if (!imageDataUri.startsWith('data:image/') || !imageDataUri.includes(';base64,')) {
         throw new Error("Invalid image data URI format. Please upload a valid image file.");
     }
     
