@@ -199,7 +199,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                         <FormItem className="w-full">
                            <FormLabel className="sr-only">Image</FormLabel>
                             <FormControl>
-                                <>
+                                <div className="w-full">
                                     <Input 
                                         id="image-upload"
                                         type="file"
@@ -218,7 +218,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                                             {isUploading ? "Uploading..." : t.uploadImageButton}
                                         </label>
                                     </Button>
-                                </>
+                                </div>
                             </FormControl>
                           <FormMessage />
                         </FormItem>
