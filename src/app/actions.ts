@@ -19,13 +19,14 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
     try {
         const result = await imagekit.upload({
             file: imageDataUri,
-            fileName: "ro-part.jpg", // A generic filename is fine
+            fileName: "ro-part.webp", // A generic filename is fine
             folder: "roparts-hub",
             transformation: [{
               "height": "600",
               "width": "600",
               "aspectRatio": "1-1",
-              "crop": "pad_resize"
+              "crop": "pad_resize",
+              "format": "webp"
             }]
         });
         return result.url;
