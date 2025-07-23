@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { Part } from '@/lib/types';
-import { generateDescriptionAction, uploadImageAction } from '../actions';
+import { generateDescriptionAction, uploadImageAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from '@/context/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';

@@ -2,119 +2,67 @@
 "use server";
 
 import 'dotenv/config';
-import { generatePartDescription } from "@/ai/flows/generate-part-description";
-import { refineVoiceSearch } from "@/ai/flows/refine-voice-search";
-import { suggestRelatedParts } from "@/ai/flows/suggest-related-parts";
-import { suggestSearchTerm } from "@/ai/flows/suggest-search-term";
-import type { Part } from "@/lib/types";
-import ImageKit from 'imagekit';
-import { randomBytes } from 'crypto';
+import ImageKit from "imagekit";
+import { generatePartDescription } from '@/ai/flows/generate-part-description';
+import { suggestRelatedParts } from '@/ai/flows/suggest-related-parts';
+import { refineVoiceSearch } from '@/ai/flows/refine-voice-search';
+import type { Part } from '@/lib/types';
+
+
+export async function getRefinedVoiceSearch(transcript: string, allParts: Part[]): Promise<string> {
+    const result = await refineVoiceSearch({ transcript, allParts });
+    return result.refinedQuery;
+}
+
+export async function getRelatedParts(part: Part, allParts: Part[]): Promise<string[]> {
+    const allPartNames = allParts.filter(p => p.id !== part.id).map(p => p.name);
+    const result = await suggestRelatedParts({
+        partId: part.id,
+        partCategory: part.subcategory,
+        partDescription: part.description,
+        allPartNames
+    });
+    return result.relatedParts;
+}
+
+export async function generateDescriptionAction(input: { partName: string, partCategory: string, partFeatures: string }): Promise<string> {
+    const result = await generatePartDescription(input);
+    return result.description;
+}
 
 export async function uploadImageAction(imageDataUri: string): Promise<string> {
-    if (
-      !process.env.IMAGEKIT_PUBLIC_KEY ||
-      !process.env.IMAGEKIT_PRIVATE_KEY ||
-      !process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT
-    ) {
-      console.error("ImageKit credentials are not configured in .env file.");
-      throw new Error("ImageKit credentials are not configured. Please check your .env file and follow the CREDENTIALS_SETUP.md guide.");
+    // Basic validation for data URI
+    if (!imageDataUri.startsWith('data:image/') || !imageDataUri.includes(';base64,')) {
+        throw new Error("Invalid image data URI format. Please upload a valid image file.");
     }
-
-    // Validate the Data URI format
-    if (!imageDataUri || !imageDataUri.startsWith('data:image/') || !imageDataUri.includes(';base64,')) {
-        console.error("Invalid image data URI format received.");
-        throw new Error("Invalid image data format. The file may be corrupted or in an unsupported format.");
-    }
-
-    const imagekit = new ImageKit({
-      publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT,
-    });
     
     try {
-        // Generate a unique filename
-        const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
-        const fileName = `ro-part-${uniqueSuffix}.webp`;
-
-        const result = await imagekit.upload({
-            file: imageDataUri,
-            fileName: fileName,
-            folder: "roparts-hub",
-            transformation: [{
-              "height": "600",
-              "width": "600",
-              "aspectRatio": "1-1",
-              "crop": "pad_resize",
-              "format": "webp",
-              "quality": "80"
-            }]
+        const imagekit = new ImageKit({
+            publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+            privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+            urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
         });
-        return result.url;
+        
+        const uniqueFileName = `ro-part-${Date.now()}-${Math.round(Math.random() * 1E6)}.webp`;
+
+        const response = await imagekit.upload({
+            file: imageDataUri,
+            fileName: uniqueFileName,
+            folder: "/ro-parts/",
+            transformation: [{
+                "format": "webp",
+                "quality": "80",
+                "height": "600",
+                "width": "600",
+                "crop": "at_max"
+            }],
+            useUniqueFileName: false, // We are providing our own unique name
+        });
+
+        return response.url;
     } catch (error: any) {
         console.error("ImageKit upload failed with specific error:", error.message);
         // Throw the actual error from the SDK for better debugging.
         throw new Error(`ImageKit Upload Error: ${error.message}`);
-    }
-}
-
-export async function generateDescriptionAction(input: {
-  partName: string;
-  partCategory: string;
-  partFeatures: string;
-}) {
-  try {
-    const result = await generatePartDescription(input);
-    return result.description;
-  } catch (error) {
-    console.error(error);
-    return "Error generating description.";
-  }
-}
-
-export async function getRelatedParts(part: Part, allParts: Part[]) {
-  try {
-    // Note: The AI flow is designed to work with names. We pass all available part names.
-    const allPartNames = allParts.map(p => p.name);
-    const result = await suggestRelatedParts({
-      partId: part.id,
-      partCategory: part.subcategory,
-      partDescription: `${part.name}: ${part.description}`,
-      allPartNames,
-    });
-    return result.relatedParts;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-}
-
-
-export async function getSearchSuggestion(query: string) {
-  // This function is deprecated in favor of client-side Fuse.js search.
-  if (!query || query.trim().length < 2) {
-    return [];
-  }
-  try {
-    // const result = await suggestSearchTerm({ query });
-    // return result.suggestions;
-    return [];
-  } catch (error) {
-    console.error("Error getting search suggestion:", error);
-    return [];
-  }
-}
-
-export async function getRefinedVoiceSearch(transcript: string, allParts: Part[]) {
-    if (!transcript.trim()) {
-        return "";
-    }
-    try {
-        const result = await refineVoiceSearch({ transcript, allParts });
-        return result.refinedQuery;
-    } catch (error) {
-        console.error("Error refining voice search:", error);
-        // Fallback to the original transcript on error
-        return transcript;
     }
 }

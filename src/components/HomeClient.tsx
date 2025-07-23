@@ -8,7 +8,7 @@ import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
 import { Input } from '@/components/ui/input';
 import { Search, Mic, History, ListFilter, Filter } from 'lucide-react';
-import { getRefinedVoiceSearch } from '../app/actions';
+import { getRefinedVoiceSearch } from '@/app/actions';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
