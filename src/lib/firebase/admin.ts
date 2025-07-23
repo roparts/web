@@ -1,6 +1,5 @@
-{// src/lib/firebase/admin.ts
+// src/lib/firebase/admin.ts
 import admin from 'firebase-admin';
-import 'dotenv/config';
 
 if (!admin.apps.length) {
   try {
