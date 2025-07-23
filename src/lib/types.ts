@@ -21,14 +21,15 @@ export interface Part {
   features_hi?: string;
   minQuantity?: number;
   brand?: string;
-  // New detailed fields
   gpd?: number;
-  voltage?: string; // e.g., "24V", "36V"
-  inletOutletSize?: string; // e.g., "1/4"", "3/8""
-  material?: string; // e.g., "ABS", "FRP", "Stainless Steel"
-  color?: string; // e.g., "White", "Blue", "Transparent"
+  voltage?: string; 
+  inletOutletSize?: string;
+  material?: string;
+  color?: string;
 }
 
 export interface CartItem extends Part {
   quantity: number;
 }
+
+    
