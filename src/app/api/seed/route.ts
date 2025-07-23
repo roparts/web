@@ -16,8 +16,9 @@ export async function GET() {
 
   try {
     const partsCollection = adminDb.collection(PARTS_COLLECTION);
+    
+    // Safety Check: See if data exists
     const existingPartsSnapshot = await partsCollection.limit(1).get();
-
     if (!existingPartsSnapshot.empty) {
       return NextResponse.json(
         {
@@ -26,7 +27,14 @@ export async function GET() {
         { status: 200 }
       );
     }
+    
+    // "Wake up" Firestore with a dummy write/delete. This is a workaround for
+    // a common issue when batch writing to a completely empty Firestore database.
+    const dummyDoc = partsCollection.doc('__dummy__');
+    await dummyDoc.set({ a: 1 });
+    await dummyDoc.delete();
 
+    // Now, perform the actual batch write
     const batch = adminDb.batch();
     let count = 0;
 
