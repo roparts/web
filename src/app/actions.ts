@@ -1,7 +1,6 @@
 
 "use server";
 
-import 'dotenv/config';
 import ImageKit from "imagekit";
 import { generatePartDescription } from '@/ai/flows/generate-part-description';
 import { suggestRelatedParts } from '@/ai/flows/suggest-related-parts';
