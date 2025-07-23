@@ -50,12 +50,6 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
             fileName: uniqueFileName,
             folder: "/ro-parts/",
             useUniqueFileName: false,
-            transformation: [
-              {
-                format: 'webp',
-                quality: 80,
-              }
-            ]
         });
 
         return response.url;
@@ -65,5 +59,3 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
         throw new Error(`ImageKit Upload Error: ${error.message}`);
     }
 }
-
-
