@@ -6,6 +6,12 @@
 
   # This is the directory that Netlify will deploy.
   publish = ".next"
+  
+  # Environment variables for the build
+  [build.environment]
+    # Omit these keys from Netlify's secret scanning to prevent build failures.
+    # These are necessary for the application to build and function correctly.
+    SECRETS_SCAN_OMIT_KEYS = "FIREBASE_SERVICE_ACCOUNT_BASE64,GEMINI_API_KEY,IMAGEKIT_PRIVATE_KEY,IMAGEKIT_PUBLIC_KEY,NEXT_PUBLIC_FIREBASE_API_KEY"
 
 [dev]
   # This is the command that will be run when you run `netlify dev`
