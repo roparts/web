@@ -26,7 +26,7 @@ export async function getRelatedParts(part: Part, allParts: Part[]): Promise<str
 }
 
 export async function generateDescriptionAction(input: { partName: string, partCategory: string, partFeatures: string }): Promise<string> {
-    const result = await generatePartDescription(input);
+    const result = await generateDescriptionAction(input);
     return result.description;
 }
 
