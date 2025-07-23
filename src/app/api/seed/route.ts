@@ -28,24 +28,14 @@ export async function GET() {
       );
     }
     
-    // "Wake up" Firestore with a dummy write/delete. This is a workaround for
-    // a common issue when batch writing to a completely empty Firestore database.
-    const dummyDoc = partsCollection.doc('__dummy__');
-    await dummyDoc.set({ a: 1 });
-    await dummyDoc.delete();
-
-    // Now, perform the actual batch write
-    const batch = adminDb.batch();
+    // Use a loop to write each document individually for robustness.
     let count = 0;
-
     for (const part of partsData) {
       const { id, ...partData } = part;
       const docRef = partsCollection.doc(id);
-      batch.set(docRef, partData);
+      await docRef.set(partData);
       count++;
     }
-
-    await batch.commit();
 
     return NextResponse.json(
       { message: `Successfully seeded database with ${count} parts.` },
