@@ -1,13 +1,13 @@
+
 "use server";
 
 import { adminDb } from './firebase/admin';
 import type { Part } from './types';
-import { unstable_noStore as noStore } from 'next/cache';
 
 const PARTS_COLLECTION = 'parts';
 
 export async function getAllParts(): Promise<Part[]> {
-  noStore(); // Opt out of caching for this function
+  // Caching is now enabled by default. `revalidatePath` in admin actions will handle updates.
   if (!adminDb) {
      console.log("Admin DB not available in getAllParts");
     return [];
@@ -28,7 +28,7 @@ export async function getAllParts(): Promise<Part[]> {
 }
 
 export async function getPartById(id: string): Promise<Part | null> {
-    noStore();
+    // Caching is now enabled by default. `revalidatePath` in admin actions will handle updates.
     if (!adminDb) {
         console.log("Admin DB not available in getPartById");
         return null;
