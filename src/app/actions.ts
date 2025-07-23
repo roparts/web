@@ -26,7 +26,7 @@ export async function getRelatedParts(part: Part, allParts: Part[]): Promise<str
 }
 
 export async function generateDescriptionAction(input: { partName: string, partCategory: string, partFeatures: string }): Promise<string> {
-    const result = await generateDescriptionAction(input);
+    const result = await generatePartDescription(input);
     return result.description;
 }
 
@@ -61,3 +61,4 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
         throw new Error(`ImageKit Upload Error: ${error.message}`);
     }
 }
+
