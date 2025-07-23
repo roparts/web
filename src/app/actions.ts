@@ -20,6 +20,13 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
       throw new Error("ImageKit credentials are not configured. Please check your .env file and follow the CREDENTIALS_SETUP.md guide.");
     }
 
+    // Validate the Data URI format
+    if (!imageDataUri || !imageDataUri.startsWith('data:image/') || !imageDataUri.includes(';base64,')) {
+        console.error("Invalid image data URI format received.");
+        throw new Error("Invalid image data format. The file may be corrupted or in an unsupported format.");
+    }
+
+
     try {
         const imagekit = new ImageKit({
           publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
@@ -47,7 +54,7 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
         return result.url;
     } catch (error) {
         console.error("ImageKit upload failed:", error);
-        throw new Error("Failed to upload image. This may be due to incorrect ImageKit credentials or a network issue. Please verify your keys in the .env file.");
+        throw new Error("Failed to upload image. Your credentials seem correct, but the server encountered an error during the upload process. The file might be corrupted.");
     }
 }
 
