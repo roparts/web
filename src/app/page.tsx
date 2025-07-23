@@ -1,17 +1,18 @@
 
 import { Suspense } from 'react';
-import { HomeClient } from '@/components/HomeClient';
 import { getAllParts } from '@/lib/parts-data-server';
 import { Skeleton } from '@/components/ui/skeleton';
+import dynamic from 'next/dynamic';
+
+const HomeClient = dynamic(() => import('@/components/HomeClient').then(mod => mod.HomeClient), {
+  loading: () => <HomePageSkeleton />,
+});
 
 export default async function Home() {
-  // Fetch data on the server
   const initialParts = await getAllParts();
 
   return (
-    <Suspense fallback={<HomePageSkeleton />}>
       <HomeClient initialParts={initialParts} />
-    </Suspense>
   );
 }
 
