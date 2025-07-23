@@ -89,27 +89,36 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     }
   }, [part, form, isOpen]);
 
-  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setIsUploading(true);
-      try {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = async () => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = async () => {
+        try {
           const base64data = reader.result as string;
           const imageUrl = await uploadImageAction(base64data);
           form.setValue('image', imageUrl, { shouldValidate: true });
-           toast({ title: "Image uploaded successfully!" });
-        };
-      } catch (error) {
-        console.error("Image upload failed", error);
+          toast({ title: "Image uploaded successfully!" });
+        } catch (error) {
+          console.error("Image upload failed", error);
+          toast({
+            variant: 'destructive',
+            title: "Image upload failed",
+            description: "Please try again.",
+          });
+        } finally {
+          setIsUploading(false);
+        }
+      };
+      reader.onerror = (error) => {
+        console.error("FileReader error", error);
         toast({
-          variant: 'destructive',
-          title: "Image upload failed",
-          description: "Please try again.",
+            variant: 'destructive',
+            title: "Could not read file",
+            description: "Please try a different image.",
         });
-      } finally {
         setIsUploading(false);
       }
     }
