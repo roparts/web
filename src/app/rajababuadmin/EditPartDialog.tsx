@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { Part } from '@/lib/types';
-import { generateDescriptionAction, uploadImageAction } from '@/app/actions';
+import { generateDescriptionAction, uploadImageAction, deleteImageAction } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from '@/context/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -42,6 +42,8 @@ interface EditPartDialogProps {
 export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  // This state will track an image uploaded during the current session but not yet saved.
+  const [tempImageFileId, setTempImageFileId] = useState<string | null>(null);
   const { toast } = useToast();
   const { translations } = useLanguage();
   const t = translations.admin;
@@ -64,6 +66,13 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
   });
 
   const imageValue = form.watch('image');
+
+  const resetDialogState = () => {
+    form.reset();
+    setTempImageFileId(null);
+    setIsGenerating(false);
+    setIsUploading(false);
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -90,13 +99,26 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           minQuantity: 1,
         });
       }
+    } else {
+       // When dialog is closed, clean up any unsaved temporary image.
+      if (tempImageFileId) {
+        deleteImageAction(tempImageFileId);
+      }
+      resetDialogState();
     }
-  }, [part, form, isOpen]);
+  }, [part, isOpen]); // Rerunning on `form` and `resetDialogState` causes issues
 
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setIsUploading(true);
+
+      // If there's already a temporary image from this session, delete it first.
+      if (tempImageFileId) {
+        await deleteImageAction(tempImageFileId);
+        setTempImageFileId(null); // Clear it after deletion
+      }
+
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = async () => {
@@ -105,6 +127,10 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           const { url, fileId } = await uploadImageAction(base64data);
           form.setValue('image', url, { shouldValidate: true });
           form.setValue('imageFileId', fileId, { shouldValidate: true });
+          
+          // The new image is now the temporary one until saved.
+          setTempImageFileId(fileId);
+
           toast({ title: "Image uploaded successfully!" });
         } catch (error) {
           console.error("Image upload failed", error);
@@ -166,6 +192,8 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
   };
 
   const onSubmit = (values: z.infer<typeof partSchema>) => {
+    // When we save, the temp image becomes permanent, so we clear the temp state.
+    setTempImageFileId(null); 
     onSave({
       ...(values as any),
       id: part?.id || '',
@@ -173,8 +201,19 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     onOpenChange(false);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // If closing, and a temp image exists, delete it.
+      if (tempImageFileId) {
+        deleteImageAction(tempImageFileId).catch(err => console.error("Failed to delete temp image on close:", err));
+      }
+      resetDialogState();
+    }
+    onOpenChange(open);
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">{part ? t.editDialogTitle : t.addDialogTitle}</DialogTitle>
@@ -362,7 +401,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
               </div>
             </ScrollArea>
             <DialogFooter className="pt-4 border-t">
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>{t.cancelButton}</Button>
+              <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>{t.cancelButton}</Button>
               <Button type="submit">{t.saveButton}</Button>
             </DialogFooter>
           </form>
