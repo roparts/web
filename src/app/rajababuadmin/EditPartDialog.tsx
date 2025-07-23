@@ -56,7 +56,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       discountPrice: undefined,
       features: '',
       description: '',
-      image: 'https://placehold.co/400x400.png',
+      image: 'https://placehold.co/600x600.png',
       minQuantity: 1,
     },
   });
@@ -82,7 +82,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           discountPrice: undefined,
           features: '',
           description: '',
-          image: 'https://placehold.co/400x400.png',
+          image: 'https://placehold.co/600x600.png',
           minQuantity: 1,
         });
       }
@@ -180,7 +180,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                         width={128}
                         height={128}
                         className="rounded-md object-cover border"
-                        onError={(e) => e.currentTarget.src = 'https://placehold.co/400x400.png'}
+                        onError={(e) => e.currentTarget.src = 'https://placehold.co/600x600.png'}
                       />
                     )}
                     <FormField

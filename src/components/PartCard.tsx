@@ -40,8 +40,8 @@ export function PartCard({ part }: PartCardProps) {
               <Image
                 src={part.image}
                 alt={partName}
-                width={400}
-                height={400}
+                width={600}
+                height={600}
                 className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                 data-ai-hint={`${categoryKeyword} water`}
               />
