@@ -111,42 +111,40 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <>
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
         <Head>
             <title>Admin Login</title>
             <meta name="robots" content="noindex, nofollow" />
         </Head>
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-            <Card className="w-full max-w-sm">
-            <CardHeader>
-                <CardTitle className="text-2xl font-headline">{t.loginTitle}</CardTitle>
-                <CardDescription>
-                {t.loginDescription}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="password">{t.passwordLabel}</Label>
-                    <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="********"
-                    required
-                    />
-                </div>
-                {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-                <Button type="submit" className="w-full">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    {t.signInButton}
-                </Button>
-                </form>
-            </CardContent>
-            </Card>
-        </div>
-      </>
+        <Card className="w-full max-w-sm">
+        <CardHeader>
+            <CardTitle className="text-2xl font-headline">{t.loginTitle}</CardTitle>
+            <CardDescription>
+            {t.loginDescription}
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="password">{t.passwordLabel}</Label>
+                <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="********"
+                required
+                />
+            </div>
+            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+            <Button type="submit" className="w-full">
+                <LogIn className="mr-2 h-4 w-4" />
+                {t.signInButton}
+            </Button>
+            </form>
+        </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -283,5 +281,3 @@ export default function AdminPage() {
     </>
   );
 }
-
-    
