@@ -37,7 +37,7 @@ const suggestRelatedPartsFlow = ai.defineFlow(
   },
   async ({partId, partCategory, partDescription, allPartNames}) => {
     const llmResponse = await ai.generate({
-      model: 'gemini-1.5-flash',
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert at recommending related products for a Reverse Osmosis (RO) parts store.
 Based on the provided part, suggest 3 other parts that are commonly bought with it or are functionally related.
 For example, a membrane should be paired with a housing. A filter might be paired with a different type of filter (e.g., sediment with carbon).
