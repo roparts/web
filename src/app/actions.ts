@@ -6,24 +6,31 @@ import { refineVoiceSearch } from "@/ai/flows/refine-voice-search";
 import { suggestRelatedParts } from "@/ai/flows/suggest-related-parts";
 import { suggestSearchTerm } from "@/ai/flows/suggest-search-term";
 import type { Part } from "@/lib/types";
-import { v2 as cloudinary } from 'cloudinary';
+import ImageKit from 'imagekit';
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+  urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
 });
+
 
 export async function uploadImageAction(imageDataUri: string): Promise<string> {
     try {
-        const result = await cloudinary.uploader.upload(imageDataUri, {
-            folder: "roparts-hub", // Optional: organize uploads in a specific folder
-            transformation: [{ width: 600, height: 600, crop: "limit" }]
+        const result = await imagekit.upload({
+            file: imageDataUri,
+            fileName: "ro-part.jpg", // A generic filename is fine
+            folder: "roparts-hub",
+            transformation: [{
+              "height": "600",
+              "width": "600",
+              "aspectRatio": "1-1",
+              "crop": "pad_resize"
+            }]
         });
-        return result.secure_url;
+        return result.url;
     } catch (error) {
-        console.error("Cloudinary upload failed:", error);
+        console.error("ImageKit upload failed:", error);
         throw new Error("Failed to upload image.");
     }
 }
