@@ -1,12 +1,14 @@
 
 "use server";
 
+import 'dotenv/config';
 import { generatePartDescription } from "@/ai/flows/generate-part-description";
 import { refineVoiceSearch } from "@/ai/flows/refine-voice-search";
 import { suggestRelatedParts } from "@/ai/flows/suggest-related-parts";
 import { suggestSearchTerm } from "@/ai/flows/suggest-search-term";
 import type { Part } from "@/lib/types";
 import ImageKit from 'imagekit';
+import { randomBytes } from 'crypto';
 
 export async function uploadImageAction(imageDataUri: string): Promise<string> {
     if (
@@ -18,17 +20,20 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
       throw new Error("ImageKit credentials are not configured. Please check your .env file and CREDENTIALS_SETUP.md.");
     }
 
-    // Moved initialization inside the function
     const imagekit = new ImageKit({
       publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
       privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
       urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
     });
+    
+    // Generate a unique filename
+    const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
+    const fileName = `ro-part-${uniqueSuffix}.webp`;
 
     try {
         const result = await imagekit.upload({
             file: imageDataUri,
-            fileName: "ro-part.webp", // A generic filename is fine
+            fileName: fileName,
             folder: "roparts-hub",
             transformation: [{
               "height": "600",
