@@ -6,6 +6,7 @@ import { generatePartDescription } from '@/ai/flows/generate-part-description';
 import { suggestRelatedParts } from '@/ai/flows/suggest-related-parts';
 import { refineVoiceSearch } from '@/ai/flows/refine-voice-search';
 import type { Part } from '@/lib/types';
+import 'dotenv/config';
 
 
 export async function getRefinedVoiceSearch(transcript: string, allParts: Part[]): Promise<string> {
@@ -49,8 +50,12 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
             fileName: uniqueFileName,
             folder: "/ro-parts/",
             useUniqueFileName: false,
-            format: 'webp',
-            transformation: [{ quality: 80 }],
+            transformation: [
+              {
+                format: 'webp',
+                quality: 80,
+              }
+            ]
         });
 
         return response.url;
@@ -60,4 +65,5 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
         throw new Error(`ImageKit Upload Error: ${error.message}`);
     }
 }
+
 
