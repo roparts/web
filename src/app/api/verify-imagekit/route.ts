@@ -48,7 +48,7 @@ export async function GET() {
       { 
         success: false,
         message: 'Failed to connect to ImageKit. Please verify your credentials in the .env file.',
-        error: errorMessage
+        error: `The connection attempt failed with the following error: "${errorMessage}". This usually indicates an incorrect Public Key, Private Key, or URL Endpoint. Please double-check these values in your .env file against your ImageKit dashboard.`
       },
       { status: 500 }
     );

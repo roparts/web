@@ -26,14 +26,13 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
         throw new Error("Invalid image data format. The file may be corrupted or in an unsupported format.");
     }
 
-
+    const imagekit = new ImageKit({
+      publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT,
+    });
+    
     try {
-        const imagekit = new ImageKit({
-          publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-          privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-          urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT,
-        });
-        
         // Generate a unique filename
         const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
         const fileName = `ro-part-${uniqueSuffix}.webp`;
@@ -52,9 +51,10 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
             }]
         });
         return result.url;
-    } catch (error) {
-        console.error("ImageKit upload failed:", error);
-        throw new Error("Failed to upload image. Your credentials seem correct, but the server encountered an error during the upload process. The file might be corrupted.");
+    } catch (error: any) {
+        console.error("ImageKit upload failed with specific error:", error.message);
+        // Throw the actual error from the SDK for better debugging.
+        throw new Error(`ImageKit Upload Error: ${error.message}`);
     }
 }
 
