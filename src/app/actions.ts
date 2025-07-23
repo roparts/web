@@ -43,24 +43,13 @@ export async function uploadImageAction(imageDataUri: string): Promise<string> {
             urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
         });
         
-        const uniqueFileName = `ro-part-${Date.now()}-${Math.round(Math.random() * 1E6)}.webp`;
+        const uniqueFileName = `ro-part-${Date.now()}-${Math.round(Math.random() * 1E6)}`;
 
         const response = await imagekit.upload({
             file: imageDataUri,
             fileName: uniqueFileName,
             folder: "/ro-parts/",
-            transformation: [
-                {
-                    "height": "600",
-                    "width": "600",
-                    "quality": "80",
-                    "crop": "at_max"
-                },
-                {
-                    "format": "webp"
-                }
-            ],
-            useUniqueFileName: false, // We are providing our own unique name
+            useUniqueFileName: false, 
         });
 
         return response.url;
