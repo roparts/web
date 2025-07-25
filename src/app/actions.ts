@@ -8,7 +8,6 @@ import { refineVoiceSearch } from '@/ai/flows/refine-voice-search';
 import { generatePartImage } from '@/ai/flows/generate-part-image';
 import type { Part } from '@/lib/types';
 import 'dotenv/config';
-import { getPartsAdmin, updatePart } from "@/lib/parts-data-admin";
 
 export async function getRefinedVoiceSearch(transcript: string, allParts: Part[]): Promise<string> {
     const result = await refineVoiceSearch({ transcript, allParts });
@@ -38,41 +37,6 @@ export async function generateImageAction(input: { partName: string, partCategor
     }
     return await uploadImageAction(imageDataUri);
 }
-
-export async function batchGenerateImagesAction(): Promise<{ successCount: number, failureCount: number }> {
-    const allParts = await getPartsAdmin();
-    const partsToUpdate = allParts.filter(p => p.image.includes('placehold.co'));
-    
-    let successCount = 0;
-    let failureCount = 0;
-
-    for (const part of partsToUpdate) {
-        try {
-            const { url, fileId } = await generateImageAction({
-                partName: part.name,
-                partCategory: part.subcategory,
-            });
-
-            // If the old image was from ImageKit, delete it.
-            if (part.imageFileId) {
-                await deleteImageAction(part.imageFileId);
-            }
-
-            await updatePart({
-                ...part,
-                image: url,
-                imageFileId: fileId,
-            });
-            successCount++;
-        } catch (error) {
-            console.error(`Failed to generate image for part ${part.id} (${part.name}):`, error);
-            failureCount++;
-        }
-    }
-
-    return { successCount, failureCount };
-}
-
 
 export async function uploadImageAction(imageDataUri: string): Promise<{ url: string; fileId: string }> {
     // Basic validation for data URI
