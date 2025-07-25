@@ -41,6 +41,8 @@ interface EditPartDialogProps {
   allParts: Part[];
 }
 
+const NO_BRAND_VALUE = "no-brand";
+
 export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }: EditPartDialogProps) {
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
@@ -99,7 +101,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
       if (part) {
         form.reset({
           ...part,
-          brand: part.brand ?? '',
+          brand: part.brand || '',
           discountPrice: part.discountPrice ?? undefined,
           minQuantity: part.minQuantity ?? 1,
           imageFileId: part.imageFileId ?? '',
@@ -247,8 +249,13 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
 
   const onSubmit = (values: z.infer<typeof partSchema>) => {
     setTempImageFileId(null); 
+    const finalValues = {
+        ...values,
+        brand: values.brand === NO_BRAND_VALUE ? '' : values.brand,
+    }
+
     onSave({
-      ...(values as any),
+      ...(finalValues as any),
       id: part?.id || '',
     });
     onOpenChange(false);
@@ -400,7 +407,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
                             </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                                <SelectItem value="">None</SelectItem>
+                                <SelectItem value={NO_BRAND_VALUE}>None</SelectItem>
                                 {brands.map(brand => <SelectItem key={brand} value={brand}>{brand}</SelectItem>)}
                             </SelectContent>
                         </Select>
