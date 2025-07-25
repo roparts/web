@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent, useMemo } from 'react';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,7 @@ import { generateDescriptionAction, uploadImageAction, deleteImageAction, genera
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from '@/context/LanguageContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const partSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -37,17 +38,34 @@ interface EditPartDialogProps {
   onOpenChange: (isOpen: boolean) => void;
   part: Part | null;
   onSave: (partData: Part) => void;
+  allParts: Part[];
 }
 
-export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartDialogProps) {
+export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }: EditPartDialogProps) {
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  // This state will track an image uploaded during the current session but not yet saved.
   const [tempImageFileId, setTempImageFileId] = useState<string | null>(null);
   const { toast } = useToast();
   const { translations } = useLanguage();
   const t = translations.admin;
+
+  const { mainCategories, subcategories, brands } = useMemo(() => {
+    const mainCatSet = new Set<string>();
+    const subCatSet = new Set<string>();
+    const brandSet = new Set<string>();
+    allParts.forEach(p => {
+        if(p.mainCategory) mainCatSet.add(p.mainCategory);
+        if(p.subcategory) subCatSet.add(p.subcategory);
+        if(p.brand) brandSet.add(p.brand);
+    });
+    return {
+        mainCategories: Array.from(mainCatSet).sort(),
+        subcategories: Array.from(subCatSet).sort(),
+        brands: Array.from(brandSet).sort(),
+    }
+  }, [allParts]);
+
 
   const form = useForm<z.infer<typeof partSchema>>({
     resolver: zodResolver(partSchema),
@@ -108,17 +126,15 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
       }
       resetDialogState();
     }
-  }, [part, isOpen]); // Rerunning on `form` and `resetDialogState` causes issues
+  }, [part, isOpen]);
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setIsUploading(true);
-
-      // If there's already a temporary image from this session, delete it first.
       if (tempImageFileId) {
         await deleteImageAction(tempImageFileId);
-        setTempImageFileId(null); // Clear it after deletion
+        setTempImageFileId(null);
       }
 
       const reader = new FileReader();
@@ -129,10 +145,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
           const { url, fileId } = await uploadImageAction(base64data);
           form.setValue('image', url, { shouldValidate: true });
           form.setValue('imageFileId', fileId, { shouldValidate: true });
-          
-          // The new image is now the temporary one until saved.
           setTempImageFileId(fileId);
-
           toast({ title: "Image uploaded successfully!" });
         } catch (error) {
           console.error("Image upload failed", error);
@@ -173,7 +186,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     try {
       const description = await generateDescriptionAction({
         partName: name,
-        partCategory: subcategory, // Use subcategory for generation
+        partCategory: subcategory,
         partFeatures: features,
       });
       form.setValue('description', description, { shouldValidate: true });
@@ -205,8 +218,6 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     }
     
     setIsGeneratingImg(true);
-
-    // If there's an existing temporary image, clean it up.
     if (tempImageFileId) {
       await deleteImageAction(tempImageFileId);
       setTempImageFileId(null);
@@ -216,10 +227,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
         const { url, fileId } = await generateImageAction({ partName: name, partCategory: subcategory });
         form.setValue('image', url, { shouldValidate: true });
         form.setValue('imageFileId', fileId, { shouldValidate: true });
-        
-        // Track the newly generated image as the temporary one.
         setTempImageFileId(fileId);
-
         toast({
             title: "AI Image Generated!",
             description: "A new image has been generated for your part.",
@@ -238,7 +246,6 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
   };
 
   const onSubmit = (values: z.infer<typeof partSchema>) => {
-    // When we save, the temp image becomes permanent, so we clear the temp state.
     setTempImageFileId(null); 
     onSave({
       ...(values as any),
@@ -249,7 +256,6 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // If closing, and a temp image exists, delete it.
       if (tempImageFileId) {
         deleteImageAction(tempImageFileId).catch(err => console.error("Failed to delete temp image on close:", err));
       }
@@ -338,47 +344,70 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
                     </FormItem>
                   )}
                 />
+                 
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="mainCategory"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Main Category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a main category" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {mainCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="subcategory"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.categoryLabel}</FormLabel>
+                         <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder={t.categoryPlaceholder} />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {subcategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                  <FormField
                   control={form.control}
                   name="brand"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t.brandLabel}</FormLabel>
-                      <FormControl>
-                        <Input placeholder={t.brandPlaceholder} {...field} />
-                      </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value} >
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder={t.brandPlaceholder} />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="">None</SelectItem>
+                                {brands.map(brand => <SelectItem key={brand} value={brand}>{brand}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                 <div className="grid grid-cols-2 gap-4">
-                   <FormField
-                    control={form.control}
-                    name="mainCategory"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Main Category</FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g., Domestic RO Parts" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="subcategory"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t.categoryLabel}</FormLabel>
-                        <FormControl>
-                          <Input placeholder={t.categoryPlaceholder} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
                 <div className="grid grid-cols-2 gap-4">
                    <FormField
                     control={form.control}
@@ -466,7 +495,3 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave }: EditPartD
     </Dialog>
   );
 }
-
-    
-
-    
