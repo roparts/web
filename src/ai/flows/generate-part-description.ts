@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for generating a product description.
@@ -8,6 +9,7 @@
  */
 import {z} from 'zod';
 import {ai} from '../genkit';
+import { googleAI } from '@genkit-ai/googleai';
 
 const GeneratePartDescriptionInputSchema = z.object({
   partName: z.string(),
@@ -33,6 +35,7 @@ const generatePartDescriptionFlow = ai.defineFlow(
   },
   async ({partName, partCategory, partFeatures}) => {
     const llmResponse = await ai.generate({
+      model: googleAI.model('gemini-1.5-flash'),
       prompt: `You are a product marketing expert for an e-commerce store that sells Reverse Osmosis (RO) parts.
 Your task is to write a concise, compelling, and SEO-friendly product description.
 
