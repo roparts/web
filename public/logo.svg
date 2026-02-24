@@ -1,6 +1,15 @@
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" rx="8" fill="#1E3A8A"/>
-<path d="M20 8C15.5817 8 12 11.5817 12 16C12 20.4183 20 28 20 28C20 28 28 20.4183 28 16C28 11.5817 24.4183 8 20 8Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M22.5 16.6667L20.8333 18.3333L19.1667 16.6667" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M20.8333 14.1667L19.1667 15.8333L17.5 14.1667" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Hexagon -->
+  <path d="M200 20L46.4 110V290L200 380L353.6 290V110L200 20Z" stroke="#0F172A" stroke-width="12" stroke-linejoin="round"/>
+  <!-- Inner Hexagon -->
+  <path d="M200 50L72.4 125V275L200 350L327.6 275V125L200 50Z" stroke="#0F172A" stroke-width="8" stroke-linejoin="round"/>
+  
+  <!-- Purple Circle Background -->
+  <circle cx="200" cy="200" r="100" fill="#7C3AED"/>
+  
+  <!-- White Water Drop -->
+  <path d="M200 120C200 120 140 190 140 230C140 263.137 166.863 290 200 290C233.137 290 260 263.137 260 230C260 190 200 120 200 120Z" fill="white"/>
+  
+  <!-- Subtle Drop Highlight/Inner Detail -->
+  <path d="M220 210C220 210 240 230 240 250C240 261.046 231.046 270 220 270" stroke="#7C3AED" stroke-width="4" stroke-linecap="round"/>
 </svg>

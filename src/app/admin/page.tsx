@@ -1,5 +1,5 @@
 
-import { getPartsAdmin } from '@/lib/parts-data-admin';
+import { getPartsAdmin, getBrandsAdmin, getCategoriesAdmin, getBannersAdmin } from '@/lib/parts-data-admin';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -8,6 +8,9 @@ import { AdminPageClient } from './AdminPageClient';
 
 export default async function AdminPage() {
     const parts = await getPartsAdmin();
+    const brands = await getBrandsAdmin();
+    const categories = await getCategoriesAdmin();
+    const banners = await getBannersAdmin();
 
     return (
         <div className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -21,7 +24,12 @@ export default async function AdminPage() {
                 <h1 className="text-xl font-semibold font-headline text-primary">Admin Panel</h1>
             </header>
             <main className="flex-1 p-4 sm:px-6 sm:py-0">
-                <AdminPageClient initialParts={parts} />
+                <AdminPageClient
+                    initialParts={parts}
+                    initialBrands={brands}
+                    initialCategories={categories}
+                    initialBanners={banners}
+                />
             </main>
         </div>
     );

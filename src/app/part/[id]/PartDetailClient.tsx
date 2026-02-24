@@ -26,7 +26,7 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
 
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
-  
+
   const features = partFeatures.split(',').map(f => f.trim());
   const categoryKeyword = part.subcategory.split(' ')[0].toLowerCase();
 
@@ -53,18 +53,18 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
                   priority // Prioritize loading the main product image
                 />
               </div>
-               {hasDiscount && (
+              {hasDiscount && (
                 <Badge variant="destructive" className="absolute top-4 right-4 z-10 text-base">
                   {discountPercentage}{translations.partDetails.discount}
                 </Badge>
               )}
             </div>
-            
+
             <div className="flex flex-col">
               {part.brand && <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{part.brand}</p>}
               <h1 className="text-3xl lg:text-4xl font-bold font-headline text-primary tracking-tight mt-1">{partName}</h1>
               <p className="mt-2 text-muted-foreground">{translations.partDetails.category}: <Link href="/" className="text-primary hover:underline">{partSubcategory}</Link></p>
-              
+
               <div className="mt-6">
                 <p className="text-lg font-semibold">{translations.partDetails.keyFeatures}</p>
                 <ul className="mt-2 space-y-2 list-disc list-inside text-muted-foreground">
@@ -75,8 +75,8 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
               </div>
 
               <div className="mt-6">
-                 <p className="text-sm text-muted-foreground">
-                    {translations.partDetails.minQuantity}: <span className="font-bold text-foreground">{part.minQuantity || 1}</span>
+                <p className="text-sm text-muted-foreground">
+                  {translations.partDetails.minQuantity}: <span className="font-bold text-foreground">{part.minQuantity || 1}</span>
                 </p>
               </div>
 
@@ -90,7 +90,7 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
                   <p className="text-4xl font-bold text-primary">₹{part.price.toLocaleString('en-IN')}</p>
                 )}
               </div>
-              
+
               <Button onClick={() => addToCart(part)} size="lg" className="mt-8 w-full sm:w-auto">
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 {translations.partDetails.addToCart}
@@ -105,17 +105,17 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
               <p>{partDescription}</p>
             </div>
           </div>
-          
-           <RelatedParts allParts={allParts} currentPart={part} />
+
+          <RelatedParts allParts={allParts} currentPart={part} />
 
         </div>
       </main>
       <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
         <div className="container mx-auto text-center text-sm">
-           <p>&copy; {new Date().getFullYear()} RoParts Hub. {translations.footer.rightsReserved}</p>
-           <p className="mt-2">
-              <Link href="/rajababuadmin" className="hover:text-primary transition-colors">{translations.footer.adminPanel}</Link>
-            </p>
+          <p>&copy; {new Date().getFullYear()} RoParts Hub. {translations.footer.rightsReserved}</p>
+          <p className="mt-2">
+            <Link href="/admin" className="hover:text-primary transition-colors">{translations.footer.adminPanel}</Link>
+          </p>
         </div>
       </footer>
     </div>

@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: en.metadata.title,
     description: en.metadata.description,
     siteName: 'RoParts Hub',
-     images: [
+    images: [
       {
         url: '/og-image.png', // A default OG image for the site
         width: 1200,
@@ -54,12 +54,12 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: en.metadata.title,
     description: en.metadata.description,
-    images: ['/og-image.png'], 
+    images: ['/og-image.png'],
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/icon',
+    shortcut: '/icon',
+    apple: '/icon',
   },
   manifest: `${siteUrl}/site.webmanifest`,
 };
@@ -75,7 +75,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
-         <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff" />
       </head>
       <body
         className={cn(

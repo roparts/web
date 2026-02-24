@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,6 +36,7 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
+
   .dark {
     --background: 224 71% 4%;
     --foreground: 210 40% 98%;
@@ -66,7 +69,126 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+
+  /* Water Splash & Minimal UI Styles */
+  .water-splash-container {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 40px 0 0 40px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .water-splash-bg {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 60%);
+    animation: splash-rotate 20s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  @keyframes splash-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .minimal-cart-item {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .minimal-cart-item:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  }
+
+  .water-btn {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white !important;
+    border-radius: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    border: none;
+  }
+
+  .water-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+    filter: brightness(1.1);
+  }
+
+  .water-btn-outline {
+    background: transparent;
+    border: 2px solid #0ea5e9;
+    color: #0ea5e9;
+    border-radius: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .water-btn-outline:hover {
+    background: rgba(14, 165, 233, 0.05);
+    transform: translateY(-1px);
+  }
+
+  .quantity-control {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .quantity-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s;
+    background: white;
+    color: #0ea5e9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: none;
+  }
+
+  .quantity-btn:hover:not(:disabled) {
+    background: #0ea5e9;
+    color: white;
+  }
+
+  .water-title {
+    background: linear-gradient(135deg, #0369a1 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.025em;
   }
 }

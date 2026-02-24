@@ -1,10 +1,21 @@
 
-export type MainCategory =
-  | 'Domestic RO Parts'
-  | 'Commercial RO Parts'
-  | 'RO Accessories & Tools'
-  | 'Complete RO Systems'
-  | 'Service Kits & Combo Packs';
+export type MainCategory = string;
+
+export interface CategoryEntity {
+  id: string;
+  name: string;
+  type: 'main' | 'sub';
+  parentId?: string; // For subcategories belonging to a main category (optional linkage)
+}
+
+export interface Brand {
+  id: string;
+  name: string;
+  image?: string;
+  imageFileId?: string;
+  description?: string;
+  whatsappNumber?: string;
+}
 
 export interface Part {
   id: string;
@@ -22,8 +33,9 @@ export interface Part {
   features_hi?: string;
   minQuantity?: number;
   brand?: string;
+  brandId?: string; // Link to the Brand document
   gpd?: number;
-  voltage?: string; 
+  voltage?: string;
   inletOutletSize?: string;
   material?: string;
   color?: string;
@@ -31,4 +43,19 @@ export interface Part {
 
 export interface CartItem extends Part {
   quantity: number;
+}
+
+export interface AdBanner {
+  id: string;
+  title: string;
+  title_hi?: string;
+  subtitle: string;
+  subtitle_hi?: string;
+  badge?: string;
+  badge_hi?: string;
+  image: string;
+  imageFileId?: string;
+  link?: string;
+  active: boolean;
+  order: number;
 }

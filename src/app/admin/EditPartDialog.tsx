@@ -39,11 +39,12 @@ interface EditPartDialogProps {
   part: Part | null;
   onSave: (partData: Part) => void;
   allParts: Part[];
+  brandsList?: { name: string; id: string }[];
 }
 
 const NO_BRAND_VALUE = "no-brand";
 
-export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }: EditPartDialogProps) {
+export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts, brandsList }: EditPartDialogProps) {
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -55,18 +56,31 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
   const { mainCategories, subcategories, brands } = useMemo(() => {
     const mainCatSet = new Set<string>();
     const subCatSet = new Set<string>();
-    const brandSet = new Set<string>();
+
+    // Derive categories from existing parts
     allParts.forEach(p => {
-        if(p.mainCategory) mainCatSet.add(p.mainCategory);
-        if(p.subcategory) subCatSet.add(p.subcategory);
-        if(p.brand) brandSet.add(p.brand);
+      if (p.mainCategory) mainCatSet.add(p.mainCategory);
+      if (p.subcategory) subCatSet.add(p.subcategory);
     });
-    return {
-        mainCategories: Array.from(mainCatSet).sort(),
-        subcategories: Array.from(subCatSet).sort(),
-        brands: Array.from(brandSet).sort(),
+
+    // Determine brands source
+    let availableBrands: string[] = [];
+    if (brandsList && brandsList.length > 0) {
+      availableBrands = brandsList.map(b => b.name);
+    } else {
+      const brandSet = new Set<string>();
+      allParts.forEach(p => {
+        if (p.brand) brandSet.add(p.brand);
+      });
+      availableBrands = Array.from(brandSet);
     }
-  }, [allParts]);
+
+    return {
+      mainCategories: Array.from(mainCatSet).sort(),
+      subcategories: Array.from(subCatSet).sort(),
+      brands: availableBrands.sort(),
+    }
+  }, [allParts, brandsList]);
 
 
   const form = useForm<z.infer<typeof partSchema>>({
@@ -122,7 +136,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
         });
       }
     } else {
-       // When dialog is closed, clean up any unsaved temporary image.
+      // When dialog is closed, clean up any unsaved temporary image.
       if (tempImageFileId) {
         deleteImageAction(tempImageFileId);
       }
@@ -163,9 +177,9 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
       reader.onerror = (error) => {
         console.error("FileReader error", error);
         toast({
-            variant: 'destructive',
-            title: "Could not read file",
-            description: "Please try a different image.",
+          variant: 'destructive',
+          title: "Could not read file",
+          description: "Please try a different image.",
         });
         setIsUploading(false);
       }
@@ -192,7 +206,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
         partFeatures: features,
       });
       form.setValue('description', description, { shouldValidate: true });
-       toast({
+      toast({
         title: t.toast.generationSuccessTitle,
         description: t.toast.generationSuccessDescription,
       });
@@ -210,7 +224,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
 
   const handleGenerateImage = async () => {
     const { name, subcategory } = form.getValues();
-     if (!name || !subcategory) {
+    if (!name || !subcategory) {
       toast({
         variant: "destructive",
         title: t.toast.missingInfoTitle,
@@ -218,7 +232,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
       });
       return;
     }
-    
+
     setIsGeneratingImg(true);
     if (tempImageFileId) {
       await deleteImageAction(tempImageFileId);
@@ -226,32 +240,32 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
     }
 
     try {
-        const { url, fileId } = await generateImageAction({ partName: name, partCategory: subcategory });
-        form.setValue('image', url, { shouldValidate: true });
-        form.setValue('imageFileId', fileId, { shouldValidate: true });
-        setTempImageFileId(fileId);
-        toast({
-            title: "AI Image Generated!",
-            description: "A new image has been generated for your part.",
-        });
+      const { url, fileId } = await generateImageAction({ partName: name, partCategory: subcategory });
+      form.setValue('image', url, { shouldValidate: true });
+      form.setValue('imageFileId', fileId, { shouldValidate: true });
+      setTempImageFileId(fileId);
+      toast({
+        title: "AI Image Generated!",
+        description: "A new image has been generated for your part.",
+      });
 
     } catch (error) {
-        console.error("AI image generation failed:", error);
-        toast({
-            variant: 'destructive',
-            title: "AI Image Generation Failed",
-            description: "Please try again or upload an image manually.",
-        });
+      console.error("AI image generation failed:", error);
+      toast({
+        variant: 'destructive',
+        title: "AI Image Generation Failed",
+        description: "Please try again or upload an image manually.",
+      });
     } finally {
-        setIsGeneratingImg(false);
+      setIsGeneratingImg(false);
     }
   };
 
   const onSubmit = (values: z.infer<typeof partSchema>) => {
-    setTempImageFileId(null); 
+    setTempImageFileId(null);
     const finalValues = {
-        ...values,
-        brand: values.brand === NO_BRAND_VALUE ? '' : values.brand,
+      ...values,
+      brand: values.brand === NO_BRAND_VALUE ? '' : values.brand,
     }
 
     onSave({
@@ -284,59 +298,59 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-             <ScrollArea className="h-[70vh] pr-6">
+            <ScrollArea className="h-[70vh] pr-6">
               <div className="space-y-4 py-4">
                 <div className="flex flex-col items-center gap-4">
-                    {imageValue && (
-                      <Image
-                        src={imageValue}
-                        alt="Part preview"
-                        width={128}
-                        height={128}
-                        className="rounded-md object-cover border"
-                        onError={(e) => e.currentTarget.src = 'https://placehold.co/128x128.png'}
-                      />
-                    )}
-                    <FormField
-                      control={form.control}
-                      name="image"
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                           <FormLabel className="sr-only">Image</FormLabel>
-                            <FormControl>
-                                <div className="w-full grid grid-cols-2 gap-2">
-                                    <Input 
-                                        id="image-upload"
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleImageUpload}
-                                        disabled={isGenerating}
-                                    />
-                                    <Button asChild variant="outline" className="w-full" disabled={isGenerating}>
-                                        <label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center">
-                                            {isUploading ? (
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <Upload className="mr-2 h-4 w-4" />
-                                            )}
-                                            {isUploading ? "Uploading..." : t.uploadImageButton}
-                                        </label>
-                                    </Button>
-                                    <Button type="button" variant="outline" className="w-full" onClick={handleGenerateImage} disabled={isGenerating}>
-                                        {isGeneratingImg ? (
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Sparkles className="mr-2 h-4 w-4" />
-                                        )}
-                                        {isGeneratingImg ? t.generatingButton : t.generateImageButton}
-                                    </Button>
-                                </div>
-                            </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                  {imageValue && (
+                    <Image
+                      src={imageValue}
+                      alt="Part preview"
+                      width={128}
+                      height={128}
+                      className="rounded-md object-cover border"
+                      onError={(e) => e.currentTarget.src = 'https://placehold.co/128x128.png'}
                     />
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel className="sr-only">Image</FormLabel>
+                        <FormControl>
+                          <div className="w-full grid grid-cols-2 gap-2">
+                            <Input
+                              id="image-upload"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleImageUpload}
+                              disabled={isGenerating}
+                            />
+                            <Button asChild variant="outline" className="w-full" disabled={isGenerating}>
+                              <label htmlFor="image-upload" className="cursor-pointer flex items-center justify-center">
+                                {isUploading ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Upload className="mr-2 h-4 w-4" />
+                                )}
+                                {isUploading ? "Uploading..." : t.uploadImageButton}
+                              </label>
+                            </Button>
+                            <Button type="button" variant="outline" className="w-full" onClick={handleGenerateImage} disabled={isGenerating}>
+                              {isGeneratingImg ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Sparkles className="mr-2 h-4 w-4" />
+                              )}
+                              {isGeneratingImg ? t.generatingButton : t.generateImageButton}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
                 <FormField
                   control={form.control}
@@ -351,26 +365,26 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
                     </FormItem>
                   )}
                 />
-                 
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="mainCategory"
                     render={({ field }) => (
-                        <FormItem>
+                      <FormItem>
                         <FormLabel>Main Category</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
+                          <FormControl>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a main category" />
+                              <SelectValue placeholder="Select a main category" />
                             </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {mainCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-                            </SelectContent>
+                          </FormControl>
+                          <SelectContent>
+                            {mainCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                          </SelectContent>
                         </Select>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
                   />
                   <FormField
@@ -379,44 +393,44 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.categoryLabel}</FormLabel>
-                         <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
                             <SelectTrigger>
-                                <SelectValue placeholder={t.categoryPlaceholder} />
+                              <SelectValue placeholder={t.categoryPlaceholder} />
                             </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {subcategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-                            </SelectContent>
+                          </FormControl>
+                          <SelectContent>
+                            {subcategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                          </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                 <FormField
+                <FormField
                   control={form.control}
                   name="brand"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t.brandLabel}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} >
-                            <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder={t.brandPlaceholder} />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                <SelectItem value={NO_BRAND_VALUE}>None</SelectItem>
-                                {brands.map(brand => <SelectItem key={brand} value={brand}>{brand}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
+                      <Select onValueChange={field.onChange} value={field.value} >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t.brandPlaceholder} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={NO_BRAND_VALUE}>None</SelectItem>
+                          {brands.map(brand => <SelectItem key={brand} value={brand}>{brand}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <div className="grid grid-cols-2 gap-4">
-                   <FormField
+                  <FormField
                     control={form.control}
                     name="price"
                     render={({ field }) => (
@@ -429,21 +443,21 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
                       </FormItem>
                     )}
                   />
-                   <FormField
+                  <FormField
                     control={form.control}
                     name="discountPrice"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.discountPriceLabel}</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder={t.optionalPlaceholder} {...field} value={field.value ?? ''}/>
+                          <Input type="number" placeholder={t.optionalPlaceholder} {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                 <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="minQuantity"
@@ -458,13 +472,13 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts }:
                     )}
                   />
                 </div>
-                 <FormField
+                <FormField
                   control={form.control}
                   name="features"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t.featuresLabel}</FormLabel>
-                       <FormControl>
+                      <FormControl>
                         <Input placeholder={t.featuresPlaceholder} {...field} />
                       </FormControl>
                       <FormMessage />

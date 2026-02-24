@@ -22,8 +22,8 @@ const MAIN_CATEGORIES: MainCategory[] = [
   'Service Kits & Combo Packs',
 ];
 
-export function MobileNavSheet({ 
-  open, 
+export function MobileNavSheet({
+  open,
   onOpenChange,
   selectedMainCategory,
   onMainCategoryChange
@@ -50,7 +50,7 @@ export function MobileNavSheet({
                 className="w-full justify-start text-base"
                 onClick={() => handleCategoryClick(category)}
               >
-                {language === 'hi' ? translations.categories.main[category] : category}
+                {language === 'hi' ? (translations.categories.main as any)[category] : category}
               </Button>
             ))}
           </div>
