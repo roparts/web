@@ -1,81 +1,63 @@
 
 "use server";
 
-import { adminDb } from './firebase/admin';
+import { ddbDocClient, TABLES } from './aws/dynamodb';
+import { ScanCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import type { Part, Brand, AdBanner } from './types';
 
-const PARTS_COLLECTION = 'parts';
-
 export async function getAllParts(): Promise<Part[]> {
-  // Caching is now enabled by default. `revalidatePath` in admin actions will handle updates.
-  if (!adminDb) {
-    console.log("Admin DB not available in getAllParts");
-    return [];
-  }
   try {
-    const snapshot = await adminDb.collection(PARTS_COLLECTION).get();
-    if (snapshot.empty) {
-      console.log('No parts found in Firestore.');
-      return [];
-    }
-    const parts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Part));
-    return parts;
+    const command = new ScanCommand({
+      TableName: TABLES.PARTS,
+    });
+    const response = await ddbDocClient.send(command);
+    return (response.Items as Part[]) || [];
   } catch (error) {
-    console.error("Error fetching parts from Firestore:", error);
-    // In case of error, you might want to return an empty array or handle it differently
+    console.error("Error fetching parts from DynamoDB:", error);
     return [];
   }
 }
 
 export async function getPartById(id: string): Promise<Part | null> {
-  // Caching is now enabled by default. `revalidatePath` in admin actions will handle updates.
-  if (!adminDb) {
-    console.log("Admin DB not available in getPartById");
-    return null;
-  }
   try {
-    const docRef = adminDb.collection(PARTS_COLLECTION).doc(id);
-    const docSnap = await docRef.get();
-
-    if (docSnap.exists) {
-      return { id: docSnap.id, ...docSnap.data() } as Part;
-    } else {
-      console.log("No such document!");
-      return null;
-    }
+    const command = new GetCommand({
+      TableName: TABLES.PARTS,
+      Key: { id },
+    });
+    const response = await ddbDocClient.send(command);
+    return (response.Item as Part) || null;
   } catch (error) {
-    console.error("Error fetching part by ID from Firestore:", error);
+    console.error("Error fetching part by ID from DynamoDB:", error);
     return null;
   }
 }
 
-
 export async function getAllBrands(): Promise<Brand[]> {
-  if (!adminDb) {
-    console.log("Admin DB not available in getAllBrands");
-    return [];
-  }
   try {
-    const snapshot = await adminDb.collection('brands').orderBy('name').get();
-    if (snapshot.empty) {
-      return [];
-    }
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Brand));
+    const command = new ScanCommand({
+      TableName: TABLES.BRANDS,
+    });
+    const response = await ddbDocClient.send(command);
+    const brands = (response.Items as Brand[]) || [];
+    return brands.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error("Error fetching brands:", error);
+    console.error("Error fetching brands from DynamoDB:", error);
     return [];
   }
 }
 
 export async function getAllBanners(): Promise<AdBanner[]> {
-  if (!adminDb) return [];
   try {
-    const snapshot = await adminDb.collection('banners').orderBy('order').get();
-    if (snapshot.empty) return [];
-    const banners = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as AdBanner));
-    return banners.filter(b => b.active);
+    const command = new ScanCommand({
+      TableName: TABLES.BANNERS,
+    });
+    const response = await ddbDocClient.send(command);
+    const banners = (response.Items as AdBanner[]) || [];
+    return banners
+      .filter(b => b.active)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   } catch (error) {
-    console.error("Error fetching banners:", error);
+    console.error("Error fetching banners from DynamoDB:", error);
     return [];
   }
 }

@@ -2,98 +2,100 @@
 "use server";
 
 import { revalidatePath } from 'next/cache';
-import { adminDb } from './firebase/admin';
+import { ddbDocClient, TABLES } from './aws/dynamodb';
+import { ScanCommand, PutCommand, DeleteCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import type { Part, Brand, CategoryEntity, AdBanner } from './types';
 import { deleteImageAction } from '@/app/actions';
 
-const PARTS_COLLECTION = 'parts';
-const BRANDS_COLLECTION = 'brands';
-
 export async function getPartsAdmin(): Promise<Part[]> {
-  if (!adminDb) {
-    console.log("Admin DB not available in getPartsAdmin");
-    return [];
-  }
   try {
-    const snapshot = await adminDb.collection(PARTS_COLLECTION).orderBy('name').get();
-    if (snapshot.empty) {
-      return [];
-    }
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Part));
+    const command = new ScanCommand({
+      TableName: TABLES.PARTS,
+    });
+    const response = await ddbDocClient.send(command);
+    const parts = (response.Items as Part[]) || [];
+    return parts.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error("Error fetching parts for admin:", error);
+    console.error("Error fetching parts for admin from DynamoDB:", error);
     return [];
   }
 }
 
 export async function addPart(partData: Omit<Part, 'id'>): Promise<Part> {
-  if (!adminDb) {
-    throw new Error("Admin DB not available. Cannot add part.");
-  }
   try {
-    const docRef = await adminDb.collection(PARTS_COLLECTION).add(partData);
+    const id = crypto.randomUUID();
+    const newPart = { ...partData, id };
+    const command = new PutCommand({
+      TableName: TABLES.PARTS,
+      Item: newPart,
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
     revalidatePath('/');
-    return { ...partData, id: docRef.id };
+    return newPart;
   } catch (error) {
-    console.error("Error adding part:", error);
+    console.error("Error adding part to DynamoDB:", error);
     throw new Error("Failed to add part.");
   }
 }
 
 export async function updatePart(partData: Part): Promise<Part> {
-  if (!adminDb) {
-    throw new Error("Admin DB not available. Cannot update part.");
-  }
   try {
-    const { id, ...dataToUpdate } = partData;
-    const docRef = adminDb.collection(PARTS_COLLECTION).doc(id);
+    const { id } = partData;
 
-    // Fetch the old document to check if the image has changed
-    const oldDoc = await docRef.get();
-    if (oldDoc.exists) {
-      const oldData = oldDoc.data() as Part;
-      const oldImageFileId = oldData.imageFileId;
-      const newImageFileId = dataToUpdate.imageFileId;
+    // Fetch old to handle image deletion
+    const getCommand = new GetCommand({
+      TableName: TABLES.PARTS,
+      Key: { id },
+    });
+    const oldRes = await ddbDocClient.send(getCommand);
+    const oldData = oldRes.Item as Part;
 
-      // If there's a new image and an old one to delete
-      if (newImageFileId && oldImageFileId && newImageFileId !== oldImageFileId) {
-        await deleteImageAction(oldImageFileId);
+    if (oldData) {
+      if (partData.imageFileId && oldData.imageFileId && partData.imageFileId !== oldData.imageFileId) {
+        await deleteImageAction(oldData.imageFileId);
       }
     }
 
-    await docRef.set(dataToUpdate, { merge: true });
+    const command = new PutCommand({
+      TableName: TABLES.PARTS,
+      Item: partData,
+    });
+    await ddbDocClient.send(command);
+
     revalidatePath('/admin');
     revalidatePath('/');
     revalidatePath(`/part/${id}`);
     return partData;
   } catch (error) {
-    console.error("Error updating part:", error);
+    console.error("Error updating part in DynamoDB:", error);
     throw new Error("Failed to update part.");
   }
 }
 
-
 export async function deletePart(partId: string): Promise<void> {
-  if (!adminDb) {
-    throw new Error("Admin DB not available. Cannot delete part.");
-  }
   try {
-    const docRef = adminDb.collection(PARTS_COLLECTION).doc(partId);
-    const docSnap = await docRef.get();
+    const getCommand = new GetCommand({
+      TableName: TABLES.PARTS,
+      Key: { id: partId },
+    });
+    const oldRes = await ddbDocClient.send(getCommand);
+    const partData = oldRes.Item as Part;
 
-    if (docSnap.exists) {
-      const partData = docSnap.data() as Part;
-      if (partData.imageFileId) {
-        await deleteImageAction(partData.imageFileId);
-      }
+    if (partData?.imageFileId) {
+      await deleteImageAction(partData.imageFileId);
     }
 
-    await docRef.delete();
+    const command = new DeleteCommand({
+      TableName: TABLES.PARTS,
+      Key: { id: partId },
+    });
+    await ddbDocClient.send(command);
+
     revalidatePath('/admin');
     revalidatePath('/');
   } catch (error) {
-    console.error("Error deleting part:", error);
+    console.error("Error deleting part from DynamoDB:", error);
     throw new Error("Failed to delete part.");
   }
 }
@@ -101,206 +103,241 @@ export async function deletePart(partId: string): Promise<void> {
 // --- Brand Operations ---
 
 export async function getBrandsAdmin(): Promise<Brand[]> {
-  if (!adminDb) {
-    console.log("Admin DB not available in getBrandsAdmin");
-    return [];
-  }
   try {
-    const snapshot = await adminDb.collection(BRANDS_COLLECTION).orderBy('name').get();
-    if (snapshot.empty) {
-      return [];
-    }
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Brand));
+    const command = new ScanCommand({
+      TableName: TABLES.BRANDS,
+    });
+    const response = await ddbDocClient.send(command);
+    const brands = (response.Items as Brand[]) || [];
+    return brands.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error("Error fetching brands for admin:", error);
+    console.error("Error fetching brands for admin from DynamoDB:", error);
     return [];
   }
 }
 
 export async function addBrand(brandData: Omit<Brand, 'id'>): Promise<Brand> {
-  if (!adminDb) {
-    throw new Error("Admin DB not available. Cannot add brand.");
-  }
   try {
-    const docRef = await adminDb.collection(BRANDS_COLLECTION).add(brandData);
+    const id = crypto.randomUUID();
+    const newBrand = { ...brandData, id };
+    const command = new PutCommand({
+      TableName: TABLES.BRANDS,
+      Item: newBrand,
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
-    return { ...brandData, id: docRef.id };
+    return newBrand;
   } catch (error) {
-    console.error("Error adding brand:", error);
+    console.error("Error adding brand to DynamoDB:", error);
     throw new Error("Failed to add brand.");
   }
 }
 
 export async function updateBrand(brandData: Brand): Promise<Brand> {
-  if (!adminDb) {
-    throw new Error("Admin DB not available. Cannot update brand.");
-  }
   try {
-    const { id, ...dataToUpdate } = brandData;
-    const docRef = adminDb.collection(BRANDS_COLLECTION).doc(id);
+    const { id } = brandData;
+    const getCommand = new GetCommand({
+      TableName: TABLES.BRANDS,
+      Key: { id },
+    });
+    const oldRes = await ddbDocClient.send(getCommand);
+    const oldData = oldRes.Item as Brand;
 
-    const oldDoc = await docRef.get();
-    if (oldDoc.exists) {
-      const oldData = oldDoc.data() as Brand;
-      const oldImageFileId = oldData.imageFileId;
-      const newImageFileId = dataToUpdate.imageFileId;
-
-      if (newImageFileId && oldImageFileId && newImageFileId !== oldImageFileId) {
-        await deleteImageAction(oldImageFileId);
+    if (oldData) {
+      if (brandData.imageFileId && oldData.imageFileId && brandData.imageFileId !== oldData.imageFileId) {
+        await deleteImageAction(oldData.imageFileId);
       }
     }
 
-    await docRef.set(dataToUpdate, { merge: true });
+    const command = new PutCommand({
+      TableName: TABLES.BRANDS,
+      Item: brandData,
+    });
+    await ddbDocClient.send(command);
+
     revalidatePath('/admin');
     return brandData;
   } catch (error) {
-    console.error("Error updating brand:", error);
+    console.error("Error updating brand in DynamoDB:", error);
     throw new Error("Failed to update brand.");
   }
 }
 
 export async function deleteBrand(brandId: string): Promise<void> {
-  if (!adminDb) {
-    throw new Error("Admin DB not available. Cannot delete brand.");
-  }
   try {
-    const docRef = adminDb.collection(BRANDS_COLLECTION).doc(brandId);
-    const docSnap = await docRef.get();
+    const getCommand = new GetCommand({
+      TableName: TABLES.BRANDS,
+      Key: { id: brandId },
+    });
+    const oldRes = await ddbDocClient.send(getCommand);
+    const brandData = oldRes.Item as Brand;
 
-    if (docSnap.exists) {
-      const brandData = docSnap.data() as Brand;
-      if (brandData.imageFileId) {
-        await deleteImageAction(brandData.imageFileId);
-      }
+    if (brandData?.imageFileId) {
+      await deleteImageAction(brandData.imageFileId);
     }
 
-    await docRef.delete();
+    const command = new DeleteCommand({
+      TableName: TABLES.BRANDS,
+      Key: { id: brandId },
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
   } catch (error) {
-    console.error("Error deleting brand:", error);
+    console.error("Error deleting brand from DynamoDB:", error);
     throw new Error("Failed to delete brand.");
   }
 }
+
 // --- Category Operations ---
 
-const CATEGORIES_COLLECTION = 'categories';
-
 export async function getCategoriesAdmin(): Promise<CategoryEntity[]> {
-  if (!adminDb) return [];
   try {
-    const snapshot = await adminDb.collection(CATEGORIES_COLLECTION).orderBy('name').get();
-    if (snapshot.empty) return [];
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as CategoryEntity));
+    const command = new ScanCommand({
+      TableName: TABLES.CATEGORIES,
+    });
+    const response = await ddbDocClient.send(command);
+    const categories = (response.Items as CategoryEntity[]) || [];
+    return categories.sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error("Error fetching categories from DynamoDB:", error);
     return [];
   }
 }
 
 export async function addCategory(categoryData: Omit<CategoryEntity, 'id'>): Promise<CategoryEntity> {
-  if (!adminDb) throw new Error("Admin DB not available");
   try {
-    const docRef = await adminDb.collection(CATEGORIES_COLLECTION).add(categoryData);
+    const id = crypto.randomUUID();
+    const newCategory = { ...categoryData, id };
+    const command = new PutCommand({
+      TableName: TABLES.CATEGORIES,
+      Item: newCategory,
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
-    return { ...categoryData, id: docRef.id };
+    return newCategory;
   } catch (error) {
-    console.error("Error adding category:", error);
+    console.error("Error adding category to DynamoDB:", error);
     throw new Error("Failed to add category");
   }
 }
 
 export async function updateCategory(categoryData: CategoryEntity): Promise<CategoryEntity> {
-  if (!adminDb) throw new Error("Admin DB not available");
   try {
-    const { id, ...data } = categoryData;
-    await adminDb.collection(CATEGORIES_COLLECTION).doc(id).set(data, { merge: true });
+    const command = new PutCommand({
+      TableName: TABLES.CATEGORIES,
+      Item: categoryData,
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
     return categoryData;
   } catch (error) {
-    console.error("Error updating category:", error);
+    console.error("Error updating category in DynamoDB:", error);
     throw new Error("Failed to update category");
   }
 }
 
 export async function deleteCategory(categoryId: string): Promise<void> {
-  if (!adminDb) throw new Error("Admin DB not available");
   try {
-    await adminDb.collection(CATEGORIES_COLLECTION).doc(categoryId).delete();
+    const command = new DeleteCommand({
+      TableName: TABLES.CATEGORIES,
+      Key: { id: categoryId },
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
   } catch (error) {
-    console.error("Error deleting category:", error);
+    console.error("Error deleting category from DynamoDB:", error);
     throw new Error("Failed to delete category");
   }
 }
 
 // --- Banner Operations ---
-const BANNERS_COLLECTION = 'banners';
 
 export async function getBannersAdmin(): Promise<AdBanner[]> {
-  if (!adminDb) return [];
   try {
-    const snapshot = await adminDb.collection(BANNERS_COLLECTION).orderBy('order').get();
-    if (snapshot.empty) return [];
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as AdBanner));
+    const command = new ScanCommand({
+      TableName: TABLES.BANNERS,
+    });
+    const response = await ddbDocClient.send(command);
+    const banners = (response.Items as AdBanner[]) || [];
+    return banners.sort((a, b) => (a.order || 0) - (b.order || 0));
   } catch (error) {
-    console.error("Error fetching banners:", error);
+    console.error("Error fetching banners from DynamoDB:", error);
     return [];
   }
 }
 
 export async function addBanner(bannerData: Omit<AdBanner, 'id'>): Promise<AdBanner> {
-  if (!adminDb) throw new Error("Admin DB not available");
   try {
-    const docRef = await adminDb.collection(BANNERS_COLLECTION).add(bannerData);
+    const id = crypto.randomUUID();
+    const newBanner = { ...bannerData, id };
+    const command = new PutCommand({
+      TableName: TABLES.BANNERS,
+      Item: newBanner,
+    });
+    await ddbDocClient.send(command);
     revalidatePath('/admin');
     revalidatePath('/');
-    return { ...bannerData, id: docRef.id };
+    return newBanner;
   } catch (error) {
-    console.error("Error adding banner:", error);
+    console.error("Error adding banner to DynamoDB:", error);
     throw new Error("Failed to add banner");
   }
 }
 
 export async function updateBanner(bannerData: AdBanner): Promise<AdBanner> {
-  if (!adminDb) throw new Error("Admin DB not available");
   try {
-    const { id, ...data } = bannerData;
-    const docRef = adminDb.collection(BANNERS_COLLECTION).doc(id);
+    const { id } = bannerData;
+    const getCommand = new GetCommand({
+      TableName: TABLES.BANNERS,
+      Key: { id },
+    });
+    const oldRes = await ddbDocClient.send(getCommand);
+    const oldData = oldRes.Item as AdBanner;
 
-    const oldDoc = await docRef.get();
-    if (oldDoc.exists) {
-      const oldData = oldDoc.data() as AdBanner;
-      if (data.imageFileId && oldData.imageFileId && data.imageFileId !== oldData.imageFileId) {
+    if (oldData) {
+      if (bannerData.imageFileId && oldData.imageFileId && bannerData.imageFileId !== oldData.imageFileId) {
         await deleteImageAction(oldData.imageFileId);
       }
     }
 
-    await docRef.set(data, { merge: true });
+    const command = new PutCommand({
+      TableName: TABLES.BANNERS,
+      Item: bannerData,
+    });
+    await ddbDocClient.send(command);
+
     revalidatePath('/admin');
     revalidatePath('/');
     return bannerData;
   } catch (error) {
-    console.error("Error updating banner:", error);
+    console.error("Error updating banner in DynamoDB:", error);
     throw new Error("Failed to update banner");
   }
 }
 
 export async function deleteBanner(bannerId: string): Promise<void> {
-  if (!adminDb) throw new Error("Admin DB not available");
   try {
-    const docRef = adminDb.collection(BANNERS_COLLECTION).doc(bannerId);
-    const docSnap = await docRef.get();
-    if (docSnap.exists) {
-      const data = docSnap.data() as AdBanner;
-      if (data.imageFileId) {
-        await deleteImageAction(data.imageFileId);
-      }
+    const getCommand = new GetCommand({
+      TableName: TABLES.BANNERS,
+      Key: { id: bannerId },
+    });
+    const oldRes = await ddbDocClient.send(getCommand);
+    const data = oldRes.Item as AdBanner;
+
+    if (data?.imageFileId) {
+      await deleteImageAction(data.imageFileId);
     }
-    await docRef.delete();
+
+    const command = new DeleteCommand({
+      TableName: TABLES.BANNERS,
+      Key: { id: bannerId },
+    });
+    await ddbDocClient.send(command);
+
     revalidatePath('/admin');
     revalidatePath('/');
   } catch (error) {
-    console.error("Error deleting banner:", error);
+    console.error("Error deleting banner from DynamoDB:", error);
     throw new Error("Failed to delete banner");
   }
 }
