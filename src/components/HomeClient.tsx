@@ -357,16 +357,26 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             <div className="flex-[1.2] text-center lg:text-left">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-headline text-slate-900 tracking-tight mb-6 leading-[1.1]">
-                Ultimate RO <br className="hidden lg:block" />
-                <span className="text-primary">Parts Collection</span>
+                {translations.home.title}
               </h1>
               <div className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 flex flex-wrap items-center justify-center lg:justify-start gap-x-2">
-                <span>Find everything you need for your water purification system.</span>
-                <TypewriterText
-                  texts={["High-quality.", "Reliable.", "Ready to ship."]}
-                  className="text-primary font-semibold"
-                  cursorClassName="text-primary"
-                />
+                <span>{translations.home.subtitle}</span>
+              </div>
+              {/* Visually Hidden SEO Content */}
+              <div className="sr-only">
+                <h2>Best Reverse Osmosis (RO) Spare Parts in India</h2>
+                <p>
+                  Buy high-quality RO membrane, water purifier filters, RO pumps, and all types of
+                  RO spare parts at the best prices. We supply Kent RO parts, Aquaguard spares,
+                  and universal water purifier components for domestic and commercial systems.
+                </p>
+                <ul>
+                  <li>RO Filter Spares</li>
+                  <li>Reverse Osmosis Membranes</li>
+                  <li>Water Purifier Service Kits</li>
+                  <li>RO SV and Pump</li>
+                  <li>Inline Filters and Carbon Filters</li>
+                </ul>
               </div>
             </div>
             <div className="flex-1 relative w-full max-w-[180px] sm:max-w-[320px] lg:max-w-[300px]">

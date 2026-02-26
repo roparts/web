@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/context/LanguageContext';
 import en from '@/locales/en.json';
 import hi from '@/locales/hi.json';
+import { generateOrganizationSchema } from '@/lib/seo-schema';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -109,6 +110,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#ffffff" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateOrganizationSchema()) }}
+        />
       </head>
       <body
         className={cn(
