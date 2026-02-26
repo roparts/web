@@ -2,9 +2,11 @@
 import { Suspense } from 'react';
 import { getAllParts, getAllBanners } from '@/lib/parts-data-server';
 import { Skeleton } from '@/components/ui/skeleton';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
-const HomeClient = dynamic(() => import('@/components/HomeClient').then(mod => mod.HomeClient), {
+export const dynamic = 'force-dynamic';
+
+const HomeClient = nextDynamic(() => import('@/components/HomeClient').then(mod => mod.HomeClient), {
   loading: () => <HomePageSkeleton />,
 });
 
