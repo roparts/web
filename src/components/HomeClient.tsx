@@ -357,10 +357,10 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             <div className="flex-[1.2] text-center lg:text-left">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-headline text-slate-900 tracking-tight mb-6 leading-[1.1]">
-                {translations.home.title}
+                {translations?.home?.title || "Ultimate RO Parts Collection"}
               </h1>
               <div className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 flex flex-wrap items-center justify-center lg:justify-start gap-x-2">
-                <span>{translations.home.subtitle}</span>
+                <span>{translations?.home?.subtitle || "Find everything you need for your water purification system."}</span>
               </div>
               {/* Visually Hidden SEO Content */}
               <div className="sr-only">
@@ -644,9 +644,13 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-6">
                 <Search className="h-10 w-10 text-slate-400" />
               </div>
-              <h4 className="text-2xl font-bold text-slate-700 mb-2">No parts found</h4>
+              <h4 className="text-2xl font-bold text-slate-700 mb-2">
+                {initialParts.length === 0 ? "Database Connection Required" : "No parts found"}
+              </h4>
               <p className="text-slate-500 max-w-md mx-auto">
-                We couldn't find any parts matching your current filters. Try adjusting your search or filters.
+                {initialParts.length === 0
+                  ? "We couldn't load any products from the server. Please check if the Firebase configuration is set correctly."
+                  : translations?.home?.noPartsHint || "Try adjusting your search or filters."}
               </p>
             </div>
           )}

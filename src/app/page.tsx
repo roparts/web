@@ -14,6 +14,8 @@ export default async function Home() {
   const initialParts = await getAllParts();
   const banners = await getAllBanners();
 
+  console.log(`Server Fetch: ${initialParts.length} parts, ${banners.length} banners found.`);
+
   return (
     <HomeClient initialParts={initialParts} initialBanners={banners} />
   );
