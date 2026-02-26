@@ -29,11 +29,37 @@ export const metadata: Metadata = {
     template: `%s | RoParts Hub`,
   },
   description: en.metadata.description,
-  keywords: ['RO Parts', 'Reverse Osmosis', 'Water Purifier Spares', 'RO Membrane', 'RO Filter', 'RO Pump'],
+  keywords: [
+    'RO Parts', 'Reverse Osmosis', 'Water Purifier Spares', 'RO Membrane',
+    'RO Filter', 'RO Pump', 'Water Filter Spares India', 'Domestic RO Parts',
+    'Commercial RO Parts', 'AquaPure', 'Kent RO Spares', 'RO Accessories'
+  ],
   authors: [{ name: 'RoParts Hub' }],
   creator: 'RoParts Hub',
   publisher: 'RoParts Hub',
-  robots: 'index, follow',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: '/',
+    languages: {
+      'en-US': '/en',
+      'hi-IN': '/hi',
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -43,10 +69,10 @@ export const metadata: Metadata = {
     siteName: 'RoParts Hub',
     images: [
       {
-        url: '/og-image.png', // A default OG image for the site
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'RoParts Hub',
+        alt: 'RoParts Hub - Best RO Spare Parts in India',
       },
     ],
   },
@@ -55,13 +81,20 @@ export const metadata: Metadata = {
     title: en.metadata.title,
     description: en.metadata.description,
     images: ['/og-image.png'],
+    creator: '@ropartshub',
   },
   icons: {
-    icon: '/icon',
-    shortcut: '/icon',
-    apple: '/icon',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    shortcut: '/icon.png',
+    apple: '/apple-icon.png',
   },
-  manifest: `${siteUrl}/site.webmanifest`,
+  manifest: `/site.webmanifest`,
+  verification: {
+    google: 'google-site-verification-id', // Placeholder - user should replace with actual ID
+  },
 };
 
 export default function RootLayout({
