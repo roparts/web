@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { PlusCircle, ArrowLeft, Trash2, Edit } from 'lucide-react';
-import type { Part, Brand } from '@/lib/types';
+import type { Part, Brand, CategoryEntity } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import {
     Table,
@@ -36,9 +36,10 @@ interface BrandDetailProps {
     allParts: Part[];
     onBack: () => void;
     onUpdateParts?: (updater: any) => void;
+    categories: CategoryEntity[];
 }
 
-export function BrandDetail({ brand, allParts, onBack, onUpdateParts }: BrandDetailProps) {
+export function BrandDetail({ brand, allParts, onBack, onUpdateParts, categories }: BrandDetailProps) {
     const brandParts = allParts.filter(p => p.brandId === brand.id || p.brand === brand.name);
 
     const [parts, setParts] = useState<Part[]>(brandParts);
@@ -205,6 +206,7 @@ export function BrandDetail({ brand, allParts, onBack, onUpdateParts }: BrandDet
                 onSave={handleSave}
                 allParts={allParts}
                 brandsList={[brand]}
+                categoriesList={categories}
             />
 
             <AddExistingProductDialog

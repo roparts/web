@@ -413,6 +413,7 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
           allParts={parts}
           onBack={() => setViewMode('brands')}
           onUpdateParts={setParts}
+          categories={categories}
         />
       );
     }
@@ -662,6 +663,7 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
         onSave={handleSave}
         allParts={parts}
         brandsList={brands}
+        categoriesList={categories}
       />
 
       <EditAdDialog

@@ -37,14 +37,15 @@ interface EditPartDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   part: Part | null;
-  onSave: (partData: Part) => void;
   allParts: Part[];
+  onSave: (partData: Part) => void;
   brandsList?: { name: string; id: string }[];
+  categoriesList?: { name: string; type: 'main' | 'sub' }[];
 }
 
 const NO_BRAND_VALUE = "no-brand";
 
-export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts, brandsList }: EditPartDialogProps) {
+export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts, brandsList, categoriesList }: EditPartDialogProps) {
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -57,7 +58,13 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts, b
     const mainCatSet = new Set<string>();
     const subCatSet = new Set<string>();
 
-    // Derive categories from existing parts
+    // 1. Add formal categories from management
+    categoriesList?.forEach((c: { name: string; type: 'main' | 'sub' }) => {
+      if (c.type === 'main') mainCatSet.add(c.name);
+      else subCatSet.add(c.name);
+    });
+
+    // 2. Derive categories from existing parts (legacy/unmanaged)
     allParts.forEach(p => {
       if (p.mainCategory) mainCatSet.add(p.mainCategory);
       if (p.subcategory) subCatSet.add(p.subcategory);
@@ -80,7 +87,7 @@ export function EditPartDialog({ isOpen, onOpenChange, part, onSave, allParts, b
       subcategories: Array.from(subCatSet).sort(),
       brands: availableBrands.sort(),
     }
-  }, [allParts, brandsList]);
+  }, [allParts, brandsList, categoriesList]);
 
 
   const form = useForm<z.infer<typeof partSchema>>({
