@@ -35,9 +35,10 @@ interface BrandDetailProps {
     brand: Brand;
     allParts: Part[];
     onBack: () => void;
+    onUpdateParts?: (updater: any) => void;
 }
 
-export function BrandDetail({ brand, allParts, onBack }: BrandDetailProps) {
+export function BrandDetail({ brand, allParts, onBack, onUpdateParts }: BrandDetailProps) {
     const brandParts = allParts.filter(p => p.brandId === brand.id || p.brand === brand.name);
 
     const [parts, setParts] = useState<Part[]>(brandParts);
@@ -81,6 +82,9 @@ export function BrandDetail({ brand, allParts, onBack }: BrandDetailProps) {
         try {
             await deletePart(partId);
             setParts(prev => prev.filter(p => p.id !== partId));
+            if (onUpdateParts) {
+                onUpdateParts((prev: Part[]) => prev.filter((p: Part) => p.id !== partId));
+            }
             toast({ title: "Part Deleted" });
         } catch (error) {
             toast({ variant: "destructive", title: "Error Deleting Part" });
@@ -99,12 +103,16 @@ export function BrandDetail({ brand, allParts, onBack }: BrandDetailProps) {
             let savedPart: Part;
             if (dataToSave.id) {
                 savedPart = await updatePart(dataToSave);
-                setParts(prev => prev.map(p => p.id === savedPart.id ? savedPart : p));
+                const updater = (prev: Part[]) => prev.map(p => p.id === savedPart.id ? savedPart : p).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                setParts(updater);
+                if (onUpdateParts) onUpdateParts(updater);
                 toast({ title: "Part Updated" });
             } else {
                 const { id, ...newData } = dataToSave;
                 savedPart = await addPart(newData);
-                setParts(prev => [...prev, savedPart]);
+                const updater = (prev: Part[]) => [...prev, savedPart].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                setParts(updater);
+                if (onUpdateParts) onUpdateParts(updater);
                 toast({ title: "Part Added" });
             }
         } catch (error) {

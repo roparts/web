@@ -17,11 +17,14 @@ import { MobileNavSheet } from './MobileNavSheet';
 import type { MainCategory } from '@/lib/types';
 
 interface HeaderProps {
-  selectedMainCategory: MainCategory;
-  onMainCategoryChange: (category: MainCategory) => void;
+  selectedMainCategory?: string;
+  onMainCategoryChange?: (category: string) => void;
 }
 
-export function Header({ selectedMainCategory, onMainCategoryChange }: HeaderProps) {
+export function Header({
+  selectedMainCategory = 'All',
+  onMainCategoryChange = () => { }
+}: HeaderProps) {
   const { itemCount, setSheetOpen } = useCart();
   const { language, setLanguage, translations } = useLanguage();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);

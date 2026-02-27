@@ -37,8 +37,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { BrandManager } from './BrandManager';
 import { BrandDetail } from './BrandDetail';
+import { CategoryManager } from './CategoryManager';
 
 interface AdminPageClientProps {
   initialParts: Part[];
@@ -89,11 +91,15 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
   }, [initialParts]);
 
   useEffect(() => {
-    setBrands(initialBrands);
+    setBrands([...(initialBrands || [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')));
   }, [initialBrands]);
 
   useEffect(() => {
-    setBanners(initialBanners);
+    setCategories([...(initialCategories || [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+  }, [initialCategories]);
+
+  useEffect(() => {
+    setBanners([...(initialBanners || [])].sort((a, b) => (a.order || 0) - (b.order || 0)));
   }, [initialBanners]);
 
   // Derived counts for ANALYTICS (Taxonomy Tab)
@@ -227,15 +233,16 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
   }
   const handleSaveBrand = async (brandData: Brand) => {
     try {
-      if (brandData.id) {
+      if (brandData.id && !brandData.id.startsWith('legacy-')) {
         await updateBrand(brandData);
-        setBrands(prev => prev.map(b => b.id === brandData.id ? brandData : b));
+        setBrands(prev => prev.map(b => b.id === brandData.id ? brandData : b).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
         toast({ title: "Brand Updated" });
       } else {
+        // If it's a new brand or converting a legacy brand, clear ID to let server generate a fresh one
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, ...rest } = brandData;
         const newBrand = await addBrand(rest);
-        setBrands(prev => [...prev, newBrand]);
+        setBrands(prev => [...prev, newBrand].sort((a, b) => (a.name || '').localeCompare(b.name || '')));
         toast({ title: "Brand Added" });
       }
       setIsBrandDialogOpen(false);
@@ -285,15 +292,16 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
   }
   const handleSaveCategory = async (catData: CategoryEntity) => {
     try {
-      if (catData.id) {
+      if (catData.id && !catData.id.startsWith('legacy-')) {
         await updateCategory(catData);
-        setCategories(prev => prev.map(c => c.id === catData.id ? catData : c));
+        setCategories(prev => prev.map(c => c.id === catData.id ? catData : c).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
         toast({ title: "Category Updated" });
       } else {
+        // If converting from legacy or adding new, strip legacy ID
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, ...rest } = catData;
         const newCat = await addCategory(rest);
-        setCategories(prev => [...prev, newCat]);
+        setCategories(prev => [...prev, newCat].sort((a, b) => (a.name || '').localeCompare(b.name || '')));
         toast({ title: "Category Added" });
       }
       setIsCategoryDialogOpen(false);
@@ -399,7 +407,14 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
     }
 
     if (viewMode === 'brandDetail' && selectedBrand) {
-      return <BrandDetail brand={selectedBrand} allParts={parts} onBack={() => setViewMode('brands')} />;
+      return (
+        <BrandDetail
+          brand={selectedBrand}
+          allParts={parts}
+          onBack={() => setViewMode('brands')}
+          onUpdateParts={setParts}
+        />
+      );
     }
 
     // Default 'parts' view
@@ -513,7 +528,7 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[150px]">Preview</TableHead>
-                  <TableHead>Title \ Subtitle</TableHead>
+                  <TableHead>Title / Subtitle</TableHead>
                   <TableHead>Order</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-center">Actions</TableHead>
@@ -577,96 +592,47 @@ export function AdminPageClient({ initialParts, initialBrands, initialCategories
           </div>
         </TabsContent>
         <TabsContent value="taxonomy">
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Brands Stats - First */}
+          <div className="space-y-8">
+            {/* Brands Section (Stats for quick view) */}
             <Card className="glass-card border-0 bg-transparent">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Brands Stats</CardTitle>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/20" onClick={handleAddNewBrand}>
-                    <PlusCircle className="h-4 w-4" />
+                  <CardTitle className="text-xl">Brands Quick View</CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => setViewMode('brands')}>
+                    <Edit className="mr-2 h-4 w-4" /> Full Manager
                   </Button>
                 </div>
-                <CardDescription>Product distribution by brands.</CardDescription>
+                <CardDescription>Click a brand to see details or edit.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-96 pr-4">
-                  <ul className="space-y-3">
+                <ScrollArea className="h-48">
+                  <div className="flex flex-wrap gap-3">
                     {brandStats.map((brand) => (
-                      <li key={brand.id} className="group flex justify-between items-center text-sm p-3 rounded-xl bg-white/30 hover:bg-white/50 transition-colors cursor-pointer border border-transparent hover:border-white/20 shadow-sm" onClick={() => handleSelectBrand(brand)}>
+                      <div
+                        key={brand.id}
+                        className="flex items-center gap-2 text-sm p-3 rounded-xl bg-white/30 hover:bg-white/50 transition-all cursor-pointer border border-transparent hover:border-white/20 shadow-sm"
+                        onClick={() => handleSelectBrand(brand)}
+                      >
                         <span className="font-medium">{brand.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">{brand.count}</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); handleEditBrand(brand); }}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </li>
+                        <span className="font-mono text-[10px] bg-primary/10 text-primary rounded-full px-2 py-0.5">{brand.count}</span>
+                        {!brand.isManaged && <Badge variant="outline" className="text-[10px] h-4 px-1 border-amber-200 text-amber-600">Legacy</Badge>}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </ScrollArea>
               </CardContent>
             </Card>
 
-            {/* Main Categories - Second */}
-            <Card className="glass-card border-0 bg-transparent">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Main Categories</CardTitle>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/20" onClick={() => handleAddNewCategory('main')}>
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
-                </div>
-                <CardDescription>All primary categories in your store.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-96 pr-4">
-                  <ul className="space-y-3">
-                    {mainCategoryStats.map((cat) => (
-                      <li key={cat.id} className="group flex justify-between items-center text-sm p-3 rounded-xl bg-white/30 hover:bg-white/50 transition-colors cursor-pointer border border-transparent hover:border-white/20 shadow-sm">
-                        <span className="font-medium">{cat.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">{cat.count}</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); handleEditCategory(cat); }}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* Subcategories - Third */}
-            <Card className="glass-card border-0 bg-transparent">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Subcategories</CardTitle>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/20" onClick={() => handleAddNewCategory('sub')}>
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
-                </div>
-                <CardDescription>All subcategories across your store.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-96 pr-4">
-                  <ul className="space-y-3">
-                    {subCategoryStats.map((cat) => (
-                      <li key={cat.id} className="group flex justify-between items-center text-sm p-3 rounded-xl bg-white/30 hover:bg-white/50 transition-colors cursor-pointer border border-transparent hover:border-white/20 shadow-sm">
-                        <span className="font-medium">{cat.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">{cat.count}</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); handleEditCategory(cat); }}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+            <CategoryManager
+              categories={categories}
+              onAdd={handleAddNewCategory}
+              onEdit={handleEditCategory}
+              onDelete={handleDeleteCategory}
+              stats={{
+                main: mainCategoryStats as any,
+                sub: subCategoryStats as any
+              }}
+            />
           </div>
 
           <EditBrandDialog

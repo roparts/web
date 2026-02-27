@@ -54,6 +54,27 @@ export function BrandManager({ initialBrands, onSelectBrand }: BrandManagerProps
 
     const handleDelete = async (e: React.MouseEvent, brandId: string) => {
         e.stopPropagation();
+
+        // --- Dependency Check ---
+        const brandToDelete = brands.find(b => b.id === brandId);
+        const isLegacy = brandId.startsWith('legacy-');
+
+        if (isLegacy) {
+            toast({
+                variant: "destructive",
+                title: "Cannot Delete Legacy Item",
+                description: "This brand exists only on products. Please update the products first."
+            });
+            return;
+        }
+
+        // We don't have parts list here to check locally, 
+        // but the backend should ideally handle this.
+        // However, for consistency with AdminPageClient, we should probably pass parts or a handler.
+        // For now, let's at least fix the typo and add a warning.
+
+        if (!confirm("Are you sure you want to delete this brand? Products associated with this brand will remain but become unassigned.")) return;
+
         try {
             await deleteBrand(brandId);
             setBrands(prev => prev.filter(b => b.id !== brandId));
@@ -140,7 +161,7 @@ export function BrandManager({ initialBrands, onSelectBrand }: BrandManagerProps
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Delete Brand?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This will delete the brand. Products associated with this brand will remain but unwrapped.
+                                                This will delete the brand. Products associated with this brand will remain but become unassigned.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
