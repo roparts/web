@@ -1,22 +1,90 @@
-
 "use server";
 
 import { revalidatePath } from 'next/cache';
-import { ddbDocClient, TABLES } from './aws/dynamodb';
-import { ScanCommand, PutCommand, DeleteCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { supabaseAdmin } from './supabase';
 import type { Part, Brand, CategoryEntity, AdBanner } from './types';
 import { deleteImageAction } from '@/app/actions';
 
+// Helpers to map database models to client types
+function mapPart(dbPart: any): Part {
+  return {
+    id: dbPart.id,
+    name: dbPart.name,
+    name_hi: dbPart.name_hi || undefined,
+    mainCategory: dbPart.mainCategory,
+    subcategory: dbPart.subcategory,
+    price: Number(dbPart.price),
+    discountPrice: dbPart.discountPrice !== null && dbPart.discountPrice !== undefined ? Number(dbPart.discountPrice) : undefined,
+    description: dbPart.description,
+    description_hi: dbPart.description_hi || undefined,
+    image: dbPart.image,
+    imageFileId: dbPart.imageFileId || undefined,
+    features: dbPart.features,
+    features_hi: dbPart.features_hi || undefined,
+    minQuantity: dbPart.minQuantity !== null && dbPart.minQuantity !== undefined ? dbPart.minQuantity : undefined,
+    brand: dbPart.brand || undefined,
+    brandId: dbPart.brandId || undefined,
+    gpd: dbPart.gpd !== null && dbPart.gpd !== undefined ? Number(dbPart.gpd) : undefined,
+    voltage: dbPart.voltage || undefined,
+    inletOutletSize: dbPart.inletOutletSize || undefined,
+    material: dbPart.material || undefined,
+    color: dbPart.color || undefined,
+  };
+}
+
+function mapBrand(dbBrand: any): Brand {
+  return {
+    id: dbBrand.id,
+    name: dbBrand.name,
+    image: dbBrand.image || undefined,
+    imageFileId: dbBrand.imageFileId || undefined,
+    description: dbBrand.description || undefined,
+    whatsappNumber: dbBrand.whatsappNumber || undefined,
+  };
+}
+
+function mapCategory(dbCategory: any): CategoryEntity {
+  return {
+    id: dbCategory.id,
+    name: dbCategory.name,
+    type: dbCategory.type as 'main' | 'sub',
+    parentId: dbCategory.parentId || undefined,
+  };
+}
+
+function mapBanner(dbBanner: any): AdBanner {
+  return {
+    id: dbBanner.id,
+    title: dbBanner.title,
+    title_hi: dbBanner.title_hi || undefined,
+    subtitle: dbBanner.subtitle,
+    subtitle_hi: dbBanner.subtitle_hi || undefined,
+    badge: dbBanner.badge || undefined,
+    badge_hi: dbBanner.badge_hi || undefined,
+    image: dbBanner.image,
+    imageFileId: dbBanner.imageFileId || undefined,
+    link: dbBanner.link || undefined,
+    active: dbBanner.active ?? false,
+    order: dbBanner.order ?? 0,
+  };
+}
+
+// --- Part Operations ---
+
 export async function getPartsAdmin(): Promise<Part[]> {
   try {
-    const command = new ScanCommand({
-      TableName: TABLES.PARTS,
-    });
-    const response = await ddbDocClient.send(command);
-    const parts = (response.Items as Part[]) || [];
-    return parts.sort((a, b) => a.name.localeCompare(b.name));
+    const { data, error } = await supabaseAdmin
+      .from('parts')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error("Error fetching parts for admin from Supabase:", error);
+      return [];
+    }
+    return (data || []).map(mapPart);
   } catch (error) {
-    console.error("Error fetching parts for admin from DynamoDB:", error);
+    console.error("Error fetching parts for admin from Supabase:", error);
     return [];
   }
 }
@@ -24,17 +92,48 @@ export async function getPartsAdmin(): Promise<Part[]> {
 export async function addPart(partData: Omit<Part, 'id'>): Promise<Part> {
   try {
     const id = crypto.randomUUID();
-    const newPart = { ...partData, id };
-    const command = new PutCommand({
-      TableName: TABLES.PARTS,
-      Item: newPart,
-    });
-    await ddbDocClient.send(command);
+    const newPart = {
+      id,
+      sku: id, // Fallback SKU to generated UUID
+      name: partData.name,
+      name_hi: partData.name_hi || null,
+      mainCategory: partData.mainCategory,
+      subcategory: partData.subcategory,
+      price: partData.price,
+      discountPrice: partData.discountPrice !== undefined ? partData.discountPrice : null,
+      description: partData.description,
+      description_hi: partData.description_hi || null,
+      image: partData.image,
+      imageFileId: partData.imageFileId || null,
+      features: partData.features,
+      features_hi: partData.features_hi || null,
+      minQuantity: partData.minQuantity !== undefined ? partData.minQuantity : 1,
+      brand: partData.brand || null,
+      brandId: partData.brandId || null,
+      gpd: partData.gpd !== undefined ? partData.gpd : null,
+      voltage: partData.voltage || null,
+      inletOutletSize: partData.inletOutletSize || null,
+      material: partData.material || null,
+      color: partData.color || null,
+      stock: 50,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('parts')
+      .insert([newPart])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error adding part to Supabase:", error);
+      throw new Error(`Failed to add part: ${error.message}`);
+    }
+
     revalidatePath('/admin');
     revalidatePath('/');
-    return newPart;
+    return mapPart(data);
   } catch (error) {
-    console.error("Error adding part to DynamoDB:", error);
+    console.error("Error adding part to Supabase:", error);
     throw new Error("Failed to add part.");
   }
 }
@@ -43,59 +142,90 @@ export async function updatePart(partData: Part): Promise<Part> {
   try {
     const { id } = partData;
 
-    // Fetch old to handle image deletion
-    const getCommand = new GetCommand({
-      TableName: TABLES.PARTS,
-      Key: { id },
-    });
-    const oldRes = await ddbDocClient.send(getCommand);
-    const oldData = oldRes.Item as Part;
+    // Fetch old record to check image changes
+    const { data: oldData, error: getError } = await supabaseAdmin
+      .from('parts')
+      .select('imageFileId')
+      .eq('id', id)
+      .maybeSingle();
 
-    if (oldData) {
+    if (!getError && oldData) {
       if (partData.imageFileId && oldData.imageFileId && partData.imageFileId !== oldData.imageFileId) {
         await deleteImageAction(oldData.imageFileId);
       }
     }
 
-    const command = new PutCommand({
-      TableName: TABLES.PARTS,
-      Item: partData,
-    });
-    await ddbDocClient.send(command);
+    const updatedPart = {
+      name: partData.name,
+      name_hi: partData.name_hi || null,
+      mainCategory: partData.mainCategory,
+      subcategory: partData.subcategory,
+      price: partData.price,
+      discountPrice: partData.discountPrice !== undefined ? partData.discountPrice : null,
+      description: partData.description,
+      description_hi: partData.description_hi || null,
+      image: partData.image,
+      imageFileId: partData.imageFileId || null,
+      features: partData.features,
+      features_hi: partData.features_hi || null,
+      minQuantity: partData.minQuantity !== undefined ? partData.minQuantity : 1,
+      brand: partData.brand || null,
+      brandId: partData.brandId || null,
+      gpd: partData.gpd !== undefined ? partData.gpd : null,
+      voltage: partData.voltage || null,
+      inletOutletSize: partData.inletOutletSize || null,
+      material: partData.material || null,
+      color: partData.color || null,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('parts')
+      .update(updatedPart)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating part in Supabase:", error);
+      throw new Error(`Failed to update part: ${error.message}`);
+    }
 
     revalidatePath('/admin');
     revalidatePath('/');
     revalidatePath(`/part/${id}`);
-    return partData;
+    return mapPart(data);
   } catch (error) {
-    console.error("Error updating part in DynamoDB:", error);
+    console.error("Error updating part in Supabase:", error);
     throw new Error("Failed to update part.");
   }
 }
 
 export async function deletePart(partId: string): Promise<void> {
   try {
-    const getCommand = new GetCommand({
-      TableName: TABLES.PARTS,
-      Key: { id: partId },
-    });
-    const oldRes = await ddbDocClient.send(getCommand);
-    const partData = oldRes.Item as Part;
+    const { data: partData, error: getError } = await supabaseAdmin
+      .from('parts')
+      .select('imageFileId')
+      .eq('id', partId)
+      .maybeSingle();
 
-    if (partData?.imageFileId) {
+    if (!getError && partData?.imageFileId) {
       await deleteImageAction(partData.imageFileId);
     }
 
-    const command = new DeleteCommand({
-      TableName: TABLES.PARTS,
-      Key: { id: partId },
-    });
-    await ddbDocClient.send(command);
+    const { error } = await supabaseAdmin
+      .from('parts')
+      .delete()
+      .eq('id', partId);
+
+    if (error) {
+      console.error("Error deleting part from Supabase:", error);
+      throw new Error(`Failed to delete part: ${error.message}`);
+    }
 
     revalidatePath('/admin');
     revalidatePath('/');
   } catch (error) {
-    console.error("Error deleting part from DynamoDB:", error);
+    console.error("Error deleting part from Supabase:", error);
     throw new Error("Failed to delete part.");
   }
 }
@@ -104,14 +234,18 @@ export async function deletePart(partId: string): Promise<void> {
 
 export async function getBrandsAdmin(): Promise<Brand[]> {
   try {
-    const command = new ScanCommand({
-      TableName: TABLES.BRANDS,
-    });
-    const response = await ddbDocClient.send(command);
-    const brands = (response.Items as Brand[]) || [];
-    return brands.sort((a, b) => a.name.localeCompare(b.name));
+    const { data, error } = await supabaseAdmin
+      .from('brands')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error("Error fetching brands for admin from Supabase:", error);
+      return [];
+    }
+    return (data || []).map(mapBrand);
   } catch (error) {
-    console.error("Error fetching brands for admin from DynamoDB:", error);
+    console.error("Error fetching brands for admin from Supabase:", error);
     return [];
   }
 }
@@ -119,16 +253,30 @@ export async function getBrandsAdmin(): Promise<Brand[]> {
 export async function addBrand(brandData: Omit<Brand, 'id'>): Promise<Brand> {
   try {
     const id = crypto.randomUUID();
-    const newBrand = { ...brandData, id };
-    const command = new PutCommand({
-      TableName: TABLES.BRANDS,
-      Item: newBrand,
-    });
-    await ddbDocClient.send(command);
+    const newBrand = {
+      id,
+      name: brandData.name,
+      image: brandData.image || null,
+      imageFileId: brandData.imageFileId || null,
+      description: brandData.description || null,
+      whatsappNumber: brandData.whatsappNumber || null,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('brands')
+      .insert([newBrand])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error adding brand to Supabase:", error);
+      throw new Error(`Failed to add brand: ${error.message}`);
+    }
+
     revalidatePath('/admin');
-    return newBrand;
+    return mapBrand(data);
   } catch (error) {
-    console.error("Error adding brand to DynamoDB:", error);
+    console.error("Error adding brand to Supabase:", error);
     throw new Error("Failed to add brand.");
   }
 }
@@ -136,54 +284,72 @@ export async function addBrand(brandData: Omit<Brand, 'id'>): Promise<Brand> {
 export async function updateBrand(brandData: Brand): Promise<Brand> {
   try {
     const { id } = brandData;
-    const getCommand = new GetCommand({
-      TableName: TABLES.BRANDS,
-      Key: { id },
-    });
-    const oldRes = await ddbDocClient.send(getCommand);
-    const oldData = oldRes.Item as Brand;
 
-    if (oldData) {
+    const { data: oldData, error: getError } = await supabaseAdmin
+      .from('brands')
+      .select('imageFileId')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!getError && oldData) {
       if (brandData.imageFileId && oldData.imageFileId && brandData.imageFileId !== oldData.imageFileId) {
         await deleteImageAction(oldData.imageFileId);
       }
     }
 
-    const command = new PutCommand({
-      TableName: TABLES.BRANDS,
-      Item: brandData,
-    });
-    await ddbDocClient.send(command);
+    const updatedBrand = {
+      name: brandData.name,
+      image: brandData.image || null,
+      imageFileId: brandData.imageFileId || null,
+      description: brandData.description || null,
+      whatsappNumber: brandData.whatsappNumber || null,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('brands')
+      .update(updatedBrand)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating brand in Supabase:", error);
+      throw new Error(`Failed to update brand: ${error.message}`);
+    }
 
     revalidatePath('/admin');
-    return brandData;
+    return mapBrand(data);
   } catch (error) {
-    console.error("Error updating brand in DynamoDB:", error);
+    console.error("Error updating brand in Supabase:", error);
     throw new Error("Failed to update brand.");
   }
 }
 
 export async function deleteBrand(brandId: string): Promise<void> {
   try {
-    const getCommand = new GetCommand({
-      TableName: TABLES.BRANDS,
-      Key: { id: brandId },
-    });
-    const oldRes = await ddbDocClient.send(getCommand);
-    const brandData = oldRes.Item as Brand;
+    const { data: brandData, error: getError } = await supabaseAdmin
+      .from('brands')
+      .select('imageFileId')
+      .eq('id', brandId)
+      .maybeSingle();
 
-    if (brandData?.imageFileId) {
+    if (!getError && brandData?.imageFileId) {
       await deleteImageAction(brandData.imageFileId);
     }
 
-    const command = new DeleteCommand({
-      TableName: TABLES.BRANDS,
-      Key: { id: brandId },
-    });
-    await ddbDocClient.send(command);
+    const { error } = await supabaseAdmin
+      .from('brands')
+      .delete()
+      .eq('id', brandId);
+
+    if (error) {
+      console.error("Error deleting brand from Supabase:", error);
+      throw new Error(`Failed to delete brand: ${error.message}`);
+    }
+
     revalidatePath('/admin');
   } catch (error) {
-    console.error("Error deleting brand from DynamoDB:", error);
+    console.error("Error deleting brand from Supabase:", error);
     throw new Error("Failed to delete brand.");
   }
 }
@@ -192,14 +358,18 @@ export async function deleteBrand(brandId: string): Promise<void> {
 
 export async function getCategoriesAdmin(): Promise<CategoryEntity[]> {
   try {
-    const command = new ScanCommand({
-      TableName: TABLES.CATEGORIES,
-    });
-    const response = await ddbDocClient.send(command);
-    const categories = (response.Items as CategoryEntity[]) || [];
-    return categories.sort((a, b) => a.name.localeCompare(b.name));
+    const { data, error } = await supabaseAdmin
+      .from('categories')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error("Error fetching categories from Supabase:", error);
+      return [];
+    }
+    return (data || []).map(mapCategory);
   } catch (error) {
-    console.error("Error fetching categories from DynamoDB:", error);
+    console.error("Error fetching categories from Supabase:", error);
     return [];
   }
 }
@@ -207,45 +377,76 @@ export async function getCategoriesAdmin(): Promise<CategoryEntity[]> {
 export async function addCategory(categoryData: Omit<CategoryEntity, 'id'>): Promise<CategoryEntity> {
   try {
     const id = crypto.randomUUID();
-    const newCategory = { ...categoryData, id };
-    const command = new PutCommand({
-      TableName: TABLES.CATEGORIES,
-      Item: newCategory,
-    });
-    await ddbDocClient.send(command);
+    const newCategory = {
+      id,
+      name: categoryData.name,
+      type: categoryData.type,
+      parentId: categoryData.parentId || null,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('categories')
+      .insert([newCategory])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error adding category to Supabase:", error);
+      throw new Error(`Failed to add category: ${error.message}`);
+    }
+
     revalidatePath('/admin');
-    return newCategory;
+    return mapCategory(data);
   } catch (error) {
-    console.error("Error adding category to DynamoDB:", error);
+    console.error("Error adding category to Supabase:", error);
     throw new Error("Failed to add category");
   }
 }
 
 export async function updateCategory(categoryData: CategoryEntity): Promise<CategoryEntity> {
   try {
-    const command = new PutCommand({
-      TableName: TABLES.CATEGORIES,
-      Item: categoryData,
-    });
-    await ddbDocClient.send(command);
+    const { id } = categoryData;
+    const updatedCategory = {
+      name: categoryData.name,
+      type: categoryData.type,
+      parentId: categoryData.parentId || null,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('categories')
+      .update(updatedCategory)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating category in Supabase:", error);
+      throw new Error(`Failed to update category: ${error.message}`);
+    }
+
     revalidatePath('/admin');
-    return categoryData;
+    return mapCategory(data);
   } catch (error) {
-    console.error("Error updating category in DynamoDB:", error);
+    console.error("Error updating category in Supabase:", error);
     throw new Error("Failed to update category");
   }
 }
 
 export async function deleteCategory(categoryId: string): Promise<void> {
   try {
-    const command = new DeleteCommand({
-      TableName: TABLES.CATEGORIES,
-      Key: { id: categoryId },
-    });
-    await ddbDocClient.send(command);
+    const { error } = await supabaseAdmin
+      .from('categories')
+      .delete()
+      .eq('id', categoryId);
+
+    if (error) {
+      console.error("Error deleting category from Supabase:", error);
+      throw new Error(`Failed to delete category: ${error.message}`);
+    }
+
     revalidatePath('/admin');
   } catch (error) {
-    console.error("Error deleting category from DynamoDB:", error);
+    console.error("Error deleting category from Supabase:", error);
     throw new Error("Failed to delete category");
   }
 }
@@ -254,14 +455,18 @@ export async function deleteCategory(categoryId: string): Promise<void> {
 
 export async function getBannersAdmin(): Promise<AdBanner[]> {
   try {
-    const command = new ScanCommand({
-      TableName: TABLES.BANNERS,
-    });
-    const response = await ddbDocClient.send(command);
-    const banners = (response.Items as AdBanner[]) || [];
-    return banners.sort((a, b) => (a.order || 0) - (b.order || 0));
+    const { data, error } = await supabaseAdmin
+      .from('banners')
+      .select('*')
+      .order('order', { ascending: true });
+
+    if (error) {
+      console.error("Error fetching banners from Supabase:", error);
+      return [];
+    }
+    return (data || []).map(mapBanner);
   } catch (error) {
-    console.error("Error fetching banners from DynamoDB:", error);
+    console.error("Error fetching banners from Supabase:", error);
     return [];
   }
 }
@@ -269,17 +474,37 @@ export async function getBannersAdmin(): Promise<AdBanner[]> {
 export async function addBanner(bannerData: Omit<AdBanner, 'id'>): Promise<AdBanner> {
   try {
     const id = crypto.randomUUID();
-    const newBanner = { ...bannerData, id };
-    const command = new PutCommand({
-      TableName: TABLES.BANNERS,
-      Item: newBanner,
-    });
-    await ddbDocClient.send(command);
+    const newBanner = {
+      id,
+      title: bannerData.title,
+      title_hi: bannerData.title_hi || null,
+      subtitle: bannerData.subtitle,
+      subtitle_hi: bannerData.subtitle_hi || null,
+      badge: bannerData.badge || null,
+      badge_hi: bannerData.badge_hi || null,
+      image: bannerData.image,
+      imageFileId: bannerData.imageFileId || null,
+      link: bannerData.link || null,
+      active: bannerData.active ?? false,
+      order: bannerData.order ?? 0,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('banners')
+      .insert([newBanner])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error adding banner to Supabase:", error);
+      throw new Error(`Failed to add banner: ${error.message}`);
+    }
+
     revalidatePath('/admin');
     revalidatePath('/');
-    return newBanner;
+    return mapBanner(data);
   } catch (error) {
-    console.error("Error adding banner to DynamoDB:", error);
+    console.error("Error adding banner to Supabase:", error);
     throw new Error("Failed to add banner");
   }
 }
@@ -287,57 +512,80 @@ export async function addBanner(bannerData: Omit<AdBanner, 'id'>): Promise<AdBan
 export async function updateBanner(bannerData: AdBanner): Promise<AdBanner> {
   try {
     const { id } = bannerData;
-    const getCommand = new GetCommand({
-      TableName: TABLES.BANNERS,
-      Key: { id },
-    });
-    const oldRes = await ddbDocClient.send(getCommand);
-    const oldData = oldRes.Item as AdBanner;
 
-    if (oldData) {
+    const { data: oldData, error: getError } = await supabaseAdmin
+      .from('banners')
+      .select('imageFileId')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!getError && oldData) {
       if (bannerData.imageFileId && oldData.imageFileId && bannerData.imageFileId !== oldData.imageFileId) {
         await deleteImageAction(oldData.imageFileId);
       }
     }
 
-    const command = new PutCommand({
-      TableName: TABLES.BANNERS,
-      Item: bannerData,
-    });
-    await ddbDocClient.send(command);
+    const updatedBanner = {
+      title: bannerData.title,
+      title_hi: bannerData.title_hi || null,
+      subtitle: bannerData.subtitle,
+      subtitle_hi: bannerData.subtitle_hi || null,
+      badge: bannerData.badge || null,
+      badge_hi: bannerData.badge_hi || null,
+      image: bannerData.image,
+      imageFileId: bannerData.imageFileId || null,
+      link: bannerData.link || null,
+      active: bannerData.active ?? false,
+      order: bannerData.order ?? 0,
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('banners')
+      .update(updatedBanner)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating banner in Supabase:", error);
+      throw new Error(`Failed to update banner: ${error.message}`);
+    }
 
     revalidatePath('/admin');
     revalidatePath('/');
-    return bannerData;
+    return mapBanner(data);
   } catch (error) {
-    console.error("Error updating banner in DynamoDB:", error);
+    console.error("Error updating banner in Supabase:", error);
     throw new Error("Failed to update banner");
   }
 }
 
 export async function deleteBanner(bannerId: string): Promise<void> {
   try {
-    const getCommand = new GetCommand({
-      TableName: TABLES.BANNERS,
-      Key: { id: bannerId },
-    });
-    const oldRes = await ddbDocClient.send(getCommand);
-    const data = oldRes.Item as AdBanner;
+    const { data: bannerData, error: getError } = await supabaseAdmin
+      .from('banners')
+      .select('imageFileId')
+      .eq('id', bannerId)
+      .maybeSingle();
 
-    if (data?.imageFileId) {
-      await deleteImageAction(data.imageFileId);
+    if (!getError && bannerData?.imageFileId) {
+      await deleteImageAction(bannerData.imageFileId);
     }
 
-    const command = new DeleteCommand({
-      TableName: TABLES.BANNERS,
-      Key: { id: bannerId },
-    });
-    await ddbDocClient.send(command);
+    const { error } = await supabaseAdmin
+      .from('banners')
+      .delete()
+      .eq('id', bannerId);
+
+    if (error) {
+      console.error("Error deleting banner from Supabase:", error);
+      throw new Error(`Failed to delete banner: ${error.message}`);
+    }
 
     revalidatePath('/admin');
     revalidatePath('/');
   } catch (error) {
-    console.error("Error deleting banner from DynamoDB:", error);
+    console.error("Error deleting banner from Supabase:", error);
     throw new Error("Failed to delete banner");
   }
 }
