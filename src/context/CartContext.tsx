@@ -5,7 +5,14 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import type { Part, CartItem } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast"
 import { useLanguage } from './LanguageContext';
+import { useAuth } from './AuthContext';
 import { CartSheet } from '@/components/CartSheet';
+
+export const BUSINESS_RULES = {
+  minOrderValue: 500,
+  minOrderQuantity: 0,
+  fallbackDiscountPercent: 15,
+};
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -15,6 +22,9 @@ interface CartContextType {
   clearCart: () => void;
   itemCount: number;
   totalPrice: number;
+  retailTotalPrice: number;
+  businessSavings: number;
+  isMinimumOrderSatisfied: boolean;
   lastAddedItem: Part | null;
   isSheetOpen: boolean;
   setSheetOpen: (isOpen: boolean) => void;
@@ -105,11 +115,28 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems([]);
   }, []);
 
+  const { profile } = useAuth();
+  const isBusiness = profile?.role === 'business';
+
   const itemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
-  const totalPrice = cartItems.reduce((total, item) => {
+  
+  const retailTotalPrice = cartItems.reduce((total, item) => {
     const price = item.discountPrice ?? item.price;
     return total + price * item.quantity;
   }, 0);
+
+  const totalPrice = cartItems.reduce((total, item) => {
+    const price = isBusiness
+      ? (item.businessPrice ?? (item.price * (1 - BUSINESS_RULES.fallbackDiscountPercent / 100)))
+      : (item.discountPrice ?? item.price);
+    return total + price * item.quantity;
+  }, 0);
+
+  const businessSavings = isBusiness ? Math.max(0, retailTotalPrice - totalPrice) : 0;
+
+  const isMinimumOrderSatisfied = isBusiness
+    ? (totalPrice >= BUSINESS_RULES.minOrderValue && itemCount >= BUSINESS_RULES.minOrderQuantity)
+    : true;
 
   return (
     <CartContext.Provider value={{ 
@@ -120,6 +147,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         clearCart, 
         itemCount, 
         totalPrice, 
+        retailTotalPrice,
+        businessSavings,
+        isMinimumOrderSatisfied,
         lastAddedItem,
         isSheetOpen,
         setSheetOpen

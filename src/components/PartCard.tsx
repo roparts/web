@@ -10,6 +10,7 @@ import { useCart } from '@/context/CartContext';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface PartCardProps {
   part: Part;
@@ -18,6 +19,12 @@ interface PartCardProps {
 export function PartCard({ part }: PartCardProps) {
   const { addToCart } = useCart();
   const { translations, language } = useLanguage();
+  const { profile } = useAuth();
+  const isBusiness = profile?.role === 'business';
+  
+  const b2bPrice = part.businessPrice ?? (part.price * 0.85); // 15% fallback
+  const regularPrice = part.discountPrice ?? part.price;
+
   const hasDiscount = part.discountPrice !== undefined && part.discountPrice < part.price;
   const discountPercentage = hasDiscount ? Math.round(((part.price - part.discountPrice!) / part.price) * 100) : 0;
   const showMinQuantity = !!part.minQuantity && part.minQuantity > 1;
@@ -62,7 +69,15 @@ export function PartCard({ part }: PartCardProps) {
       </div>
       <CardFooter className="p-3 pt-0 flex flex-col sm:flex-row justify-between items-center gap-2 mt-auto">
         <div className="flex flex-col items-start self-start">
-          {hasDiscount ? (
+          {isBusiness ? (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 drop-shadow-sm">₹{b2bPrice.toLocaleString('en-IN')}</p>
+                <span className="text-[9px] px-1 py-0.2 bg-emerald-500/10 text-emerald-600 rounded-md font-bold uppercase tracking-wide">B2B</span>
+              </div>
+              <p className="text-xs text-muted-foreground line-through opacity-70">₹{regularPrice.toLocaleString('en-IN')}</p>
+            </div>
+          ) : hasDiscount ? (
             <div className="flex flex-col">
               <p className="text-lg font-extrabold text-primary drop-shadow-sm">₹{part.discountPrice!.toLocaleString('en-IN')}</p>
               <p className="text-xs text-muted-foreground line-through opacity-70">₹{part.price.toLocaleString('en-IN')}</p>

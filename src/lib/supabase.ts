@@ -15,7 +15,7 @@ export const supabasePublic = createClient(
 );
 
 // Client for admin writes (runs with service_role bypass RLS permissions)
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  supabaseServiceKey || ""
-);
+// We only initialize this if the service role key is present (which is only on the server)
+export const supabaseAdmin = supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null as any;

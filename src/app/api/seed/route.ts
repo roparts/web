@@ -152,8 +152,66 @@ export async function GET() {
       console.warn('Warning: Failed to seed default banner:', bannerError.message);
     }
 
+    // 5. Seed QA Test Accounts
+    const qaUsers = [
+      {
+        email: 'retail@test.com',
+        password: 'test1234',
+        profile: {
+          role: 'retail',
+          verification_status: 'pending'
+        }
+      },
+      {
+        email: 'business@test.com',
+        password: 'test1234',
+        profile: {
+          role: 'business',
+          verification_status: 'approved',
+          company_name: 'Test Business Ltd',
+          gst_number: '07AAAAA1111A1Z1',
+          phone_number: '9876543210',
+          business_type_code: 'wholesaler',
+          city: 'Delhi',
+          state: 'Delhi'
+        }
+      }
+    ];
+
+    for (const qaUser of qaUsers) {
+      let userId: string | undefined;
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: qaUser.email,
+        password: qaUser.password,
+        email_confirm: true
+      });
+
+      if (createError) {
+        // Find existing user ID
+        const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+        const existing = existingUsers?.users.find(u => u.email === qaUser.email);
+        userId = existing?.id;
+      } else {
+        userId = newUser.user?.id;
+      }
+
+      if (userId) {
+        const { error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .upsert({
+            id: userId,
+            email: qaUser.email,
+            ...qaUser.profile
+          }, { onConflict: 'id' });
+
+        if (profileError) {
+          console.error(`Error seeding QA profile for ${qaUser.email}:`, profileError.message);
+        }
+      }
+    }
+
     return NextResponse.json({
-      message: `Successfully seeded database: ${brandsToInsert.length} brands, ${mainCategoriesToInsert.length + subcategoriesToInsert.length} categories, and ${partsToInsert.length} parts seeded/updated.`,
+      message: `Successfully seeded database: ${brandsToInsert.length} brands, ${mainCategoriesToInsert.length + subcategoriesToInsert.length} categories, ${partsToInsert.length} parts, and QA test accounts seeded/updated.`,
     }, { status: 200 });
 
   } catch (error: any) {

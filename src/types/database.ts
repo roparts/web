@@ -124,10 +124,90 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          id: string
+          order_id: string | null
+          product_id: string | null
+          quantity: number
+          subtotal: number
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          order_id?: string | null
+          product_id?: string | null
+          quantity: number
+          subtotal: number
+          unit_price: number
+        }
+        Update: {
+          id?: string
+          order_id?: string | null
+          product_id?: string | null
+          quantity?: number
+          subtotal?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          gst_number: string | null
+          id: string
+          order_type: string
+          rfq_number: string
+          status: string
+          total_price: number
+          user_id: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          gst_number?: string | null
+          id?: string
+          order_type: string
+          rfq_number: string
+          status?: string
+          total_price: number
+          user_id?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          gst_number?: string | null
+          id?: string
+          order_type?: string
+          rfq_number?: string
+          status?: string
+          total_price?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       parts: {
         Row: {
           brand: string | null
           brandId: string | null
+          business_only: boolean | null
+          business_price: number | null
           color: string | null
           created_at: string | null
           description: string
@@ -150,11 +230,14 @@ export type Database = {
           stock: number | null
           subcategory: string
           updated_at: string | null
+          updated_by: string | null
           voltage: string | null
         }
         Insert: {
           brand?: string | null
           brandId?: string | null
+          business_only?: boolean | null
+          business_price?: number | null
           color?: string | null
           created_at?: string | null
           description: string
@@ -177,11 +260,14 @@ export type Database = {
           stock?: number | null
           subcategory: string
           updated_at?: string | null
+          updated_by?: string | null
           voltage?: string | null
         }
         Update: {
           brand?: string | null
           brandId?: string | null
+          business_only?: boolean | null
+          business_price?: number | null
           color?: string | null
           created_at?: string | null
           description?: string
@@ -204,6 +290,7 @@ export type Database = {
           stock?: number | null
           subcategory?: string
           updated_at?: string | null
+          updated_by?: string | null
           voltage?: string | null
         }
         Relationships: [
@@ -215,6 +302,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          business_type_code: string | null
+          city: string | null
+          company_name: string | null
+          created_at: string | null
+          email: string
+          gst_number: string | null
+          id: string
+          phone_number: string | null
+          role: string
+          state: string | null
+          updated_at: string | null
+          updated_by: string | null
+          verification_status: string
+        }
+        Insert: {
+          business_type_code?: string | null
+          city?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email: string
+          gst_number?: string | null
+          id: string
+          phone_number?: string | null
+          role: string
+          state?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          verification_status?: string
+        }
+        Update: {
+          business_type_code?: string | null
+          city?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          email?: string
+          gst_number?: string | null
+          id?: string
+          phone_number?: string | null
+          role?: string
+          state?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          verification_status?: string
+        }
+        Relationships: []
       }
     }
     Views: {

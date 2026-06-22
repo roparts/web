@@ -2,11 +2,12 @@
 "use client";
 
 import Link from 'next/link';
-import { ShoppingCart, Menu, Globe, Search } from 'lucide-react';
+import { ShoppingCart, Menu, Globe, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ export function Header({
 }: HeaderProps) {
   const { itemCount, setSheetOpen } = useCart();
   const { language, setLanguage, translations } = useLanguage();
+  const { user, profile, signOut } = useAuth();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   return (
@@ -76,7 +78,7 @@ export function Header({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <nav className="flex items-center">
+            <nav className="flex items-center gap-1">
               <Button variant="ghost" size="icon" onClick={() => setSheetOpen(true)} aria-label={translations.header.openCart}>
                 <div className="relative">
                   <ShoppingCart className="h-6 w-6" />
@@ -87,6 +89,44 @@ export function Header({
                   )}
                 </div>
               </Button>
+
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-slate-100 text-slate-800">
+                      <User className="h-6 w-6" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 mt-2">
+                    <div className="flex flex-col space-y-1 p-2">
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                        {profile?.role === 'business' ? 'Business Account' : 'Retail Customer'}
+                      </p>
+                      {profile?.company_name && (
+                        <p className="text-sm font-bold text-slate-800 truncate">
+                          {profile.company_name}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                    </div>
+                    <hr className="my-1 border-slate-100" />
+                    <DropdownMenuItem asChild>
+                      <Link href={profile?.role === 'business' ? '/dashboard/business' : '/dashboard/retail'} className="w-full cursor-pointer">
+                        {translations.header.dashboard}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive cursor-pointer">
+                      {translations.header.signOut}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button variant="ghost" size="icon" asChild className="text-slate-800">
+                  <Link href="/login" aria-label={translations.header.signIn}>
+                    <User className="h-6 w-6" />
+                  </Link>
+                </Button>
+              )}
             </nav>
           </div>
         </div>

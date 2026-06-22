@@ -39,6 +39,8 @@ export interface Part {
   inletOutletSize?: string;
   material?: string;
   color?: string;
+  businessPrice?: number;
+  businessOnly?: boolean;
 }
 
 export interface CartItem extends Part {

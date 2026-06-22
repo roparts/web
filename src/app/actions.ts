@@ -7,6 +7,8 @@ import { suggestRelatedParts } from '@/ai/flows/suggest-related-parts';
 import { refineVoiceSearch } from '@/ai/flows/refine-voice-search';
 import { generatePartImage } from '@/ai/flows/generate-part-image';
 import type { Part } from '@/lib/types';
+import { cookies } from 'next/headers';
+import { supabaseAdmin } from '@/lib/supabase';
 import 'dotenv/config';
 
 export async function getRefinedVoiceSearch(transcript: string, allParts: Part[]): Promise<string> {
@@ -86,5 +88,73 @@ export async function deleteImageAction(fileId: string): Promise<void> {
     } catch (error: any) {
         // Log the error but don't throw, as the main operation (saving the part) might still be valid.
         console.error(`Failed to delete old image (fileId: ${fileId}) from ImageKit:`, error.message);
+    }
+}
+
+export async function setUserRoleCookie(role: string | null) {
+    const cookieStore = await cookies();
+    if (role) {
+        cookieStore.set('ro-user-role', role, {
+            path: '/',
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24 * 7 // 1 week
+        });
+    } else {
+        cookieStore.delete('ro-user-role');
+    }
+}
+
+export async function createOrderAction(
+    orderData: {
+        userId: string | null;
+        orderType: 'retail' | 'business';
+        rfqNumber: string;
+        totalPrice: number;
+        companyName?: string | null;
+        gstNumber?: string | null;
+    },
+    items: {
+        productId: string;
+        quantity: number;
+        unitPrice: number;
+        subtotal: number;
+    }[]
+) {
+    try {
+        const { data: order, error: orderError } = await supabaseAdmin
+            .from('orders')
+            .insert([{
+                user_id: orderData.userId,
+                order_type: orderData.orderType,
+                rfq_number: orderData.rfqNumber,
+                total_price: orderData.totalPrice,
+                company_name: orderData.companyName || null,
+                gst_number: orderData.gstNumber || null,
+                status: 'pending'
+            }])
+            .select()
+            .single();
+
+        if (orderError) throw orderError;
+
+        const orderItemsToInsert = items.map(item => ({
+            order_id: order.id,
+            product_id: item.productId,
+            quantity: item.quantity,
+            unit_price: item.unitPrice,
+            subtotal: item.subtotal
+        }));
+
+        const { error: itemsError } = await supabaseAdmin
+            .from('order_items')
+            .insert(orderItemsToInsert);
+
+        if (itemsError) throw itemsError;
+
+        return { success: true, orderId: order.id };
+    } catch (error: any) {
+        console.error("Failed to save order snapshot:", error);
+        throw new Error(`Failed to create order: ${error.message}`);
     }
 }

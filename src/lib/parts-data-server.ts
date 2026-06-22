@@ -1,9 +1,20 @@
 "use server";
 
+import { cookies } from 'next/headers';
 import { supabasePublic } from './supabase';
 import type { Part, Brand, AdBanner } from './types';
 
-function mapPart(dbPart: any): Part {
+async function getUserRole(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get('ro-user-role')?.value || null;
+  } catch (error) {
+    // Falls back to anonymous during build/static generation
+    return null;
+  }
+}
+
+function mapPart(dbPart: any, isBusiness: boolean): Part {
   return {
     id: dbPart.id,
     name: dbPart.name,
@@ -26,15 +37,27 @@ function mapPart(dbPart: any): Part {
     inletOutletSize: dbPart.inletOutletSize || undefined,
     material: dbPart.material || undefined,
     color: dbPart.color || undefined,
+    businessPrice: (isBusiness && dbPart.business_price !== null && dbPart.business_price !== undefined)
+      ? Number(dbPart.business_price)
+      : undefined,
+    businessOnly: dbPart.business_only ?? false,
   };
 }
 
 export async function getAllParts(page?: number, limit?: number): Promise<Part[]> {
   try {
+    const role = await getUserRole();
+    const isBusiness = role === 'business';
+
     let query = supabasePublic
       .from('parts')
       .select('*')
       .order('name', { ascending: true });
+
+    // Filter business-only parts directly in database query
+    if (!isBusiness) {
+      query = query.eq('business_only', false);
+    }
 
     if (page !== undefined && limit !== undefined) {
       const from = (page - 1) * limit;
@@ -47,7 +70,7 @@ export async function getAllParts(page?: number, limit?: number): Promise<Part[]
       console.error("Error fetching parts from Supabase:", error);
       return [];
     }
-    return (data || []).map(mapPart);
+    return (data || []).map(p => mapPart(p, isBusiness));
   } catch (error) {
     console.error("Error fetching parts from Supabase:", error);
     return [];
@@ -56,6 +79,9 @@ export async function getAllParts(page?: number, limit?: number): Promise<Part[]
 
 export async function getPartById(id: string): Promise<Part | null> {
   try {
+    const role = await getUserRole();
+    const isBusiness = role === 'business';
+
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     let query = supabasePublic.from('parts').select('*');
 
@@ -65,23 +91,33 @@ export async function getPartById(id: string): Promise<Part | null> {
       query = query.eq('sku', id);
     }
 
+    // Filter business-only parts directly in database query
+    if (!isBusiness) {
+      query = query.eq('business_only', false);
+    }
+
     const { data, error } = await query.single();
     if (error) {
       // Fallback: if isUuid check succeeded but record not found, try SKU check
       if (isUuid) {
-        const { data: fallbackData, error: fallbackError } = await supabasePublic
+        let fallbackQuery = supabasePublic
           .from('parts')
           .select('*')
-          .eq('sku', id)
-          .maybeSingle();
+          .eq('sku', id);
+
+        if (!isBusiness) {
+          fallbackQuery = fallbackQuery.eq('business_only', false);
+        }
+
+        const { data: fallbackData, error: fallbackError } = await fallbackQuery.maybeSingle();
         if (!fallbackError && fallbackData) {
-          return mapPart(fallbackData);
+          return mapPart(fallbackData, isBusiness);
         }
       }
       console.error("Error fetching part by ID from Supabase:", error);
       return null;
     }
-    return data ? mapPart(data) : null;
+    return data ? mapPart(data, isBusiness) : null;
   } catch (error) {
     console.error("Error fetching part by ID from Supabase:", error);
     return null;

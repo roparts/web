@@ -35,13 +35,32 @@
   },
   "footer": {
     "rightsReserved": "All Rights Reserved.",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "description": "RoParts Hub is India's leading B2B & B2C marketplace for premium RO water purifier spare parts, membranes, filters, and accessories at competitive prices.",
+    "contactUs": "Contact Us",
+    "addressLabel": "Address",
+    "addressVal": "RoParts Hub, Netaji Subhash Place, Pitampura, New Delhi, 110034, India",
+    "phoneLabel": "Phone",
+    "emailLabel": "Email",
+    "hoursLabel": "Business Hours",
+    "hoursVal": "Mon - Sat: 9:00 AM - 7:00 PM, Sunday: Closed",
+    "quickLinks": "Quick Links",
+    "categories": "Categories",
+    "home": "Home",
+    "b2bPortal": "B2B Wholesale Portal",
+    "b2cStore": "Retail Shop",
+    "aboutUs": "About Us",
+    "qualityGuarantee": "100% Quality Guaranteed & Genuine Parts"
   },
   "header": {
     "openCategories": "Open categories menu",
     "openCart": "Open cart",
     "english": "English",
-    "hindi": "हिन्दी"
+    "hindi": "हिन्दी",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "dashboard": "Dashboard",
+    "profile": "Profile"
   },
   "partDetails": {
     "category": "Category",

@@ -4,6 +4,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, ArrowLeft } from 'lucide-react';
@@ -12,12 +13,18 @@ import { RelatedParts } from '@/components/RelatedParts';
 import type { Part } from '@/lib/types';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 
 export function PartDetailClient({ part, allParts }: { part: Part, allParts: Part[] }) {
   const { addToCart } = useCart();
   const { translations, language } = useLanguage();
+  const { profile } = useAuth();
   const router = useRouter();
+
+  const isBusiness = profile?.role === 'business';
+  const b2bPrice = part.businessPrice ?? (part.price * 0.85); // 15% fallback
+  const regularPrice = part.discountPrice ?? part.price;
 
   const partName = language === 'hi' && part.name_hi ? part.name_hi : part.name;
   const partDescription = language === 'hi' && part.description_hi ? part.description_hi : part.description;
@@ -81,7 +88,15 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
               </div>
 
               <div className="mt-6">
-                {hasDiscount ? (
+                {isBusiness ? (
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">₹{b2bPrice.toLocaleString('en-IN')}</p>
+                      <span className="text-xs px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-md font-bold uppercase tracking-wide">Business Price</span>
+                    </div>
+                    <p className="text-xl text-muted-foreground line-through mt-1">₹{regularPrice.toLocaleString('en-IN')}</p>
+                  </div>
+                ) : hasDiscount ? (
                   <div className="flex items-baseline gap-2">
                     <p className="text-4xl font-bold text-primary">₹{part.discountPrice!.toLocaleString('en-IN')}</p>
                     <p className="text-2xl text-muted-foreground line-through">₹{part.price.toLocaleString('en-IN')}</p>
@@ -110,14 +125,7 @@ export function PartDetailClient({ part, allParts }: { part: Part, allParts: Par
 
         </div>
       </main>
-      <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
-        <div className="container mx-auto text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} RoParts Hub. {translations.footer.rightsReserved}</p>
-          <p className="mt-2">
-            <Link href="/admin" className="hover:text-primary transition-colors">{translations.footer.adminPanel}</Link>
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

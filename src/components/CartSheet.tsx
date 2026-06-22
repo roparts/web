@@ -9,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, Phone } from "lucide-react";
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
+import { createOrderAction } from '@/app/actions';
 import { getAllBrands } from "@/lib/parts-data-server";
 import type { Brand } from "@/lib/types";
 import { useEffect, useState } from "react";
@@ -22,9 +24,21 @@ const WHATSAPP_NUMBER = "919523728080";
 const RFQ_COUNTER_KEY = 'roparts-rfq-counter';
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
-  const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart, itemCount } = useCart();
+  const { 
+    cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    totalPrice, 
+    retailTotalPrice, 
+    businessSavings, 
+    isMinimumOrderSatisfied, 
+    clearCart, 
+    itemCount 
+  } = useCart();
+  const { profile, user } = useAuth();
   const { translations } = useLanguage();
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
   useEffect(() => {
     getAllBrands().then(setBrands);
@@ -51,49 +65,89 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
   };
 
 
-  const handleWhatsAppOrder = (brandName?: string) => {
-    const rfqNumber = getNextRfqNumber();
-    const currentDate = new Date().toLocaleDateString('en-GB');
+  const handleWhatsAppOrder = async (brandName?: string) => {
+    if (isSubmittingOrder) return;
+    setIsSubmittingOrder(true);
 
-    // Filter items by brand if a brandName is provided
-    const itemsToOrder = brandName
-      ? cartItems.filter(item => (item.brand || 'Unbranded') === brandName)
-      : cartItems;
+    try {
+      const rfqNumber = String(getNextRfqNumber());
+      const currentDate = new Date().toLocaleDateString('en-GB');
 
-    if (itemsToOrder.length === 0) return;
+      // Filter items by brand if a brandName is provided
+      const itemsToOrder = brandName
+        ? cartItems.filter(item => (item.brand || 'Unbranded') === brandName)
+        : cartItems;
 
-    // Determine target WhatsApp ID
-    let targetNumber = WHATSAPP_NUMBER;
-    if (brandName) {
-      const brand = brands.find(b => b.name === brandName);
-      if (brand && brand.whatsappNumber) {
-        targetNumber = brand.whatsappNumber;
+      if (itemsToOrder.length === 0) return;
+
+      // Determine target WhatsApp ID
+      let targetNumber = WHATSAPP_NUMBER;
+      if (brandName) {
+        const brand = brands.find(b => b.name === brandName);
+        if (brand && brand.whatsappNumber) {
+          targetNumber = brand.whatsappNumber;
+        }
       }
-    }
 
-    const productLines = itemsToOrder
-      .map(item => `${item.quantity} x ${item.name} (${item.id})`)
-      .join('\n');
+      const isBusiness = profile?.role === 'business';
+      const orderType: 'retail' | 'business' = isBusiness ? 'business' : 'retail';
 
-    const brandHeader = brandName ? ` for ${brandName}` : '';
+      // Map items with price snapshots
+      const itemsData = itemsToOrder.map(item => {
+        const unitPrice = isBusiness
+          ? (item.businessPrice ?? (item.price * 0.85)) // 15% fallback
+          : (item.discountPrice ?? item.price);
+        return {
+          productId: item.id,
+          quantity: item.quantity,
+          unitPrice,
+          subtotal: item.quantity * unitPrice
+        };
+      });
 
-    const message = `*RFQ from roparts.in${brandHeader}*
-    
+      const calculatedTotal = itemsData.reduce((acc, item) => acc + item.subtotal, 0);
+
+      // Write snapshot to DB
+      await createOrderAction({
+        userId: user?.id || null,
+        orderType,
+        rfqNumber,
+        totalPrice: calculatedTotal,
+        companyName: profile?.company_name || null,
+        gstNumber: profile?.gst_number || null,
+      }, itemsData);
+
+      const productLines = itemsToOrder
+        .map(item => `${item.quantity} x ${item.name} (${item.id})`)
+        .join('\n');
+
+      const brandHeader = brandName ? ` for ${brandName}` : '';
+
+      const message = `*RFQ from roparts.in${brandHeader}*
+      
 RFQ Number: ${rfqNumber}
 Date: ${currentDate}
 
 Products:
 ${productLines}
 
-Total: ₹${itemsToOrder.reduce((acc, item) => acc + (item.discountPrice ?? item.price) * item.quantity, 0).toLocaleString('en-IN')}
+Total: ₹${calculatedTotal.toLocaleString('en-IN')}
 `;
 
-    // Manually encode the message to ensure newlines are preserved.
-    const encodedMessage = encodeURIComponent(message);
+      // Manually encode the message to ensure newlines are preserved.
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetNumber}&text=${encodedMessage}`;
 
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetNumber}&text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
+      
+      // Clear cart on success
+      clearCart();
 
-    window.open(whatsappUrl, '_blank');
+    } catch (error: any) {
+      console.error("Order creation failed:", error);
+    } finally {
+      setIsSubmittingOrder(false);
+    }
   };
 
   // Group items by brand
@@ -116,7 +170,10 @@ Total: ₹${itemsToOrder.reduce((acc, item) => acc + (item.discountPrice ?? item
               <ScrollArea className="flex-grow px-6 py-6 scrollbar-hide">
                 <div className="flex flex-col gap-4">
                   {cartItems.map(item => {
-                    const price = item.discountPrice ?? item.price;
+                    const isBusiness = profile?.role === 'business';
+                    const price = isBusiness
+                      ? (item.businessPrice ?? (item.price * 0.85))
+                      : (item.discountPrice ?? item.price);
                     return (
                       <div key={item.id} className="flex gap-4 minimal-cart-item group">
                         <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-white shadow-sm border border-white/50">
@@ -166,7 +223,20 @@ Total: ₹${itemsToOrder.reduce((acc, item) => acc + (item.discountPrice ?? item
               </ScrollArea>
 
               <SheetFooter className="px-8 py-8 bg-white/40 backdrop-blur-md border-t border-white/20 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
-                <div className="w-full space-y-6">
+                <div className="w-full space-y-4">
+                  {businessSavings > 0 && (
+                    <div className="flex justify-between items-center bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/25 text-xs text-emerald-700 dark:text-emerald-400 font-bold">
+                      <span>Wholesale B2B Savings:</span>
+                      <span>₹{businessSavings.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+
+                  {!isMinimumOrderSatisfied && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/25 text-destructive rounded-xl text-xs font-bold leading-normal">
+                      ⚠️ B2B wholesale orders require a minimum total value of ₹500. Please add more items to checkout.
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center">
                     <span className="text-slate-500 font-medium text-lg">{translations.cart.total}</span>
                     <span className="text-3xl font-black text-slate-900">₹{totalPrice.toLocaleString('en-IN')}</span>
@@ -177,15 +247,17 @@ Total: ₹${itemsToOrder.reduce((acc, item) => acc + (item.discountPrice ?? item
                       <Button
                         key={brandName}
                         onClick={() => handleWhatsAppOrder(brandName)}
+                        disabled={!isMinimumOrderSatisfied || isSubmittingOrder}
                         className="water-btn w-full h-14 text-lg"
                       >
                         <Phone className="mr-2 h-5 w-5 fill-white/20" />
-                        {translations.cart.getQuote} {brandGroups.length > 1 ? `(${brandName})` : ''}
+                        {isSubmittingOrder ? "Saving..." : `${translations.cart.getQuote} ${brandGroups.length > 1 ? `(${brandName})` : ''}`}
                       </Button>
                     ))}
 
                     <button
                       onClick={clearCart}
+                      disabled={isSubmittingOrder}
                       className="text-slate-400 hover:text-slate-600 text-sm font-medium transition-colors py-2"
                     >
                       {translations.cart.clearCart}

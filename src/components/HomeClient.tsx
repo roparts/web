@@ -14,6 +14,7 @@ declare global {
 import Link from 'next/link';
 import Image from 'next/image';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { PartCard } from '@/components/PartCard';
 import { RelatedParts } from '@/components/RelatedParts';
 import { Input } from '@/components/ui/input';
@@ -474,8 +475,8 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
 
           {/* Filters Row */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-10">
-            <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-              <Button variant="outline" className="rounded-full border-slate-200 text-slate-600 flex-shrink-0">
+            <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-3 md:pb-2 premium-scrollbar">
+              <Button variant="outline" className="rounded-full border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 shadow-sm flex-shrink-0 transition-all duration-300">
                 <SlidersHorizontal className="h-4 w-4 mr-2" />
                 Filters
               </Button>
@@ -484,17 +485,18 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
               {subcategories.slice(0, 6).map((cat) => (
                 <Button
                   key={cat}
-                  variant={selectedSubcategory === cat ? "default" : "secondary"}
                   onClick={() => setSelectedSubcategory(cat)}
                   className={cn(
-                    "rounded-full px-5 py-2 whitespace-nowrap transition-all flex-shrink-0",
-                    selectedSubcategory === cat ? "shadow-md scale-105" : "bg-blue-50/50 hover:bg-blue-50 text-slate-700 border-transparent"
+                    "rounded-full px-5 py-2 whitespace-nowrap transition-all duration-300 flex-shrink-0 text-sm font-medium",
+                    selectedSubcategory === cat 
+                      ? "bg-gradient-to-r from-primary to-indigo-600 text-white shadow-md shadow-primary/20 hover:opacity-95 hover:scale-105 active:scale-95" 
+                      : "bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/80 hover:border-slate-300 shadow-sm hover:shadow active:scale-95"
                   )}
                 >
                   {cat === 'All' ? "All Parts" : cat}
                 </Button>
               ))}
-              <Button variant="ghost" className="rounded-full text-primary font-medium flex-shrink-0">
+              <Button variant="ghost" className="rounded-full text-primary hover:text-primary/80 hover:bg-primary/5 font-semibold flex-shrink-0 transition-all duration-300">
                 More <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -660,12 +662,7 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
           </div>
         </section>
       </main>
-      <footer className="bg-secondary text-secondary-foreground py-6 mt-auto">
-        <div className="container mx-auto text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} RoParts Hub. {translations.footer.rightsReserved}</p>
-        </div>
-
-      </footer>
+      <Footer />
     </div>
   );
 }

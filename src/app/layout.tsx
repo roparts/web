@@ -6,9 +6,12 @@ import { cn } from '@/lib/utils';
 import { CartProvider } from '@/context/CartContext';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/context/LanguageContext';
+import { AuthProvider } from '@/context/AuthContext';
 import en from '@/locales/en.json';
 import hi from '@/locales/hi.json';
 import { generateOrganizationSchema } from '@/lib/seo-schema';
+
+import { Agentation } from 'agentation';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -122,10 +125,13 @@ export default function RootLayout({
         )}
       >
         <LanguageProvider>
-          <CartProvider>
-            {children}
-            <Toaster />
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              {children}
+              <Toaster />
+              {process.env.NODE_ENV === "development" && <Agentation />}
+            </CartProvider>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>
