@@ -12,6 +12,7 @@ import hi from '@/locales/hi.json';
 import { generateOrganizationSchema } from '@/lib/seo-schema';
 
 import { Agentation } from 'agentation';
+import { SplashScreen } from '@/components/SplashScreen';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -129,6 +130,7 @@ export default function RootLayout({
             <CartProvider>
               {children}
               <Toaster />
+              <SplashScreen />
               {process.env.NODE_ENV === "development" && <Agentation />}
             </CartProvider>
           </AuthProvider>

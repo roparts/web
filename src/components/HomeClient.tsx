@@ -360,8 +360,22 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-headline text-slate-900 tracking-tight mb-6 leading-[1.1]">
                 {translations?.home?.title || "Ultimate RO Parts Collection"}
               </h1>
-              <div className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 flex flex-wrap items-center justify-center lg:justify-start gap-x-2">
-                <span>{translations?.home?.subtitle || "Find everything you need for your water purification system."}</span>
+              <div className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 flex flex-wrap items-center justify-center lg:justify-start gap-x-2 leading-relaxed">
+                <span>{language === 'hi' ? "अपने जल शोधन प्रणाली के लिए" : "Find"}</span>
+                <TypewriterText
+                  texts={
+                    language === 'hi'
+                      ? ["आरओ मेम्ब्रेन", "प्री-फिल्टर", "बूस्टर पंप", "इनलाइन फिल्टर", "सर्विस किट", "स्पेयर पार्ट्स"]
+                      : ["RO Membranes", "Pre-Filters", "Booster Pumps", "Inline Filters", "Service Kits", "Spare Parts"]
+                  }
+                  className="font-bold"
+                  cursorClassName="font-bold"
+                />
+                <span>
+                  {language === 'hi'
+                    ? "पाएं। उच्च-गुणवत्ता, विश्वसनीय, और शिप करने के लिए तैयार।"
+                    : "for your water purification system. High-quality, reliable, and ready to ship."}
+                </span>
               </div>
               {/* Visually Hidden SEO Content */}
               <div className="sr-only">
@@ -525,9 +539,23 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" size="icon" className="rounded-full border-slate-200 flex-shrink-0">
-                <ArrowUpDown className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className={cn("rounded-full border-slate-200 flex-shrink-0 transition-all duration-300 hover:scale-105 active:scale-95", sortOption !== 'default' && "border-primary text-primary bg-primary/5")}>
+                    <ArrowUpDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px] rounded-xl shadow-xl border-slate-200/80 bg-white/95 backdrop-blur-xl">
+                  <DropdownMenuRadioGroup value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
+                    <DropdownMenuRadioItem value="default" className="text-xs focus:font-bold cursor-pointer">{translations.home.sortOptions.default}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="price-asc" className="text-xs focus:font-bold cursor-pointer">{translations.home.sortOptions.priceAsc}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="price-desc" className="text-xs focus:font-bold cursor-pointer">{translations.home.sortOptions.priceDesc}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="name-asc" className="text-xs focus:font-bold cursor-pointer">{translations.home.sortOptions.nameAsc}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="name-desc" className="text-xs focus:font-bold cursor-pointer">{translations.home.sortOptions.nameDesc}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="discount-desc" className="text-xs focus:font-bold cursor-pointer">{translations.home.sortOptions.discountDesc}</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
@@ -636,7 +664,7 @@ export function HomeClient({ initialParts, initialBanners = [] }: HomeClientProp
           </div>
 
           {filteredAndSortedParts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 sm:gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-8">
               {filteredAndSortedParts.map((part) => (
                 <PartCard key={part.id} part={part} />
               ))}

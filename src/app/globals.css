@@ -191,7 +191,7 @@ body {
     font-weight: 800;
   }
 
-  /* Premium Modern Scrollbar */
+  /*Scrollbar */
   .premium-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(124, 58, 237, 0.2) transparent;
@@ -216,5 +216,21 @@ body {
   .premium-scrollbar:hover::-webkit-scrollbar-thumb,
   .premium-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(124, 58, 237, 0.4);
+  }
+
+  /* Indeterminate Progress Loading Animation */
+  @keyframes progress-loading {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-progress {
+    width: 100%;
+    animation: progress-loading 1.6s infinite ease-in-out;
   }
 }
